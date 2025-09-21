@@ -1,0 +1,13 @@
+[
+    {
+        "Name": "Foo",
+        "Value": 1
+    },
+ {
+        "Name": "Bar",
+        "Value": 2
+    },
+    {
+        "Name": "Fizz"
+    }
+]
