@@ -1,4 +1,8 @@
-task CodeCoverage {
+<#
+    .SYNOPSIS
+    Validates code coverage is over 75% for each file tested
+#>
+task CodeCoverage ?PesterUnit, {
     if (-not $script:pesterResult) {
         Write-Build Yellow "No Pester unit test results found"
         return

@@ -1,8 +1,12 @@
-task ModuleVersion {
+<#
+    .SYNOPSIS
+    Validates current PSD1 version is higher then current published version
+#>
+task ModuleVersion SetVariables, {
     $source = $script:psd1.PrivateData.PSData.PublishSource
 
     switch ($source) {
-        "Local" {$publishedVersion = '0.0.0'}
+        "Local" {$publishedVersion = '1.0.0'}
 
         "PowershellGallery" {
             #$publishedVersion = Find-Module $script:moduleName | Select-Object -Expand Version
@@ -19,6 +23,8 @@ task ModuleVersion {
             $release = Get-GitHubRelease @releaseParams
             $publishedVersion = $release.tag_name -replace 'v'
         }
+
+        default {$publishedVersion = '1.0.0'}
     }
 
     $publishedVersion = [version]$publishedVersion

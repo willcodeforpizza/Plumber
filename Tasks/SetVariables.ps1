@@ -1,3 +1,7 @@
+<#
+    .SYNOPSIS
+    Defines variables used by other tasks in the pipeline
+#>
 task SetVariables {
     $script:moduleFolders = @()
     "$BuildRoot\Public", "$BuildRoot\Private" | ForEach-Object {

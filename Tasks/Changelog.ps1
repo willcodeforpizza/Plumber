@@ -1,5 +1,14 @@
+<#
+    .SYNOPSIS
+    Validates the changelog has been updated
+#>
 task Changelog {
-    $changelog = Get-Content C:\gh\Plumber\changelog.md #$BuildRoot
+    $changelog = Get-Content "$BuildRoot\changelog.md" -ErrorAction SilentlyContinue
+    if (-not $changelog) {
+        Write-Build Yellow "No changelog found"
+        return
+    }
+
     $latestLine = $changelog | 
         Where-Object {$_ -match '^## [0-9]'} | 
         Select-Object -First 1

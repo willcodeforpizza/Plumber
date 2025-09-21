@@ -1,5 +1,9 @@
 [
     {
+        "Name": "InvokeBuild",
+        "MinimumVersion": "5.14.0"
+    },
+    {
         "Name": "Pester",
         "MinimumVersion": "5.2.0"
     },

@@ -1,4 +1,8 @@
-task PesterUnit {
+<#
+    .SYNOPSIS
+    Runs unit tests and validates they pass
+#>
+task PesterUnit SetVariables, {
     if (-not (Test-Path "$BuildRoot\Tests\Unit")) {
         Write-Build Yellow "No unit tests found"
         return
@@ -13,5 +17,5 @@ task PesterUnit {
     $script:pesterResult = $result
 
     $failures = $result | Where-Object {$_.Result -eq 'Failed'}
-    if($failures) {Write-Error "Pester failed with $($failures.count) error(s)."}
+    if($failures) {Write-Error "Pester failed with $($failures.count) error(s)"}
 }

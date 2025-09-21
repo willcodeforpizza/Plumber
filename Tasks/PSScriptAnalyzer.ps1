@@ -1,4 +1,8 @@
-task PSScriptAnalyzer {
+<#
+    .SYNOPSIS
+    Validates PSScriptAnalyzer passes
+#>
+task PSScriptAnalyzer SetVariables, {
     $scriptFailures = $script:moduleFolders | ForEach-Object {Invoke-ScriptAnalyzer $_}
     $failures = foreach ($failure in $scriptFailures) {
         (
@@ -6,5 +10,7 @@ task PSScriptAnalyzer {
             "$($failure.RuleName) - $($failure.Message)"
         )
     }
-    Write-Error ($failures -join  (', ' + [Environment]::NewLine))
+    if ($failures) {
+        Write-Error ($failures -join  (', ' + [Environment]::NewLine))
+    }
 }

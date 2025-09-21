@@ -1,3 +1,7 @@
+<#
+    .SYNOPSIS
+    Validates no #TODOs are left as code comments
+#>
 task ToDo {
     $toDos = Get-ChildItem $BuildRoot -File -Recurse -Exclude 'ToDo.ps1' | ForEach-Object {
         $file = $_
@@ -5,5 +9,7 @@ task ToDo {
             "$($file.Name): $(($_ -replace '#TODO: ').Trim())"
         }
     }
-    Write-Error ($toDos -join  (', ' + [Environment]::NewLine))
+    if ($toDos) {
+        Write-Error ($toDos -join  (', ' + [Environment]::NewLine))
+    }
 }

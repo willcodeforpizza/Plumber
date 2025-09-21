@@ -1,5 +1,9 @@
+<#
+    .SYNOPSIS
+    Validates JSON is valid and passes schema tests
+#>
 task JSON {
-    $jsonFiles = Get-ChildItem "$BuildRoot\Resource" -File -Filter '*.json'
+    $jsonFiles = Get-ChildItem "$BuildRoot\Resource" -File -Filter '*.json' -ErrorAction SilentlyContinue
     if (-not $jsonFiles) {
         Write-Build Yellow "No JSON files found"
         return

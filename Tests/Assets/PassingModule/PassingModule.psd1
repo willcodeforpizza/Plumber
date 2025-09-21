@@ -1,21 +1,20 @@
 @{
-    RootModule    = 'Plumber.psm1'
-    ModuleVersion = '0.0.2'
-    GUID          = '03d665a4-c447-470b-acfc-ee7195c019e0'
+    RootModule    = 'PassingModule.psm1'
+    ModuleVersion = '1.1.1'
+    GUID          = '65b499f8-83c1-4b3f-a222-b83d460c6454'
     Author        = 'WillCodeForPizza'
     CompanyName   = 'WillCodeForPizza'
     Copyright     = '(c) 2025 WillCodeForPizza. All rights reserved.'
-    Description   = 'A wrapper around Invoke-Build for PowerShell Pipelines'
+    Description   = 'Example of a failing module for Plumber'
     FunctionsToExport = @(
-        'Invoke-Plumber'
+        'Get-Success'
     )
     PrivateData = @{
         PSData = @{
             PublishSource = 'Local'
-            # PublishSource = 'PowershellGallery'
             # Tags = @()
             # LicenseUri = ''
-            # ProjectUri = '' 
+            # ProjectUri = ''
             # IconUri = ''
             # ReleaseNotes = ''
             # ExternalModuleDependencies = @()

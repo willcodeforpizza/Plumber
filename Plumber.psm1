@@ -1,15 +1,24 @@
 try {
-    Import-Module InvokeBUild -ErrorAction 'Stop'
+    Import-Module InvokeBuild -ErrorAction 'Stop'
 }
 catch {
-    throw "Could not load InvokeBUild. Is it installed? Error: $_"
-}
-
-Get-ChildItem "$PSScriptRoot\Public", "$PSScriptRoot\Private" | ForEach-Object {
-    write-host $_.FullName
-    . $_.FullName
 }
 
 Get-Content "$PSScriptRoot\Resource\RequiredModules.json" | 
     ConvertFrom-Json | 
-    ForEach-Object {Import-Module -Name $_.Name -MinimumVersion $_.MinimumVersion}
+    ForEach-Object {
+        try {
+            Import-Module -Name $_.Name -MinimumVersion $_.MinimumVersion
+        }
+        catch {
+            throw (
+                "Could not load $($_.Name) v$($_.MinimumVersion). " + 
+                "Try installing with 'Install-Module $($_.Name) -Force'. Error: $_"
+            )
+        }
+    }
+
+Get-ChildItem "$PSScriptRoot\Public", "$PSScriptRoot\Private" | ForEach-Object {
+    . $_.FullName
+}
+
