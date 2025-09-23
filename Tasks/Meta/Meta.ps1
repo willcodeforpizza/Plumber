@@ -2,7 +2,8 @@
     .SYNOPSIS
     A parent task to run all meta style tasks in the validation pipeline
 #>
-task Meta ?PublicFunctions, 
+task Meta SetVariables,
+    ?PublicFunctions,
     ?Structure,
     ?Naming,
     ?Psd1Data,

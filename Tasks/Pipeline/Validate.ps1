@@ -2,10 +2,10 @@
     .SYNOPSIS
     Main parent task to run the validation pipeline
 #>
-task Validate SetVariables, 
+task -Name Validate -Jobs SetVariables,
     ?ModuleVersion,
     ?Changelog,
-    ?PSScriptAnalyzer, 
-    ?Pester, 
     ?JSON,
-    ?Meta
+    ?Meta,
+    ?PSScriptAnalyzer,
+    ?Pester

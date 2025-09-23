@@ -2,15 +2,16 @@
     .SYNOPSIS
     Validates PSScriptAnalyzer passes
 #>
-task PSScriptAnalyzer SetVariables, {
-    $scriptFailures = $script:moduleFolders | ForEach-Object {Invoke-ScriptAnalyzer $_}
+task -Name PSScriptAnalyzer -Jobs SetVariables, {
+    $scriptFailures = $script:moduleFolders |
+    ForEach-Object { Invoke-ScriptAnalyzer $_ }
     $failures = foreach ($failure in $scriptFailures) {
         (
-            "$($failure.ScriptName):$($failure.Line) - " + 
+            "$($failure.ScriptName):$($failure.Line) - " +
             "$($failure.RuleName) - $($failure.Message)"
         )
     }
     if ($failures) {
-        Write-Error ($failures -join  (', ' + [Environment]::NewLine))
+        Write-Error ($failures -join (', ' + [Environment]::NewLine))
     }
 }

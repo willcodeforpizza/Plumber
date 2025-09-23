@@ -1,6 +1,6 @@
 @{
     RootModule    = 'Plumber.psm1'
-    ModuleVersion = '0.0.2'
+    ModuleVersion = '0.0.3'
     GUID          = '03d665a4-c447-470b-acfc-ee7195c019e0'
     Author        = 'WillCodeForPizza'
     CompanyName   = 'WillCodeForPizza'
@@ -15,7 +15,7 @@
             # PublishSource = 'PowershellGallery'
             # Tags = @()
             # LicenseUri = ''
-            # ProjectUri = '' 
+            # ProjectUri = ''
             # IconUri = ''
             # ReleaseNotes = ''
             # ExternalModuleDependencies = @()

@@ -2,9 +2,9 @@
     .SYNOPSIS
     Runs unit tests and validates they pass
 #>
-task PesterUnit SetVariables, {
+task -Name PesterUnit -Jobs SetVariables, {
     if (-not (Test-Path "$BuildRoot\Tests\Unit")) {
-        Write-Build Yellow "No unit tests found"
+        Write-Build Yellow 'No unit tests found'
         return
     }
 
@@ -16,6 +16,8 @@ task PesterUnit SetVariables, {
     $result = Invoke-Pester -Configuration $config
     $script:pesterResult = $result
 
-    $failures = $result | Where-Object {$_.Result -eq 'Failed'}
-    if($failures) {Write-Error "Pester failed with $($failures.count) error(s)"}
+    $global:foo =   $script:pesterResult
+
+    $failures = $result | Where-Object { $_.Result -eq 'Failed' }
+    if ($failures) { Write-Error "Pester failed with $($failures.count) error(s)" }
 }

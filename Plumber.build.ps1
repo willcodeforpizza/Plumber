@@ -1,3 +1,3 @@
-#TODO: Remove hardcoded path
-$module = Import-Module C:\gh\Plumber\Plumber.psd1 -PassThru
-Get-ChildItem "$($module.ModuleBase)\Tasks" -Recurse -File | ForEach-Object {. $_.FullName}
+$module = Import-Module Plumber -PassThru
+Get-ChildItem "$($module.ModuleBase)\Tasks" -Recurse -File -Filter '*.ps1' |
+    ForEach-Object {. $_.FullName}

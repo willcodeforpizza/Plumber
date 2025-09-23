@@ -7,6 +7,6 @@ function Get-Success {
         .EXAMPLE
     #>
     param ()
-    $foo = GEt-Service | Select-Object -First 1
+    $foo = Get-Service | Select-Object -First 1
     return $foo
 }

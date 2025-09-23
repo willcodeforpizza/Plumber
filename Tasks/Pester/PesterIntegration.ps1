@@ -2,9 +2,9 @@
     .SYNOPSIS
     Runs integration tests and validates they pass
 #>
-task PesterIntegration SetVariables, {
+task -Name PesterIntegration -Jobs SetVariables, {
     if (-not (Test-Path "$BuildRoot\Tests\Integration")) {
-        Write-Build Yellow "No integration tests found"
+        Write-Build Yellow 'No integration tests found'
         return
     }
 
@@ -12,7 +12,7 @@ task PesterIntegration SetVariables, {
     $config.Run.Path = "$BuildRoot\Tests\Integration"
     $config.Run.PassThru = $true
     $result = Invoke-Pester -Configuration $config
-    
-    $failures = $result | Where-Object {$_.Result -eq 'Failed'}
-    if($failures) {Write-Error "Pester failed with $($failures.count) error(s)"}
+
+    $failures = $result | Where-Object { $_.Result -eq 'Failed' }
+    if ($failures) { Write-Error "Pester failed with $($failures.count) error(s)" }
 }

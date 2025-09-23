@@ -1,0 +1,22 @@
+Get-ChildItem '.\Tests\Assets\Demo' -Filter '*.ps1' -File | ForEach-Object {. $_.FullName}
+
+# Invoke-Build intro
+
+# Build file
+
+# Run single task
+Invoke-Build Task1
+Invoke-Build Task2
+
+# Run pipeline (task of tasks)
+Invoke-Build DemoPipeline
+
+# Run nested
+Invoke-Build TaskLetters
+Invoke-Build NestedPipeline
+
+# Add error to Task1
+Invoke-Build Task1Err
+Invoke-Build DemoPipelineErr
+
+# ? syntax

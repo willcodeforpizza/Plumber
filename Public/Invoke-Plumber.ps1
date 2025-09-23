@@ -8,11 +8,11 @@ function Invoke-Plumber {
         By default will run the "Validation" pipeline
 
         .PARAMETER Task
-        Enter the name of the task, or parent task to run against the module
+        The name of the task, or parent task to run against the module
 
         Generate list with
         gci .\Tasks\ -Recurse -file | select -expand BaseName | sort |
-            foreach {write-host ('"' + $_ + '",')}
+        foreach {write-host ('"' + $_ + '",')}
 
         .EXAMPLE
         Invoke-Plumber
@@ -44,23 +44,34 @@ function Invoke-Plumber {
     #>
     [CmdletBinding()]
     param (
-        [ValidateSet(
-            "Changelog",
-            "CodeCoverage",
-            "JSON",
-            "Meta",
-            "ModuleVersion",
-            "Naming",
-            "Pester",
-            "PesterIntegration",
-            "PesterUnit",
-            "Psd1Data",
-            "PSScriptAnalyzer",
-            "PublicFunctions",
-            "SetVariables",
-            "Structure",
-            "ToDo",
-            "Validate"
+    # The name of the task, or parent task to run against the module
+    [ValidateSet(
+        'Changelog',
+        'CodeCoverage',
+        'JSON',
+        'License',
+        'Meta',
+        'ModuleVersion',
+        'Naming',
+        'Pester',
+        'PesterIntegration',
+        'PesterUnit',
+        'Psd1Data',
+        'PSScriptAnalyzer',
+        'PublicFunctions',
+        'SetVariables',
+        'Structure',
+        'ToDo',
+        'Validate',
+        'DemoPipeline',
+        'Task1',
+        'TaskErr',
+        'Task2',
+        'Task3',
+        'TaskA',
+        'TaskB',
+        'TaskLetters',
+        'NestedPipeline'
         )]
         [string[]]
         $Task = 'Validate'
@@ -69,10 +80,15 @@ function Invoke-Plumber {
         Invoke-Build -Task $Task -Result buildResult
         $hasError = $buildResult.tasks | Where-Object {$_.Error}
         if($hasError) {
-            Write-Error "Build failed!"
+            Write-Error 'Build failed!'
         }
 
-        Write-Output "$($buildResult.tasks | Select-Object Name, Error | Format-Table | Out-String)"
+        Write-Output "$(
+            $buildResult.tasks |
+            Select-Object Name, Error |
+            Format-Table |
+            Out-String
+        )"
         Pop-Location
     }
 }

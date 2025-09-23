@@ -3,7 +3,10 @@
   "type": "array",
   "items": {
     "type": "object",
-    "required": ["Name", "MinimumVersion"],
+    "required": [
+      "Name",
+      "MinimumVersion"
+    ],
     "properties": {
       "Name": {
         "type": "string",
