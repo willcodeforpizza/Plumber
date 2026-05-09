@@ -77,7 +77,10 @@ function Invoke-Plumber {
         $Task = 'Validate'
     )
     process {
-        Invoke-Build -Task $Task -Result buildResult
+        $buildFile = Join-Path $script:moduleRoot 'Plumber.build.ps1'
+        Write-Verbose "Build file: $buildFile"
+        $invokeBuild = (Get-Command Invoke-Build).Definition
+        & $invokeBuild -Task $Task -File $buildFile -Result buildResult
         $hasError = $buildResult.tasks | Where-Object {$_.Error}
         if($hasError) {
             Write-Error 'Build failed!'
@@ -87,8 +90,7 @@ function Invoke-Plumber {
             $buildResult.tasks |
             Select-Object Name, Error |
             Format-Table |
-            Out-String
+                Out-String
         )"
-        Pop-Location
     }
 }
