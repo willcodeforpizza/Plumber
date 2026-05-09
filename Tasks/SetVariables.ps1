@@ -4,12 +4,14 @@
 #>
 task -Name SetVariables -Jobs {
     $script:moduleFolders = @()
-    "$BuildRoot\Public", "$BuildRoot\Private" | ForEach-Object {
+    (Join-Path $BuildRoot 'Public'), (Join-Path $BuildRoot 'Private') | ForEach-Object {
         if (Test-Path $_) { $script:moduleFolders += $_ }
     }
 
-    $script:moduleName = $BuildRoot | Split-Path -Leaf
-    $script:psd1 = Import-PowerShellDataFile "$BuildRoot\$script:moduleName.psd1"
+    $script:moduleManifest = Get-ChildItem $BuildRoot -File -Filter '*.psd1' |
+        Select-Object -First 1
+    $script:moduleName = $script:moduleManifest.BaseName
+    $script:psd1 = Import-PowerShellDataFile $script:moduleManifest.FullName
 
     Write-Build White "BuildRoot: $BuildRoot"
     Write-Build White "moduleName: $script:moduleName"

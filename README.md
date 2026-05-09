@@ -1,7 +1,15 @@
 # Plumber
 
-A wrapper around Invoke-Build for PowerShell Pipelines.
-Plumber offers a series of validation tests intended to be run locally during development
+A set of Invoke-Build tasks for Powershell validation pipelines
+
+Plumber offers a series of validation tasks you can use to build your own, customised validation
+pipeline.
+
+## Requirements
+
+- Windows or Linux
+- PowerShell 7
+- The modules listed in `.\Resource\RequiredModules.json` if you use those tasks
 
 ## To run
 
