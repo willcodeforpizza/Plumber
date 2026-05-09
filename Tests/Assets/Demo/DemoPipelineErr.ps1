@@ -1,1 +1,1 @@
-task -Name DemoPipelineErr -Jobs Task1Err, Task2, Task3
+Add-BuildTask -Name DemoPipelineErr -Jobs Task1Err, Task2, Task3

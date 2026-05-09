@@ -2,7 +2,7 @@
     .SYNOPSIS
     Runs integration tests and validates they pass
 #>
-task -Name PesterIntegration -Jobs SetVariables, {
+Add-BuildTask -Name PesterIntegration -Jobs SetVariables, {
     if (-not (Test-Path "$BuildRoot\Tests\Integration")) {
         Write-Build Yellow 'No integration tests found'
         return

@@ -48,21 +48,25 @@ function Invoke-Plumber {
     [ValidateSet(
         'Changelog',
         'CodeCoverage',
+        'CodeQuality',
+        'Content',
         'JSON',
         'License',
-        'Meta',
+        'Manifest',
+        'ModuleConventions',
         'ModuleVersion',
         'Naming',
         'Pester',
         'PesterIntegration',
         'PesterUnit',
-        'Psd1Data',
         'PSScriptAnalyzer',
         'PublicFunctions',
+        'ReleaseHygiene',
         'SetVariables',
         'Structure',
         'ToDo',
         'Validate',
+        'YAML',
         'DemoPipeline',
         'Task1',
         'TaskErr',
@@ -77,10 +81,15 @@ function Invoke-Plumber {
         $Task = 'Validate'
     )
     process {
-        $buildFile = Join-Path $script:moduleRoot 'Plumber.build.ps1'
+        $moduleRoot = if ($script:moduleRoot) {
+            $script:moduleRoot
+        } else {
+            Split-Path $PSScriptRoot -Parent
+        }
+
+        $buildFile = Join-Path $moduleRoot 'Plumber.build.ps1'
         Write-Verbose "Build file: $buildFile"
-        $invokeBuild = (Get-Command Invoke-Build).Definition
-        & $invokeBuild -Task $Task -File $buildFile -Result buildResult
+        $buildResult = Invoke-PlumberBuild -Task $Task -BuildFile $buildFile
         $hasError = $buildResult.tasks | Where-Object {$_.Error}
         if($hasError) {
             Write-Error 'Build failed!'

@@ -2,7 +2,7 @@
     .SYNOPSIS
     Validates no #TODOs are left as code comments
 #>
-task -Name ToDo -Jobs {
+Add-BuildTask -Name ToDo -Jobs {
     $toDos = Get-ChildItem $BuildRoot -File -Recurse -Exclude 'ToDo.ps1' | ForEach-Object {
         $file = $_
         Get-Content $_.FullName | Where-Object { $_ -match '#TODO' } | ForEach-Object {

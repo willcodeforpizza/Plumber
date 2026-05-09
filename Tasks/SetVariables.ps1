@@ -2,7 +2,7 @@
     .SYNOPSIS
     Defines variables used by other tasks in the pipeline
 #>
-task -Name SetVariables -Jobs {
+Add-BuildTask -Name SetVariables -Jobs {
     $script:moduleFolders = @()
     (Join-Path $BuildRoot 'Public'), (Join-Path $BuildRoot 'Private') | ForEach-Object {
         if (Test-Path $_) { $script:moduleFolders += $_ }

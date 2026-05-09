@@ -8,6 +8,4 @@ function Get-Failure {
     #>
     param ()
 
-    #TODO: Write function
-    $foo = 123
 }

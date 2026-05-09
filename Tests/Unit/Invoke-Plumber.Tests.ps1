@@ -1,18 +1,113 @@
-BeforeDiscovery {
-    # Handle clobbering module when running pipeline on Plumber itself
-    #Get-Module Plumber | Remove-Module 
-    #Import-Module "$PSScriptRoot\..\..\Plumber.psd1" -Force
+BeforeAll {
+    if (-not (Get-Module Plumber)) {
+        Import-Module "$PSScriptRoot/../../Plumber.psd1" -Force
+    }
 }
 
-Context "Invoke-Plumber" {
-    Describe "Does a thing" {
-        It "Works" {
-            $true | Should -Be $true
-            #TODO: Write proper tests
-        }
+Describe 'Invoke-Plumber' {
+    BeforeEach {
+        InModuleScope Plumber {
+            $script:mockBuildResult = [pscustomobject]@{
+                Tasks = @(
+                    [pscustomobject]@{
+                        Name  = 'Validate'
+                        Error = $null
+                    }
+                )
+            }
 
-        It "Does not work" {
-            $true | Should -Be $true
+            Mock Invoke-PlumberBuild {
+                $script:mockBuildResult
+            }
+        }
+    }
+
+    It 'runs the Validate task by default' {
+        InModuleScope Plumber {
+            Invoke-Plumber | Should -Match 'Validate'
+
+            Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
+                $Task.Count -eq 1 -and
+                $Task[0] -eq 'Validate' -and
+                (Split-Path $BuildFile -Leaf) -eq 'Plumber.build.ps1'
+            }
+        }
+    }
+
+    It 'passes explicit tasks to the build runner' {
+        InModuleScope Plumber {
+            Invoke-Plumber -Task JSON, YAML | Should -Match 'Validate'
+
+            Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
+                $Task.Count -eq 2 -and
+                $Task[0] -eq 'JSON' -and
+                $Task[1] -eq 'YAML'
+            }
+        }
+    }
+
+    It 'writes an error when any build task fails' {
+        InModuleScope Plumber {
+            $script:mockBuildResult = [pscustomobject]@{
+                Tasks = @(
+                    [pscustomobject]@{
+                        Name  = 'ToDo'
+                        Error = 'Found TODO'
+                    }
+                )
+            }
+
+            {Invoke-Plumber -Task ToDo -ErrorAction Stop} |
+                Should -Throw -ExpectedMessage 'Build failed!'
+        }
+    }
+
+    It 'rejects unknown task names' {
+        InModuleScope Plumber {
+            {Invoke-Plumber -Task NotARealTask -ErrorAction Stop} |
+                Should -Throw
+        }
+    }
+}
+
+Describe 'Invoke-PlumberBuild' {
+    It 'runs Invoke-Build through the resolved command and returns the build result' {
+        InModuleScope Plumber {
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    if (-not $File) {
+                        throw 'Build file is required'
+                    }
+
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = $null
+                            }
+                        )
+                    })
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            $result = Invoke-PlumberBuild -Task WrapperSmoke -BuildFile $BuildFile
+
+            $result.Tasks.Name | Should -Contain 'WrapperSmoke'
+            $result.Tasks.Error | Should -BeNullOrEmpty
         }
     }
 }

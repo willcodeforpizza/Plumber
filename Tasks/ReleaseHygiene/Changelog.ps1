@@ -2,7 +2,7 @@
     .SYNOPSIS
     Validates the changelog has been updated
 #>
-task -Name Changelog -Jobs {
+Add-BuildTask -Name Changelog -Jobs {
     $changelog = Get-Content "$BuildRoot\changelog.md" -ErrorAction SilentlyContinue
     if (-not $changelog) {
         Write-Build Yellow 'No changelog found'
