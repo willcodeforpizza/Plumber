@@ -1,6 +1,6 @@
 BeforeDiscovery {
     $moduleName = 'FailingModule'
-    Get-Module $moduleName | Remove-Module 
+    Get-Module $moduleName | Remove-Module
     Import-Module "$PSScriptRoot\..\..\$moduleName.psd1" -Force
 }
 

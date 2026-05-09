@@ -1,1 +1,1 @@
-task -Name TaskLetters -Jobs TaskA, TaskB
+Add-BuildTask -Name TaskLetters -Jobs TaskA, TaskB
