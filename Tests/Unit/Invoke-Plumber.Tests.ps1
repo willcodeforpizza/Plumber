@@ -67,6 +67,18 @@ Describe 'Invoke-Plumber' {
         }
     }
 
+    It 'passes local task names to the build runner' {
+        InModuleScope Plumber {
+            Invoke-Plumber -Task local -OutputMode Raw | Should -Match 'Validate'
+
+            Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
+                $Task.Count -eq 1 -and
+                $Task[0] -eq 'local' -and
+                $RawOutput
+            }
+        }
+    }
+
     It 'writes an error when any build task fails' {
         InModuleScope Plumber {
             $script:mockBuildResult = [pscustomobject]@{
@@ -121,10 +133,14 @@ Describe 'Invoke-Plumber' {
         }
     }
 
-    It 'rejects unknown task names' {
+    It 'passes unknown task names to the build runner' {
         InModuleScope Plumber {
-            {Invoke-Plumber -Task NotARealTask -ErrorAction Stop} |
-                Should -Throw
+            Invoke-Plumber -Task NotARealTask | Should -Match 'Plumber validation passed'
+
+            Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
+                $Task.Count -eq 1 -and
+                $Task[0] -eq 'NotARealTask'
+            }
         }
     }
 }

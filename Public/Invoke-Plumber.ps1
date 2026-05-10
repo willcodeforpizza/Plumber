@@ -39,31 +39,6 @@ function Invoke-Plumber {
     [CmdletBinding()]
     param (
     # The name of the task, or parent task to run against the module
-    [ValidateSet(
-        'Backticks',
-        'ChangelogUpdated',
-        'CodeCoverage',
-        'CodeQuality',
-        'Content',
-        'Help',
-        'JSON',
-        'JSONSchema',
-        'License',
-        'LineLength',
-        'Manifest',
-        'ModuleConventions',
-        'ModuleVersion',
-        'Naming',
-        'PesterIntegration',
-        'PesterUnit',
-        'PSScriptAnalyzer',
-        'PublicFunctions',
-        'ReleaseHygiene',
-        'SetVariables',
-        'ToDo',
-        'Validate',
-        'YAML'
-        )]
         [string[]]
         $Task = 'Validate',
 
