@@ -189,6 +189,49 @@ Describe 'Invoke-PlumberBuild' {
             $result.Tasks.Name | Should -Contain 'QuietSmoke'
         }
     }
+
+    It 'streams raw output without returning it as the build result' {
+        InModuleScope Plumber {
+            Mock Out-Host {}
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    if (-not $File) {
+                        throw 'Build file is required'
+                    }
+
+                    'raw output'
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = $null
+                            }
+                        )
+                    })
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            $result = Invoke-PlumberBuild -Task RawSmoke -BuildFile $BuildFile -RawOutput
+
+            $result.Tasks.Name | Should -Contain 'RawSmoke'
+            $result | Should -Not -Contain 'raw output'
+            Should -Invoke Out-Host -Times 1 -Exactly
+        }
+    }
 }
 
 Describe 'Invoke-Plumber private wrapper recovery' {

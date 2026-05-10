@@ -49,8 +49,8 @@ function Invoke-PlumberBuild {
     if ($QuietOutput) {
         $null = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable *> $null
     } elseif ($RawOutput) {
-        $buildOutput = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable
-        $buildOutput | Out-Host
+        & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable |
+            Out-Host
     } else {
         $null = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable
     }
