@@ -44,6 +44,102 @@ Describe 'TaskLoader' {
         $script:invokeBuild = Get-Command Invoke-Build
     }
 
+    It 'does not load Local when no local tasks are configured' {
+        $buildFile = Join-Path $TestDrive 'no-local.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Not -Contain 'Local'
+        $tasks['Validate'].Jobs | Should -Not -Contain '?Local'
+    }
+
+    It 'loads configured local tasks under Local' {
+        $localTaskRoot = Join-Path $TestDrive 'Tasks'
+        New-Item -Path $localTaskRoot -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $localTaskRoot 'ValidateTaskDocs.ps1') -Value @(
+            'Add-BuildTask -Name ValidateTaskDocs -Jobs {'
+            '}'
+        )
+
+        $buildFile = Join-Path $TestDrive 'local.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            "    LocalTasks = @('Tasks/ValidateTaskDocs.ps1')"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Contain 'ValidateTaskDocs'
+        $tasks.Keys | Should -Contain 'Local'
+        $tasks['Local'].Jobs | Should -Contain '?ValidateTaskDocs'
+        $tasks['Validate'].Jobs | Should -Contain '?Local'
+    }
+
+    It 'does not load local tasks when Local is excluded' {
+        $localTaskRoot = Join-Path $TestDrive 'Tasks'
+        New-Item -Path $localTaskRoot -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $localTaskRoot 'ValidateTaskDocs.ps1') -Value @(
+            'Add-BuildTask -Name ValidateTaskDocs -Jobs {'
+            '}'
+        )
+
+        $buildFile = Join-Path $TestDrive 'exclude-local.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            "    LocalTasks = @('Tasks/ValidateTaskDocs.ps1')"
+            "    ExcludeTasks = @('Local')"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Not -Contain 'ValidateTaskDocs'
+        $tasks.Keys | Should -Not -Contain 'Local'
+        $tasks['Validate'].Jobs | Should -Not -Contain '?Local'
+    }
+
+    It 'excludes individual local tasks by filename task name' {
+        $localTaskRoot = Join-Path $TestDrive 'Tasks'
+        New-Item -Path $localTaskRoot -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $localTaskRoot 'ValidateTaskDocs.ps1') -Value @(
+            'Add-BuildTask -Name ValidateTaskDocs -Jobs {'
+            '}'
+        )
+        Set-Content -Path (Join-Path $localTaskRoot 'CheckGeneratedFiles.ps1') -Value @(
+            'Add-BuildTask -Name CheckGeneratedFiles -Jobs {'
+            '}'
+        )
+
+        $buildFile = Join-Path $TestDrive 'exclude-local-task.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '    LocalTasks = @('
+            "        'Tasks/ValidateTaskDocs.ps1'"
+            "        'Tasks/CheckGeneratedFiles.ps1'"
+            '    )'
+            "    ExcludeTasks = @('ValidateTaskDocs')"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Not -Contain 'ValidateTaskDocs'
+        $tasks.Keys | Should -Contain 'CheckGeneratedFiles'
+        $tasks.Keys | Should -Contain 'Local'
+        $tasks['Local'].Jobs | Should -Not -Contain '?ValidateTaskDocs'
+        $tasks['Local'].Jobs | Should -Contain '?CheckGeneratedFiles'
+        $tasks['Validate'].Jobs | Should -Contain '?Local'
+    }
+
     It 'keeps Content when JSONSchema remains enabled' {
         $buildFile = Join-Path $TestDrive 'skip-content.build.ps1'
         @(

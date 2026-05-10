@@ -12,8 +12,8 @@
 
     .PARAMETER Config
     Repository-specific Plumber configuration. Supported keys are
-    ModuleManifest, CoverageMinimum, ExcludePaths, IncludeTestsInPssa and
-    ExcludeTasks.
+    ModuleManifest, CoverageMinimum, ExcludePaths, IncludeTestsInPssa,
+    LocalTasks and ExcludeTasks.
 
     .EXAMPLE
     . (Get-PlumberTaskLoader) -Config @{
@@ -42,14 +42,15 @@ param (
 )
 
 $defaults = @{
-    ModuleManifest     = $null
-    CoverageMinimum    = 75
-    ExcludePaths       = @{}
-    IncludeTestsInPssa = $true
-    JsonSchemas        = @()
-    MaxLineLength      = 115
+    ModuleManifest          = $null
+    CoverageMinimum         = 75
+    IncludeTestsInPssa      = $true
+    JsonSchemas             = @()
+    MaxLineLength           = 115
     PrivateHelpSynopsisOnly = $true
-    ExcludeTasks       = @()
+    ExcludeTasks            = @()
+    ExcludePaths            = @{}
+    LocalTasks              = @()
 }
 
 $script:PlumberConfig = $defaults.Clone()
@@ -62,6 +63,9 @@ if (-not $script:PlumberConfig.ExcludeTasks) {
 }
 if (-not $script:PlumberConfig.ExcludePaths) {
     $script:PlumberConfig.ExcludePaths = @{}
+}
+if (-not $script:PlumberConfig.LocalTasks) {
+    $script:PlumberConfig.LocalTasks = @()
 }
 if (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
     $script:PlumberConfig.BuildRoot = $BuildRoot
@@ -142,6 +146,7 @@ $script:PlumberTaskJobs = @{
     ReleaseHygiene    = @()
     Content           = @()
     ModuleConventions = @()
+    Local             = @()
     Validate          = @('SetVariables')
 }
 
@@ -210,6 +215,42 @@ foreach ($taskGroup in $taskGroups) {
         Parent = 'Validate'
     }
     Add-PlumberTask @parentSplat
+}
+
+if (
+    $script:PlumberConfig.LocalTasks -and
+    (Test-PlumberTaskEnabled -Name Local -ExcludeTasks $script:PlumberConfig.ExcludeTasks)
+) {
+    foreach ($localTaskPath in @($script:PlumberConfig.LocalTasks)) {
+        if (-not $localTaskPath) {
+            continue
+        }
+
+        $localTaskName = [System.IO.Path]::GetFileNameWithoutExtension($localTaskPath)
+        if (-not (Test-PlumberTaskEnabled -Name $localTaskName -ExcludeTasks $script:PlumberConfig.ExcludeTasks)) {
+            continue
+        }
+
+        $resolvedLocalTaskPath = if ([System.IO.Path]::IsPathRooted($localTaskPath)) {
+            [System.IO.Path]::GetFullPath($localTaskPath)
+        } elseif (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
+            [System.IO.Path]::GetFullPath((Join-Path $BuildRoot $localTaskPath))
+        } else {
+            [System.IO.Path]::GetFullPath($localTaskPath)
+        }
+
+        if (-not (Test-Path $resolvedLocalTaskPath -PathType Leaf)) {
+            throw "Local task file not found: $localTaskPath"
+        }
+
+        . $resolvedLocalTaskPath
+        $script:PlumberTaskJobs.Local += "?$localTaskName"
+    }
+
+    if ($script:PlumberTaskJobs.Local) {
+        Add-BuildTask -Name Local -Jobs $script:PlumberTaskJobs.Local
+        $script:PlumberTaskJobs.Validate += '?Local'
+    }
 }
 
 Add-PlumberTask -Name Validate -Path 'Pipeline/Validate.ps1'
