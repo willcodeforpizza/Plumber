@@ -341,7 +341,7 @@ Describe 'TaskLoader' {
         $result.IncludeTestsInPssa | Should -BeTrue
         $result.ExcludePathCount | Should -Be 0
         $result.JsonSchemaCount | Should -Be 0
-        $result.MaxLineLength | Should -Be 120
+        $result.MaxLineLength | Should -Be 115
         $result.PrivateHelpSynopsisOnly | Should -BeTrue
     }
 
@@ -421,9 +421,24 @@ Describe 'TaskLoader' {
             '    }'
             '}'
             '[pscustomobject]@{'
-            '    ExcludedForBackticks = Test-PlumberTaskPathExcluded -Task Backticks -Path ''' + $excludedFile + ''''
-            '    ExcludedForPssa = Test-PlumberTaskPathExcluded -Task PSScriptAnalyzer -Path ''' + $excludedFile + ''''
-            '    IncludedForBackticks = Test-PlumberTaskPathExcluded -Task Backticks -Path ''' + $includedFile + ''''
+            (
+                '    ExcludedForBackticks = ' +
+                'Test-PlumberTaskPathExcluded -Task Backticks -Path ''' +
+                $excludedFile +
+                ''''
+            )
+            (
+                '    ExcludedForPssa = ' +
+                'Test-PlumberTaskPathExcluded -Task PSScriptAnalyzer -Path ''' +
+                $excludedFile +
+                ''''
+            )
+            (
+                '    IncludedForBackticks = ' +
+                'Test-PlumberTaskPathExcluded -Task Backticks -Path ''' +
+                $includedFile +
+                ''''
+            )
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
 

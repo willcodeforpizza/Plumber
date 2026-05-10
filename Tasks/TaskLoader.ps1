@@ -47,7 +47,7 @@ $defaults = @{
     ExcludePaths       = @{}
     IncludeTestsInPssa = $true
     JsonSchemas        = @()
-    MaxLineLength      = 120
+    MaxLineLength      = 115
     PrivateHelpSynopsisOnly = $true
     SkipTasks          = @()
 }
@@ -72,41 +72,30 @@ if (-not $module) {
     throw 'Plumber module must be imported before loading tasks.'
 }
 
-$moduleRoot = $module.ModuleBase
-$script:PlumberConfig.ModuleRoot = $moduleRoot
-$taskRoot = Join-Path $moduleRoot 'Tasks'
-. (Join-Path $moduleRoot 'Private/Test-PlumberTaskEnabled.ps1')
-. (Join-Path $moduleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
-. (Join-Path $moduleRoot 'Private/Import-PlumberTask.ps1')
-
-$script:PlumberTaskJobs = @{
-    CodeQuality       = @()
-    ReleaseHygiene    = @()
-    Content           = @()
-    ModuleConventions = @()
-    Validate          = @('SetVariables')
-}
-
-$taskGroups = @(
-    @{
-        Parent   = 'CodeQuality'
-        Children = @('PSScriptAnalyzer', 'Backticks', 'LineLength', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')
-    }
-    @{
-        Parent   = 'ReleaseHygiene'
-        Children = @('ModuleVersion', 'Changelog')
-    }
-    @{
-        Parent   = 'Content'
-        Children = @('JSON', 'JSONSchema', 'YAML')
-    }
-    @{
-        Parent   = 'ModuleConventions'
-        Children = @('Manifest', 'PublicFunctions', 'Structure', 'Naming', 'ToDo', 'Help')
-    }
-)
 
 function Add-PlumberTask {
+    <#
+        .SYNOPSIS
+        Imports a Plumber task into the active Invoke-Build scope.
+
+        .DESCRIPTION
+        Resolves task metadata, dot-sources the task file, and records the task
+        as an optional dependency of its parent group.
+
+        This function is intentionally defined inline in the task loader. The
+        loader is dot-sourced by a consuming build file, so inline definition
+        keeps Add-PlumberTask in the same script scope as Invoke-Build's task
+        registration functions and the loader's task graph state.
+
+        .PARAMETER Name
+        The task name to import.
+
+        .PARAMETER Path
+        The task file path relative to the Plumber task root.
+
+        .PARAMETER Parent
+        The parent task group that should include this task.
+    #>
     param (
         [Parameter(Mandatory)]
         [string]
@@ -138,6 +127,49 @@ function Add-PlumberTask {
         $script:PlumberTaskJobs[$task.Parent] += "?$($task.Name)"
     }
 }
+
+
+$moduleRoot = $module.ModuleBase
+$script:PlumberConfig.ModuleRoot = $moduleRoot
+$taskRoot = Join-Path $moduleRoot 'Tasks'
+. (Join-Path $moduleRoot 'Private/Test-PlumberTaskEnabled.ps1')
+. (Join-Path $moduleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
+. (Join-Path $moduleRoot 'Private/Get-PlumberTaskFile.ps1')
+. (Join-Path $moduleRoot 'Private/Import-PlumberTask.ps1')
+
+$script:PlumberTaskJobs = @{
+    CodeQuality       = @()
+    ReleaseHygiene    = @()
+    Content           = @()
+    ModuleConventions = @()
+    Validate          = @('SetVariables')
+}
+
+$taskGroups = @(
+    @{
+        Parent   = 'CodeQuality'
+        Children = @(
+            'PSScriptAnalyzer',
+            'Backticks',
+            'LineLength',
+            'PesterUnit',
+            'PesterIntegration',
+            'CodeCoverage'
+        )
+    }
+    @{
+        Parent   = 'ReleaseHygiene'
+        Children = @('ModuleVersion', 'Changelog')
+    }
+    @{
+        Parent   = 'Content'
+        Children = @('JSON', 'JSONSchema', 'YAML')
+    }
+    @{
+        Parent   = 'ModuleConventions'
+        Children = @('Manifest', 'PublicFunctions', 'Structure', 'Naming', 'ToDo', 'Help')
+    }
+)
 
 . (Join-Path $taskRoot 'SetVariables.ps1')
 
