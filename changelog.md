@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.19
+- Added: FileScope config for changed-file validation
+- Added: DiffBase config for pull request changed-file validation
+
 ## 0.0.18
 - Fixed: PSScriptAnalyzer test-folder filtering for similarly named directories
 - Added: PSScriptAnalyzer shared file discovery coverage

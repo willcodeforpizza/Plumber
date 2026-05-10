@@ -4,9 +4,9 @@ function Get-PlumberTaskFile {
         Gets files for a Plumber task.
 
         .DESCRIPTION
-        Returns files under the build root after applying optional extension,
-        base path, and task-scoped exclude filters. The full build-root file
-        list is cached for the current build run.
+        Returns files under the build root after applying optional changed-file
+        scope, extension, base path, and task-scoped exclude filters. The full
+        build-root file list is cached for the current build run.
 
         .PARAMETER Task
         The task name used to apply task-scoped exclusions.
@@ -40,6 +40,27 @@ function Get-PlumberTaskFile {
         $script:PlumberFiles = @(Get-ChildItem $BuildRoot -File -Recurse)
     }
 
+    if (
+        $script:PlumberConfig.FileScope -and
+        $script:PlumberConfig.FileScope -notin 'All', 'Changed'
+    ) {
+        throw "Unsupported FileScope '$($script:PlumberConfig.FileScope)'. Use 'All' or 'Changed'."
+    }
+
+    if (
+        $script:PlumberConfig.FileScope -eq 'Changed' -and
+        -not $script:PlumberChangedFilesLoaded
+    ) {
+        if (-not (Get-Command Get-PlumberChangedFile -ErrorAction SilentlyContinue)) {
+            . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberChangedFile.ps1')
+        }
+
+        $script:PlumberChangedFiles = @(
+            Get-PlumberChangedFile -BuildRoot $BuildRoot -DiffBase $script:PlumberConfig.DiffBase
+        )
+        $script:PlumberChangedFilesLoaded = $true
+    }
+
     $basePath = if ($Path) {
         if ([System.IO.Path]::IsPathRooted($Path)) {
             [System.IO.Path]::GetFullPath($Path)
@@ -49,6 +70,17 @@ function Get-PlumberTaskFile {
     }
 
     $files = $script:PlumberFiles
+    if ($script:PlumberConfig.FileScope -eq 'Changed') {
+        $changedPathSet = [System.Collections.Generic.HashSet[string]]::new(
+            [System.StringComparer]::OrdinalIgnoreCase
+        )
+        foreach ($changedFile in $script:PlumberChangedFiles) {
+            $null = $changedPathSet.Add($changedFile.FullName)
+        }
+
+        $files = @($files | Where-Object {$changedPathSet.Contains($_.FullName)})
+    }
+
     if ($basePath) {
         $basePath = $basePath.TrimEnd(
             [System.IO.Path]::DirectorySeparatorChar,

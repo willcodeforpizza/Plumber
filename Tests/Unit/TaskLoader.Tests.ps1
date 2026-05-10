@@ -691,6 +691,8 @@ Describe 'TaskLoader' {
             '. (Get-PlumberTaskLoader)'
             '[pscustomobject]@{'
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
+            '        DiffBase = $script:PlumberConfig.DiffBase'
+            '        FileScope = $script:PlumberConfig.FileScope'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
             '        ExcludePathCount = $script:PlumberConfig.ExcludePaths.Count'
             '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
@@ -704,6 +706,8 @@ Describe 'TaskLoader' {
                 ConvertFrom-Json
 
         $result.CoverageMinimum | Should -Be 75
+        $result.DiffBase | Should -BeNullOrEmpty
+        $result.FileScope | Should -Be 'All'
         $result.IncludeTestsInPssa | Should -BeTrue
         $result.ExcludePathCount | Should -Be 0
         $result.JsonSchemaCount | Should -Be 0
@@ -728,6 +732,8 @@ Describe 'TaskLoader' {
             '    ExcludePaths = @{'
             "        Backticks = @('Tests/Assets/*')"
             '    }'
+            "    DiffBase = 'origin/main'"
+            "    FileScope = 'Changed'"
             '    IncludeTestsInPssa = $false'
             '    MaxLineLength = 100'
             '    PrivateHelpSynopsisOnly = $false'
@@ -741,6 +747,8 @@ Describe 'TaskLoader' {
             '[pscustomobject]@{'
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
             '        BackticksExcludePath = $script:PlumberConfig.ExcludePaths.Backticks[0]'
+            '        DiffBase = $script:PlumberConfig.DiffBase'
+            '        FileScope = $script:PlumberConfig.FileScope'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
             '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
             '        MaxLineLength = $script:PlumberConfig.MaxLineLength'
@@ -754,6 +762,8 @@ Describe 'TaskLoader' {
 
         $result.CoverageMinimum | Should -Be 90
         $result.BackticksExcludePath | Should -Be 'Tests/Assets/*'
+        $result.DiffBase | Should -Be 'origin/main'
+        $result.FileScope | Should -Be 'Changed'
         $result.IncludeTestsInPssa | Should -BeFalse
         $result.JsonSchemaCount | Should -Be 1
         $result.MaxLineLength | Should -Be 100
