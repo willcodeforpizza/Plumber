@@ -40,6 +40,19 @@ Invoke-Plumber -Task PesterUnit
 Invoke-Plumber -Task YAML
 ```
 
+Choose an output mode:
+
+```powershell
+Invoke-Plumber -OutputMode Summary
+Invoke-Plumber -OutputMode Table
+Invoke-Plumber -OutputMode Json
+Invoke-Plumber -OutputMode Raw
+```
+
+`Summary` is the default quiet output. `Table` prints every task result, `Json` emits structured
+output for automation, and `Raw` preserves Invoke-Build output for debugging.
+Failed validation throws after writing the selected output so CI can fail correctly.
+
 ## To run
 
 - Install or import the module.

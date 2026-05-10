@@ -24,19 +24,20 @@ Describe 'Invoke-Plumber' {
 
     It 'runs the Validate task by default' {
         InModuleScope Plumber {
-            Invoke-Plumber | Should -Match 'Validate'
+            Invoke-Plumber | Should -Match 'Plumber validation passed'
 
             Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
                 $Task.Count -eq 1 -and
                 $Task[0] -eq 'Validate' -and
-                (Split-Path $BuildFile -Leaf) -eq 'Plumber.build.ps1'
+                (Split-Path $BuildFile -Leaf) -eq 'Plumber.build.ps1' -and
+                -not $RawOutput
             }
         }
     }
 
     It 'passes explicit tasks to the build runner' {
         InModuleScope Plumber {
-            Invoke-Plumber -Task JSON, YAML | Should -Match 'Validate'
+            Invoke-Plumber -Task JSON, YAML | Should -Match 'Plumber validation passed'
 
             Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
                 $Task.Count -eq 2 -and
@@ -59,6 +60,44 @@ Describe 'Invoke-Plumber' {
 
             {Invoke-Plumber -Task ToDo -ErrorAction Stop} |
                 Should -Throw -ExpectedMessage 'Build failed!'
+        }
+    }
+
+    It 'writes JSON output when requested' {
+        InModuleScope Plumber {
+            $result = Invoke-Plumber -OutputMode Json | ConvertFrom-Json
+
+            $result.Success | Should -BeTrue
+            $result.Passed | Should -Be 1
+            $result.Tasks[0].Name | Should -Be 'Validate'
+        }
+    }
+
+    It 'writes all task rows in table mode' {
+        InModuleScope Plumber {
+            Invoke-Plumber -OutputMode Table | Should -Match 'Validate'
+        }
+    }
+
+    It 'requests raw build output in raw mode' {
+        InModuleScope Plumber {
+            Invoke-Plumber -OutputMode Raw | Should -Match 'Validate'
+
+            Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
+                $RawOutput
+            }
+        }
+    }
+
+    It 'reloads result helpers when build execution removes them' {
+        InModuleScope Plumber {
+            Mock Invoke-PlumberBuild {
+                Remove-Item Function:\ConvertTo-PlumberResult -Force
+                Remove-Item Function:\Write-PlumberResult -Force
+                $script:mockBuildResult
+            }
+
+            Invoke-Plumber | Should -Match 'Plumber validation passed'
         }
     }
 
@@ -110,6 +149,91 @@ Describe 'Invoke-PlumberBuild' {
             $result.Tasks.Error | Should -BeNullOrEmpty
         }
     }
+
+    It 'suppresses Invoke-Build output unless raw output is requested' {
+        InModuleScope Plumber {
+            Mock Out-Host {}
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    if (-not $File) {
+                        throw 'Build file is required'
+                    }
+
+                    'suppressed output'
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = $null
+                            }
+                        )
+                    })
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            $result = Invoke-PlumberBuild -Task QuietSmoke -BuildFile $BuildFile
+
+            $result.Tasks.Name | Should -Contain 'QuietSmoke'
+            Should -Invoke Out-Host -Times 0 -Exactly
+        }
+    }
+
+    It 'streams raw output without returning it as the build result' {
+        InModuleScope Plumber {
+            Mock Out-Host {}
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    if (-not $File) {
+                        throw 'Build file is required'
+                    }
+
+                    'raw output'
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = $null
+                            }
+                        )
+                    })
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            $result = Invoke-PlumberBuild -Task RawSmoke -BuildFile $BuildFile -RawOutput
+
+            $result.Tasks.Name | Should -Contain 'RawSmoke'
+            $result | Should -Not -Contain 'raw output'
+            Should -Invoke Out-Host -Times 1 -Exactly
+        }
+    }
 }
 
 Describe 'Invoke-Plumber private wrapper recovery' {
@@ -147,8 +271,8 @@ Describe 'Invoke-Plumber private wrapper recovery' {
                 $Name -eq 'Invoke-Build'
             }
 
-            Invoke-Plumber -Task Content | Should -Match 'Content'
-            Invoke-Plumber -Task JSON | Should -Match 'JSON'
+            Invoke-Plumber -Task Content -OutputMode Table | Should -Match 'Content'
+            Invoke-Plumber -Task JSON -OutputMode Table | Should -Match 'JSON'
         }
     }
 }
