@@ -44,7 +44,8 @@ Add-BuildTask -Name ValidateTaskHelp -Jobs {
         }
 
         if ($missingSections.Count -gt 0) {
-            "$($help.Name): missing or invalid task help sections: $($missingSections -join ', ')"
+            $relativeTaskPath = [System.IO.Path]::GetRelativePath($BuildRoot, $taskFile.FullName)
+            "$relativeTaskPath ($($help.Name)): missing or invalid task help sections: $($missingSections -join ', ')"
         }
     }
 
