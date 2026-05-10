@@ -17,7 +17,7 @@ CI, and agent workflows use the same checks.
 
 | Category | Parent task | Child tasks |
 | --- | --- | --- |
-| Code quality | `CodeQuality` | `PSScriptAnalyzer`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
+| Code quality | `CodeQuality` | `PSScriptAnalyzer`, `Backticks`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
 | Release hygiene | `ReleaseHygiene` | `ModuleVersion`, `Changelog` |
 | Content | `Content` | `JSON`, `JSONSchema`, `YAML` |
 | Module conventions | `ModuleConventions` | `Manifest`, `PublicFunctions`, `Structure`, `Naming`, `ToDo`, `Help` |
@@ -33,6 +33,7 @@ Run a subset while iterating:
 
 ```powershell
 Invoke-Plumber -Task CodeQuality
+Invoke-Plumber -Task Backticks
 Invoke-Plumber -Task Content
 Invoke-Plumber -Task PesterUnit
 Invoke-Plumber -Task YAML

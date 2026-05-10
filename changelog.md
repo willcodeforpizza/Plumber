@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.9
+- Added: Backticks task for PowerShell line-continuation style validation
+
 ## 0.0.8
 - Added: Help task for public and private function comment-based help validation
 - Added: PrivateHelpSynopsisOnly config for private function help validation
