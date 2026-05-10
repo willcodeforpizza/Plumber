@@ -216,8 +216,11 @@ normalized with `/`.
 `FileScope` controls which files are returned by Plumber's shared file
 discovery. The default is `All`.
 
-Set `FileScope` to `Changed` to validate only files changed in git. This includes
-staged changes, unstaged changes and untracked files. Deleted files are ignored.
+Set `FileScope` to `Changed` to validate only files changed in git. This
+includes staged changes, unstaged changes and untracked files. Deleted files are
+ignored.
+
+Local development example:
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
@@ -225,8 +228,7 @@ staged changes, unstaged changes and untracked files. Deleted files are ignored.
 }
 ```
 
-For pull request validation, set `DiffBase` to include committed changes from a
-base branch:
+Pull request validation example:
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
@@ -238,6 +240,9 @@ base branch:
 Changed-file scope applies only to tasks that use `Get-PlumberTaskFile`, such as
 `PSScriptAnalyzer`, `Backticks`, `LineLength`, `ToDo`, `JSON`, `JSONSchema` and
 `YAML`. Pester and module-wide checks still run normally.
+
+When changed-file scope is active, Plumber writes how many changed files were
+selected before task-specific filters are applied.
 
 
 
