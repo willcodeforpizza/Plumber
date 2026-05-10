@@ -12,14 +12,10 @@
     )
     PrivateData = @{
         PSData = @{
-            PublishSource = 'Local'
-            # PublishSource = 'PowershellGallery'
-            # Tags = @()
+            Tags = @('Validation', 'Pipeline', 'Invoke-Build')
             LicenseUri = 'https://github.com/willcodeforpizza/Plumber/blob/main/LICENSE'
             ProjectUri = 'https://github.com/willcodeforpizza/Plumber'
-            # IconUri = ''
-            # ReleaseNotes = ''
-            # ExternalModuleDependencies = @()
+            ReleaseNotes = 'https://github.com/willcodeforpizza/Plumber/blob/main/changelog.md'
         }
     }
 }
