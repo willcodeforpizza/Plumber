@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.8
+- Added: Help task for public and private function comment-based help validation
+- Added: PrivateHelpSynopsisOnly config for private function help validation
+- Changed: Document Help task configuration
+
 ## 0.0.7
 - Added: JSONSchema task using Test-Json and JsonSchemas config
 - Changed: Document JSON schema configuration
