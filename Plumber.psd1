@@ -15,8 +15,8 @@
             PublishSource = 'Local'
             # PublishSource = 'PowershellGallery'
             # Tags = @()
-            # LicenseUri = ''
-            # ProjectUri = ''
+            LicenseUri = 'https://github.com/willcodeforpizza/Plumber/blob/main/LICENSE'
+            ProjectUri = 'https://github.com/willcodeforpizza/Plumber'
             # IconUri = ''
             # ReleaseNotes = ''
             # ExternalModuleDependencies = @()
