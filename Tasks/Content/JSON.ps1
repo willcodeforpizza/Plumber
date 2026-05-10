@@ -1,6 +1,47 @@
 <#
     .SYNOPSIS
-    Validates JSON files can be parsed
+    Validates JSON files can be parsed.
+
+    .DESCRIPTION
+    Finds `.json` files directly under the `Resource` directory and verifies
+    that each file can be parsed from JSON and serialized back to JSON.
+
+    .GROUP
+    Content
+
+    .CONFIGURATION
+    `ExcludePaths.JSON` excludes matching files from this task.
+
+    ### Example
+
+    ```powershell
+    . (Get-PlumberTaskLoader) -Config @{
+        ModuleManifest = 'MyModule.psd1'
+        ExcludePaths   = @{
+            JSON = @('Resource/generated.json')
+        }
+    }
+    ```
+
+    .RUN
+    ```powershell
+    Invoke-Plumber -Task JSON
+    ```
+
+    .PASS
+    ```json
+    {
+      "name": "Plumber",
+      "enabled": true
+    }
+    ```
+
+    .FAIL
+    ```json
+    {
+      "name": "Plumber",
+      "enabled": true
+    ```
 #>
 Add-BuildTask -Name JSON -Jobs {
     # Scope can be lost when running Plumber on Plumber multiple times

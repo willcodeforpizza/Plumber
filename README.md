@@ -11,34 +11,94 @@ CI, and agent workflows use the same checks.
 
 - Windows or Linux
 - PowerShell 7
-- The modules listed in `./Resource/RequiredModules.json` if you use those tasks
 
-## Task groups
+## To run
 
-| Category | Parent task | Child tasks |
-| --- | --- | --- |
-| Code quality | `CodeQuality` | `PSScriptAnalyzer`, `Backticks`, `LineLength`, Pester tasks, `CodeCoverage` |
-| Release hygiene | `ReleaseHygiene` | `ModuleVersion`, `Changelog` |
-| Content | `Content` | `JSON`, `JSONSchema`, `YAML` |
-| Module conventions | `ModuleConventions` | `Manifest`, `PublicFunctions`, `Structure`, `Naming`, `ToDo`, `Help` |
+- Install Plumber `Install-Module Plumber -Scope CurrentUser`
+- Browse to the module you want to validate.
+- Add a build file to the root of your module `MyModule.build.ps1` (see configuration below).
+- Run `Invoke-Plumber`.
 
-`Validate` runs all four parent tasks:
+### Configuration
+
+Create a `build.ps1` in the root of the module. This is the basic configuration you need to get running:
 
 ```powershell
+./MyModule.build.ps1
+--------------------
+
+Import-Module Plumber
+
+. (Get-PlumberTaskLoader) -Config @{
+    ModuleManifest = 'MyModule.psd1'
+}
+```
+
+To customize the tasks you run, or edit settings, set configuration in the build file.
+
+Check the [task index](docs/tasks/index.md) for details on each task configuration. Here is an example of all available options:
+
+```powershell
+./MyModule.build.ps1
+--------------------
+
+Import-Module Plumber
+
+. (Get-PlumberTaskLoader) -Config @{
+    ModuleManifest          = 'MyModule.psd1'
+    ExcludeTasks            = @(
+        'Backticks',
+        'ToDo'
+    )
+    ExcludePaths            = @{
+        PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
+    }
+    CoverageMinimum         = 75
+    IncludeTestsInPssa      = $false
+    JsonSchemas             = @(
+        @{
+            Path   = 'Resource/*.json'
+            Schema = 'Resource/Schema/config.schema.json'
+        }
+    )
+    MaxLineLength           = 80
+    PrivateHelpSynopsisOnly = $true
+}
+```
+
+You can also run the same tasks through Invoke-Build:
+
+```powershell
+Invoke-Build Validate ./MyModule.build.ps1
+```
+
+Warning: When running directly through `Invoke-Build` be aware that Plumber tasks run with `?TaskName`. This means "Continue on error" so the entire pipeline completes. Be careful with your error handling. Use `Invoke-Plumber` for concrete error behavior.
+
+## Running tasks
+
+`Validate` runs all validation tasks:
+
+```powershell
+cd ./MyModule
 Invoke-Plumber
+
+# Or explicitly
 Invoke-Plumber -Task Validate
 ```
 
-Run a subset while iterating:
+Run a subset group or individual tasks:
 
 ```powershell
 Invoke-Plumber -Task CodeQuality
+Invoke-Plumber -Task Content
+
+Invoke-Plumber -Task PesterUnit
 Invoke-Plumber -Task Backticks
 Invoke-Plumber -Task LineLength
-Invoke-Plumber -Task Content
-Invoke-Plumber -Task PesterUnit
 Invoke-Plumber -Task YAML
 ```
+
+## Output
 
 Choose an output mode:
 
@@ -51,6 +111,7 @@ Invoke-Plumber -OutputMode Raw
 
 `Summary` is the default quiet output. `Table` prints every task result, `Json` emits structured
 output for automation, and `Raw` preserves Invoke-Build output for debugging.
+
 Failed validation throws after writing the selected output so CI can fail correctly.
 
 Choose a build file explicitly when a repository has more than one build file:
@@ -59,92 +120,78 @@ Choose a build file explicitly when a repository has more than one build file:
 Invoke-Plumber -BuildFile ./MyModule.build.ps1
 ```
 
-## To run
+## Tasks
 
-- Install or import the module.
-- Browse to the module you want to validate.
-- Add a build file to the root of your module, for example `MyModule.build.ps1`.
-- Run `Invoke-Plumber`.
+Tasks are documented in detail in the [task index](docs/tasks/index.md).
 
-Example build file:
+### Groups
 
-```powershell
-./MyModule.build.ps1
---------------------
+| Group | Includes |
+| --- | --- |
+| [CodeQuality](docs/tasks/CodeQuality.md) | `PSScriptAnalyzer`, `Backticks`, `LineLength`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
+| [Content](docs/tasks/Content.md) | `JSON`, `JSONSchema`, `YAML` |
+| [ModuleConventions](docs/tasks/ModuleConventions.md) | `Manifest`, `PublicFunctions`, `Structure`, `Naming`, `ToDo`, `Help` |
+| [ReleaseHygiene](docs/tasks/ReleaseHygiene.md) | `ModuleVersion`, `ChangelogUpdated` |
+| [Validate](docs/tasks/Validate.md) | `CodeQuality`, `ReleaseHygiene`, `Content`, `ModuleConventions` |
 
-Import-Module Plumber
+### Validation Tasks
 
-. (Get-PlumberTaskLoader) -Config @{
-    ModuleManifest     = 'MyModule.psd1'
-    CoverageMinimum    = 75
-    IncludeTestsInPssa = $true
-    JsonSchemas        = @()
-    MaxLineLength      = 115
-    PrivateHelpSynopsisOnly = $true
-    SkipTasks          = @()
-}
-```
+| Task | Group |
+| --- | --- |
+| [Backticks](docs/tasks/Backticks.md) | `CodeQuality` |
+| [CodeCoverage](docs/tasks/CodeCoverage.md) | `CodeQuality` |
+| [LineLength](docs/tasks/LineLength.md) | `CodeQuality` |
+| [PesterIntegration](docs/tasks/PesterIntegration.md) | `CodeQuality` |
+| [PesterUnit](docs/tasks/PesterUnit.md) | `CodeQuality` |
+| [PSScriptAnalyzer](docs/tasks/PSScriptAnalyzer.md) | `CodeQuality` |
+| [JSON](docs/tasks/JSON.md) | `Content` |
+| [JSONSchema](docs/tasks/JSONSchema.md) | `Content` |
+| [YAML](docs/tasks/YAML.md) | `Content` |
+| [Help](docs/tasks/Help.md) | `ModuleConventions` |
+| [Manifest](docs/tasks/Manifest.md) | `ModuleConventions` |
+| [Naming](docs/tasks/Naming.md) | `ModuleConventions` |
+| [PublicFunctions](docs/tasks/PublicFunctions.md) | `ModuleConventions` |
+| [Structure](docs/tasks/Structure.md) | `ModuleConventions` |
+| [ToDo](docs/tasks/ToDo.md) | `ModuleConventions` |
+| [ChangelogUpdated](docs/tasks/ChangelogUpdated.md) | `ReleaseHygiene` |
+| [ModuleVersion](docs/tasks/ModuleVersion.md) | `ReleaseHygiene` |
 
-You can also run the same tasks through Invoke-Build:
-
-```powershell
-Invoke-Build Validate ./MyModule.build.ps1
-```
 
 ## Configuration
 
-| Key | Default | Description |
-| --- | --- | --- |
-| `ModuleManifest` | First `*.psd1` in the build root | Module manifest path. Explicit config is recommended. |
-| `CoverageMinimum` | `75` | Minimum acceptable Pester coverage percentage. |
-| `IncludeTestsInPssa` | `$true` | Include files under `Tests/` when running PSScriptAnalyzer. |
-| `JsonSchemas` | `@()` | JSON file glob and schema mappings for `JSONSchema`. |
-| `MaxLineLength` | `115` | Maximum line length for `LineLength`. |
-| `PrivateHelpSynopsisOnly` | `$true` | Only require synopsis help for private functions. |
-| `SkipTasks` | `@()` | Task names to exclude from the loaded task graph. |
+Configuration is defined in the build file, in the hashtable passed to `Get-PlumberTaskLoader`.
 
-`ModuleManifest` is recommended even though Plumber can fall back to discovery. Being explicit
-avoids surprises in repos with analyzer settings, fixtures, examples or other data files.
+Review the details per task help in the [task index](docs/tasks/index.md).
 
-`SkipTasks` removes tasks before Invoke-Build runs. Skipping a superset task skips all of its
-children, for example `Content` skips `JSON`, `JSONSchema` and `YAML`. If all children of a
-parent task are skipped, the parent task is not loaded.
+### Global
 
-Example config overrides:
+#### ExcludeTasks
 
-```powershell
-# Skip one child task
-SkipTasks = @('YAML')
+`ExcludeTasks` removes tasks before `Invoke-Build` runs. Excluding a group task excludes all of
+its children, for example `Content` excludes `JSON`, `JSONSchema` and `YAML`. If all children of a
+parent task are excluded, the parent task is not loaded.
 
-# Skip the Content task group
-SkipTasks = @("Content")
+You can also exclude individual tasks.
 
-# Require higher code coverage
-CoverageMinimum = 90
+#### ExcludePaths
 
-# Allow longer lines
-MaxLineLength = 140
-```
+`ExcludePaths` is task-scoped. A file excluded from one task can still be used by another task.
 
-Example JSON schema config:
+For example, to exclude a test asset from PSScriptAnalyzer, you would do:
 
 ```powershell
-JsonSchemas = @(
-    @{
-        Path   = 'Resource/*.json'
-        Schema = 'Resource/Schema/config.schema.json'
+. (Get-PlumberTaskLoader) -Config @{
+    ExcludePaths = @{
+        PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
     }
-)
+}
 ```
 
-## Task notes
+Review the details per task help in the [task index](docs/tasks/index.md) for details on what tasks support `ExcludePaths`.
 
-- `CodeCoverage` uses `CoverageMinimum`.
-- `JSONSchema` uses `JsonSchemas`.
-- `LineLength` uses `MaxLineLength`.
-- `PSScriptAnalyzer` uses `IncludeTestsInPssa`.
-- `Help` uses `PrivateHelpSynopsisOnly`.
-- `Manifest`, `ModuleVersion` and `Naming` use `ModuleManifest`.
-- Parent validation tasks aggregate child failures so all checks can report in one run.
+Patterns use PowerShell wildcard matching against repository-relative paths
+normalized with `/`.
+
+
 
  ![Plumber-bottom-banner](docs/images/Plumber-bottom-banner.png)

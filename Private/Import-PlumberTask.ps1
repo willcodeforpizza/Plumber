@@ -5,7 +5,7 @@ function Import-PlumberTask {
 
         .DESCRIPTION
         Returns task import metadata when a task is enabled. If the task name is
-        present in SkipTasks, no object is returned. TaskLoader.ps1 uses this
+        present in ExcludeTasks, no object is returned. TaskLoader.ps1 uses this
         metadata to dot-source task files in the active Invoke-Build scope.
 
         .PARAMETER Name
@@ -20,7 +20,7 @@ function Import-PlumberTask {
         .PARAMETER Parent
         The parent task that should reference this task.
 
-        .PARAMETER SkipTasks
+        .PARAMETER ExcludeTasks
         Task names that should not be imported.
 
         .EXAMPLE
@@ -29,9 +29,9 @@ function Import-PlumberTask {
         Returns metadata for importing the JSON task under the Content parent.
 
         .EXAMPLE
-        Import-PlumberTask -Name YAML -Path Content/YAML.ps1 -TaskRoot $taskRoot -SkipTasks YAML
+        Import-PlumberTask -Name YAML -Path Content/YAML.ps1 -TaskRoot $taskRoot -ExcludeTasks YAML
 
-        Returns nothing because YAML is skipped.
+        Returns nothing because YAML is excluded.
     #>
     [CmdletBinding()]
     [OutputType([pscustomobject])]
@@ -52,10 +52,10 @@ function Import-PlumberTask {
         $Parent,
 
         [string[]]
-        $SkipTasks = @()
+        $ExcludeTasks = @()
     )
 
-    if (-not (Test-PlumberTaskEnabled -Name $Name -SkipTasks $SkipTasks)) {
+    if (-not (Test-PlumberTaskEnabled -Name $Name -ExcludeTasks $ExcludeTasks)) {
         return
     }
 

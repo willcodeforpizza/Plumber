@@ -5,16 +5,16 @@ BeforeAll {
 }
 
 Describe 'Test-PlumberTaskEnabled' {
-    It 'returns true when the task is not skipped' {
+    It 'returns true when the task is not excluded' {
         InModuleScope Plumber {
-            Test-PlumberTaskEnabled -Name JSON -SkipTasks YAML |
+            Test-PlumberTaskEnabled -Name JSON -ExcludeTasks YAML |
                 Should -BeTrue
         }
     }
 
-    It 'returns false when the task is skipped' {
+    It 'returns false when the task is excluded' {
         InModuleScope Plumber {
-            Test-PlumberTaskEnabled -Name YAML -SkipTasks YAML |
+            Test-PlumberTaskEnabled -Name YAML -ExcludeTasks YAML |
                 Should -BeFalse
         }
     }
@@ -31,9 +31,9 @@ Describe 'Import-PlumberTask' {
         }
     }
 
-    It 'returns nothing when the task is skipped' {
+    It 'returns nothing when the task is excluded' {
         InModuleScope Plumber {
-            Import-PlumberTask -Name YAML -Path 'Content/YAML.ps1' -TaskRoot $TestDrive -SkipTasks YAML |
+            Import-PlumberTask -Name YAML -Path 'Content/YAML.ps1' -TaskRoot $TestDrive -ExcludeTasks YAML |
                 Should -BeNullOrEmpty
         }
     }
@@ -50,7 +50,7 @@ Describe 'TaskLoader' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    SkipTasks = @('JSON', 'YAML')"
+            "    ExcludeTasks = @('JSON', 'YAML')"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -82,7 +82,7 @@ Describe 'TaskLoader' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    SkipTasks = @('PesterUnit', 'PesterIntegration', 'CodeCoverage')"
+            "    ExcludeTasks = @('PesterUnit', 'PesterIntegration', 'CodeCoverage')"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -392,13 +392,13 @@ Describe 'TaskLoader' {
         $tasks['Content'].Jobs | Should -Contain '?JSONSchema'
     }
 
-    It 'does not load Content when all Content child tasks are skipped' {
+    It 'does not load Content when all Content child tasks are excluded' {
         $buildFile = Join-Path $TestDrive 'skip-all-content.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    SkipTasks = @('JSON', 'JSONSchema', 'YAML')"
+            "    ExcludeTasks = @('JSON', 'JSONSchema', 'YAML')"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -407,13 +407,13 @@ Describe 'TaskLoader' {
         $tasks['Validate'].Jobs | Should -Not -Contain '?Content'
     }
 
-    It 'does not load Content children when Content is skipped' {
+    It 'does not load Content children when Content is excluded' {
         $buildFile = Join-Path $TestDrive 'skip-content-parent.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    SkipTasks = @('Content')"
+            "    ExcludeTasks = @('Content')"
             '}'
         ) | Set-Content -Path $buildFile
 

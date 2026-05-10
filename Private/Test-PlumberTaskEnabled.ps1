@@ -4,24 +4,24 @@ function Test-PlumberTaskEnabled {
         Tests whether a Plumber task is enabled.
 
         .DESCRIPTION
-        Compares a task name with the configured SkipTasks list and returns true
+        Compares a task name with the configured ExcludeTasks list and returns true
         when the task should be loaded.
 
         .PARAMETER Name
         The task name to check.
 
-        .PARAMETER SkipTasks
+        .PARAMETER ExcludeTasks
         Task names that should not be loaded.
 
         .EXAMPLE
-        Test-PlumberTaskEnabled -Name JSON -SkipTasks YAML
+        Test-PlumberTaskEnabled -Name JSON -ExcludeTasks YAML
 
-        Returns true because JSON is not skipped.
+        Returns true because JSON is not excluded.
 
         .EXAMPLE
-        Test-PlumberTaskEnabled -Name YAML -SkipTasks YAML
+        Test-PlumberTaskEnabled -Name YAML -ExcludeTasks YAML
 
-        Returns false because YAML is skipped.
+        Returns false because YAML is excluded.
     #>
     [CmdletBinding()]
     [OutputType([bool])]
@@ -31,8 +31,8 @@ function Test-PlumberTaskEnabled {
         $Name,
 
         [string[]]
-        $SkipTasks = @()
+        $ExcludeTasks = @()
     )
 
-    $SkipTasks -notcontains $Name
+    $ExcludeTasks -notcontains $Name
 }

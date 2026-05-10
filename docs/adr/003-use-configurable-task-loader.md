@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Plumber needs a stable core validation pipeline while still allowing consuming projects to adjust validation behavior. Examples include skipping tasks, changing thresholds and selecting files.
+Plumber needs a stable core validation pipeline while still allowing consuming projects to adjust validation behavior. Examples include excluding tasks, changing thresholds and selecting files.
 
 Hard-coding all behavior in `Plumber.build.ps1` would make the module simpler internally but would force consumers to fork or wrap Plumber for common project differences.
 
@@ -14,7 +14,7 @@ Hard-coding all behavior in `Plumber.build.ps1` would make the module simpler in
 
 Plumber will load validation tasks through a task loader and a `PlumberConfig` object.
 
-The loader is responsible for assembling the task graph from Plumber's core tasks and configuration. Configuration is responsible for project-specific behavior such as task skipping, coverage thresholds, line length limits, manifest selection, and other supported validation settings.
+The loader is responsible for assembling the task graph from Plumber's core tasks and configuration. Configuration is responsible for project-specific behavior such as task exclusion, coverage thresholds, line length limits, manifest selection, and other supported validation settings.
 
 The loader should discover configuration through the consuming module's build context rather than requiring consumers to edit Plumber module files.
 

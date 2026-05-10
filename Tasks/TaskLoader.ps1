@@ -13,7 +13,7 @@
     .PARAMETER Config
     Repository-specific Plumber configuration. Supported keys are
     ModuleManifest, CoverageMinimum, ExcludePaths, IncludeTestsInPssa and
-    SkipTasks.
+    ExcludeTasks.
 
     .EXAMPLE
     . (Get-PlumberTaskLoader) -Config @{
@@ -30,10 +30,10 @@
             Backticks = @('Tests/Assets/*')
         }
         IncludeTestsInPssa = $false
-        SkipTasks          = @('YAML', 'Changelog')
+        ExcludeTasks       = @('YAML', 'ChangelogUpdated')
     }
 
-    Loads Plumber tasks with custom coverage, PSScriptAnalyzer and task skip
+    Loads Plumber tasks with custom coverage, PSScriptAnalyzer and task exclusion
     settings.
 #>
 param (
@@ -49,7 +49,7 @@ $defaults = @{
     JsonSchemas        = @()
     MaxLineLength      = 115
     PrivateHelpSynopsisOnly = $true
-    SkipTasks          = @()
+    ExcludeTasks       = @()
 }
 
 $script:PlumberConfig = $defaults.Clone()
@@ -57,8 +57,8 @@ foreach ($key in $Config.Keys) {
     $script:PlumberConfig[$key] = $Config[$key]
 }
 
-if (-not $script:PlumberConfig.SkipTasks) {
-    $script:PlumberConfig.SkipTasks = @()
+if (-not $script:PlumberConfig.ExcludeTasks) {
+    $script:PlumberConfig.ExcludeTasks = @()
 }
 if (-not $script:PlumberConfig.ExcludePaths) {
     $script:PlumberConfig.ExcludePaths = @{}
@@ -114,7 +114,7 @@ function Add-PlumberTask {
         Path      = $Path
         TaskRoot  = $taskRoot
         Parent    = $Parent
-        SkipTasks = $script:PlumberConfig.SkipTasks
+        ExcludeTasks = $script:PlumberConfig.ExcludeTasks
     }
     $task = Import-PlumberTask @taskSplat
     if (-not $task) {
@@ -159,7 +159,7 @@ $taskGroups = @(
     }
     @{
         Parent   = 'ReleaseHygiene'
-        Children = @('ModuleVersion', 'Changelog')
+        Children = @('ModuleVersion', 'ChangelogUpdated')
     }
     @{
         Parent   = 'Content'
@@ -172,10 +172,11 @@ $taskGroups = @(
 )
 
 . (Join-Path $taskRoot 'SetVariables.ps1')
+. (Join-Path $taskRoot 'GenerateDocs.ps1')
 
 foreach ($taskGroup in $taskGroups) {
     if (
-        -not (Test-PlumberTaskEnabled -Name $taskGroup.Parent -SkipTasks $script:PlumberConfig.SkipTasks)
+        -not (Test-PlumberTaskEnabled -Name $taskGroup.Parent -ExcludeTasks $script:PlumberConfig.ExcludeTasks)
     ) {
         continue
     }

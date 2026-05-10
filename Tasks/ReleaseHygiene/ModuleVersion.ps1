@@ -1,6 +1,40 @@
 <#
     .SYNOPSIS
-    Validates current PSD1 version is higher than current PSGallery version
+    Validates current PSD1 version is higher than current PSGallery version.
+
+    .DESCRIPTION
+    Looks up the module on PSGallery and fails when the configured manifest
+    version is not greater than the published version.
+
+    .GROUP
+    ReleaseHygiene
+
+    .CONFIGURATION
+    `ModuleManifest` controls which module manifest supplies the module name
+    and `ModuleVersion`.
+
+    ### Example
+
+    ```powershell
+    . (Get-PlumberTaskLoader) -Config @{
+        ModuleManifest = 'MyModule.psd1'
+    }
+    ```
+
+    .RUN
+    ```powershell
+    Invoke-Plumber -Task ModuleVersion
+    ```
+
+    .PASS
+    ```powershell
+    ModuleVersion = '1.2.3'
+    ```
+
+    .FAIL
+    ```powershell
+    ModuleVersion = '1.2.2'
+    ```
 #>
 Add-BuildTask -Name ModuleVersion -Jobs SetVariables, {
     $publishedModule = Find-Module $script:moduleName -ErrorAction SilentlyContinue

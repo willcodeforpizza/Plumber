@@ -16,8 +16,8 @@
 - Changed: Failed Invoke-Plumber validation now throws after writing output
 
 ## 0.0.11
-- Added: Config examples for task skipping, coverage and line length
-- Changed: SkipTasks now supports skipping parent task groups
+- Added: Config examples for task exclusion, coverage and line length
+- Changed: ExcludeTasks now supports excluding parent task groups
 
 ## 0.0.10
 - Added: LineLength task for configurable maximum line length validation
@@ -36,7 +36,7 @@
 
 ## 0.0.6
 - Added: Configurable task loading through Get-PlumberTaskLoader and Tasks/TaskLoader.ps1
-- Added: PlumberConfig support for ModuleManifest, CoverageMinimum, IncludeTestsInPssa and SkipTasks
+- Added: PlumberConfig support for ModuleManifest, CoverageMinimum, IncludeTestsInPssa and ExcludeTasks
 - Changed: Plumber's build file loads tasks through the configurable loader
 - Changed: PesterUnit, PesterIntegration and CodeCoverage load directly under CodeQuality
 

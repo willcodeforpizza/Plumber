@@ -1,6 +1,53 @@
 <#
     .SYNOPSIS
-    Validates PSScriptAnalyzer passes
+    Validates PSScriptAnalyzer passes.
+
+    .DESCRIPTION
+    Runs PSScriptAnalyzer against PowerShell files under the build root and
+    fails when analyzer diagnostics are returned.
+
+    .GROUP
+    CodeQuality
+
+    .CONFIGURATION
+    `IncludeTestsInPssa` controls whether files under `Tests` are analyzed. The
+    default is `$true`.
+
+    `ExcludePaths.PSScriptAnalyzer` excludes matching files from this task.
+
+    PSScriptAnalyzer settings can be supplied at the build root in
+    `PSScriptAnalyzerSettings.psd1`.
+
+    ### Example
+
+    ```powershell
+    . (Get-PlumberTaskLoader) -Config @{
+        ModuleManifest     = 'MyModule.psd1'
+        IncludeTestsInPssa = $false
+        ExcludePaths       = @{
+            PSScriptAnalyzer = @('Tests/Assets/*.ps1')
+        }
+    }
+    ```
+
+    .RUN
+    ```powershell
+    Invoke-Plumber -Task PSScriptAnalyzer
+    ```
+
+    .PASS
+    ```powershell
+    function Get-Thing {
+        [CmdletBinding()]
+        param ()
+    }
+    ```
+
+    .FAIL
+    ```powershell
+    function get-thing {
+    }
+    ```
 #>
 Add-BuildTask -Name PSScriptAnalyzer -Jobs SetVariables, {
     # Scope can be lost when running Plumber on Plumber multiple times
