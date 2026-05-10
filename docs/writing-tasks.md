@@ -14,8 +14,8 @@ $files = Get-PlumberTaskFile -Task Backticks -Extension '.ps1', '.psm1', '.psd1'
 ```
 
 `Get-PlumberTaskFile` caches the build-root file list for the current run,
-applies optional extension and path filters, and applies task-scoped
-`ExcludePaths` configuration.
+applies `FileScope = 'Changed'` when configured, applies optional extension and
+path filters, and applies task-scoped `ExcludePaths` configuration.
 
 ## Task Exclusions
 

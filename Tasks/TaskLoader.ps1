@@ -12,8 +12,8 @@
 
     .PARAMETER Config
     Repository-specific Plumber configuration. Supported keys are
-    ModuleManifest, CoverageMinimum, ExcludePaths, IncludeTestsInPssa,
-    LocalTasks and ExcludeTasks.
+    ModuleManifest, CoverageMinimum, ExcludePaths, FileScope, DiffBase,
+    IncludeTestsInPssa, LocalTasks and ExcludeTasks.
 
     .EXAMPLE
     . (Get-PlumberTaskLoader) -Config @{
@@ -44,6 +44,8 @@ param (
 $defaults = @{
     ModuleManifest          = $null
     CoverageMinimum         = 75
+    DiffBase                = $null
+    FileScope               = 'All'
     IncludeTestsInPssa      = $true
     JsonSchemas             = @()
     MaxLineLength           = 115
@@ -138,6 +140,7 @@ $script:PlumberConfig.ModuleRoot = $moduleRoot
 $taskRoot = Join-Path $moduleRoot 'Tasks'
 . (Join-Path $moduleRoot 'Private/Test-PlumberTaskEnabled.ps1')
 . (Join-Path $moduleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
+. (Join-Path $moduleRoot 'Private/Get-PlumberChangedFile.ps1')
 . (Join-Path $moduleRoot 'Private/Get-PlumberTaskFile.ps1')
 . (Join-Path $moduleRoot 'Private/Import-PlumberTask.ps1')
 

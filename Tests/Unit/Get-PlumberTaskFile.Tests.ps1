@@ -23,9 +23,12 @@ Describe 'Get-PlumberTaskFile' {
     It 'gets files by extension' {
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
             $script:PlumberFiles = $null
+            $script:PlumberChangedFiles = $null
+            $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
                 BuildRoot    = $BuildRoot
                 ExcludePaths = @{}
+                FileScope    = 'All'
             }
 
             $files = Get-PlumberTaskFile -Task PSScriptAnalyzer -Extension '.ps1'
@@ -39,11 +42,14 @@ Describe 'Get-PlumberTaskFile' {
     It 'applies task-scoped exclusions' {
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
             $script:PlumberFiles = $null
+            $script:PlumberChangedFiles = $null
+            $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
                 BuildRoot    = $BuildRoot
                 ExcludePaths = @{
                     Backticks = @('Tests/Assets/*')
                 }
+                FileScope    = 'All'
             }
 
             $files = Get-PlumberTaskFile -Task Backticks -Extension '.ps1'
@@ -56,9 +62,12 @@ Describe 'Get-PlumberTaskFile' {
     It 'filters files to a path' {
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
             $script:PlumberFiles = $null
+            $script:PlumberChangedFiles = $null
+            $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
                 BuildRoot    = $BuildRoot
                 ExcludePaths = @{}
+                FileScope    = 'All'
             }
 
             $files = Get-PlumberTaskFile -Task JSON -Extension '.json' -Path Resource
@@ -66,6 +75,92 @@ Describe 'Get-PlumberTaskFile' {
             $files.Name | Should -Contain 'config.json'
             $files.Name | Should -Contain 'config.schema.json'
             $files.Name | Should -Not -Contain 'Invoke-Thing.ps1'
+        }
+    }
+
+    It 'limits files to changed files before extension, path and exclusion filters' {
+        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+            $script:PlumberFiles = $null
+            $script:PlumberChangedFilesLoaded = $true
+            $script:PlumberChangedFiles = @(
+                Get-Item (Join-Path $BuildRoot 'Public/Invoke-Thing.ps1')
+                Get-Item (Join-Path $BuildRoot 'Resource/config.json')
+                Get-Item (Join-Path $BuildRoot 'Tests/Assets/Fixture.ps1')
+            )
+            $script:PlumberConfig = @{
+                BuildRoot    = $BuildRoot
+                ExcludePaths = @{
+                    JSON = @('Tests/Assets/*')
+                }
+                FileScope    = 'Changed'
+            }
+
+            $files = Get-PlumberTaskFile -Task JSON -Extension '.json' -Path Resource
+
+            $files.Name | Should -Contain 'config.json'
+            $files.Name | Should -Not -Contain 'config.schema.json'
+            $files.Name | Should -Not -Contain 'Invoke-Thing.ps1'
+            $files.Name | Should -Not -Contain 'Fixture.ps1'
+        }
+    }
+
+    It 'throws for unsupported file scopes' {
+        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+            $script:PlumberFiles = $null
+            $script:PlumberChangedFiles = $null
+            $script:PlumberChangedFilesLoaded = $false
+            $script:PlumberConfig = @{
+                BuildRoot    = $BuildRoot
+                ExcludePaths = @{}
+                FileScope    = 'Touched'
+            }
+
+            {Get-PlumberTaskFile -Task JSON} |
+                Should -Throw -ExpectedMessage "Unsupported FileScope 'Touched'*"
+        }
+    }
+}
+
+Describe 'Get-PlumberChangedFile' {
+    BeforeEach {
+        $script:repoRoot = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        New-Item -Path $script:repoRoot -ItemType Directory -Force | Out-Null
+        & git -C $script:repoRoot init | Out-Null
+        & git -C $script:repoRoot config user.email plumber@example.invalid
+        & git -C $script:repoRoot config user.name Plumber
+
+        Set-Content -Path (Join-Path $script:repoRoot 'committed.ps1') -Value '$true'
+        & git -C $script:repoRoot add committed.ps1
+        & git -C $script:repoRoot commit -m initial | Out-Null
+        & git -C $script:repoRoot branch base
+    }
+
+    It 'gets staged, unstaged and untracked files' {
+        Set-Content -Path (Join-Path $script:repoRoot 'committed.ps1') -Value '$false'
+        Set-Content -Path (Join-Path $script:repoRoot 'staged.ps1') -Value '$true'
+        Set-Content -Path (Join-Path $script:repoRoot 'untracked.ps1') -Value '$true'
+        & git -C $script:repoRoot add staged.ps1
+
+        InModuleScope Plumber -Parameters @{RepoRoot = $script:repoRoot} {
+            $files = Get-PlumberChangedFile -BuildRoot $RepoRoot
+
+            $files.Name | Should -Contain 'committed.ps1'
+            $files.Name | Should -Contain 'staged.ps1'
+            $files.Name | Should -Contain 'untracked.ps1'
+        }
+    }
+
+    It 'gets files changed from a diff base and skips deleted files' {
+        Set-Content -Path (Join-Path $script:repoRoot 'base-change.ps1') -Value '$true'
+        Remove-Item (Join-Path $script:repoRoot 'committed.ps1')
+        & git -C $script:repoRoot add --all
+        & git -C $script:repoRoot commit -m changed | Out-Null
+
+        InModuleScope Plumber -Parameters @{RepoRoot = $script:repoRoot} {
+            $files = Get-PlumberChangedFile -BuildRoot $RepoRoot -DiffBase base
+
+            $files.Name | Should -Contain 'base-change.ps1'
+            $files.Name | Should -Not -Contain 'committed.ps1'
         }
     }
 }
