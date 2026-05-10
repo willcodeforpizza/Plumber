@@ -39,3 +39,9 @@ steps:
   - task: validate
     invalid
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: Content](Content.md)
+- Previous: [JSONSchema](JSONSchema.md)

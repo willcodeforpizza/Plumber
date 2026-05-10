@@ -23,3 +23,8 @@ coverage.
 ```powershell
 Invoke-Plumber -Task CodeQuality
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- Next: [Content](Content.md)

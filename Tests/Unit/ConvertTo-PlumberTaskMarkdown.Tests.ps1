@@ -22,13 +22,22 @@ Invoke-Plumber -Task Content
                 Pass          = $null
                 Fail          = $null
             }
+            $allHelp = @(
+                [pscustomobject]@{Name = 'CodeQuality'; Group = $null; Includes = @('Backticks')}
+                $help
+                [pscustomobject]@{Name = 'ModuleConventions'; Group = $null; Includes = @('Help')}
+            )
 
-            $markdown = ConvertTo-PlumberTaskMarkdown -Help $help
+            $markdown = ConvertTo-PlumberTaskMarkdown -Help $help -AllHelp $allHelp
 
             $markdown | Should -Match '# Content'
             $markdown | Should -Match '## Includes'
             $markdown | Should -Match '- `JSON`'
             $markdown | Should -Match 'Invoke-Plumber -Task Content'
+            $markdown | Should -Match '## Navigation'
+            $markdown | Should -Match '\[Task index\]\(index\.md\)'
+            $markdown | Should -Match 'Previous: \[CodeQuality\]\(CodeQuality\.md\)'
+            $markdown | Should -Match 'Next: \[ModuleConventions\]\(ModuleConventions\.md\)'
             $markdown | Should -Not -Match '## Pass'
             $markdown | Should -Not -Match '## Fail'
         }
@@ -59,8 +68,13 @@ name: build:
 ```
 '@
             }
+            $allHelp = @(
+                [pscustomobject]@{Name = 'JSON'; Group = 'Content'; Includes = @()}
+                $help
+                [pscustomobject]@{Name = 'JSONSchema'; Group = 'Content'; Includes = @()}
+            )
 
-            $markdown = ConvertTo-PlumberTaskMarkdown -Help $help
+            $markdown = ConvertTo-PlumberTaskMarkdown -Help $help -AllHelp $allHelp
 
             $markdown | Should -Match '# YAML'
             $markdown | Should -Match '## Group'
@@ -68,6 +82,9 @@ name: build:
             $markdown | Should -Match '## Pass'
             $markdown | Should -Match '```yaml'
             $markdown | Should -Match '## Fail'
+            $markdown | Should -Match '\[Group: Content\]\(Content\.md\)'
+            $markdown | Should -Match 'Previous: \[JSONSchema\]\(JSONSchema\.md\)'
+            $markdown | Should -Not -Match 'Next:'
         }
     }
 }

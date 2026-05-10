@@ -16,3 +16,7 @@ Plumber task files.
 ```powershell
 Invoke-Build -File ./Plumber.build.ps1 -Task GenerateDocs
 ```
+
+## Navigation
+
+- [Task index](index.md)

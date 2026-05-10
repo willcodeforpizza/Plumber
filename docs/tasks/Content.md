@@ -20,3 +20,9 @@ JSON schema, and YAML.
 ```powershell
 Invoke-Plumber -Task Content
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- Previous: [CodeQuality](CodeQuality.md)
+- Next: [ModuleConventions](ModuleConventions.md)

@@ -38,3 +38,10 @@ It 'returns the expected value' {
     Get-Thing | Should -Be 'other'
 }
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: CodeQuality](CodeQuality.md)
+- Previous: [PesterIntegration](PesterIntegration.md)
+- Next: [PSScriptAnalyzer](PSScriptAnalyzer.md)

@@ -44,3 +44,10 @@ Covered file reports coverage greater than or equal to CoverageMinimum.
 ```text
 Covered file reports coverage lower than CoverageMinimum.
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: CodeQuality](CodeQuality.md)
+- Previous: [Backticks](Backticks.md)
+- Next: [LineLength](LineLength.md)

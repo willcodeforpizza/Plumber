@@ -62,3 +62,10 @@ Invoke-Plumber -Task JSONSchema
   "enabled": true
 }
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: Content](Content.md)
+- Previous: [JSON](JSON.md)
+- Next: [YAML](YAML.md)

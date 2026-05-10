@@ -50,3 +50,10 @@ $name = 'LineLength'
 ```powershell
 $line = '<more than MaxLineLength characters on one physical line>'
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: CodeQuality](CodeQuality.md)
+- Previous: [CodeCoverage](CodeCoverage.md)
+- Next: [PesterIntegration](PesterIntegration.md)

@@ -50,3 +50,9 @@ Invoke-Plumber -Task JSON
   "name": "Plumber",
   "enabled": true
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: Content](Content.md)
+- Next: [JSONSchema](JSONSchema.md)

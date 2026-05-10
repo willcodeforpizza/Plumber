@@ -45,3 +45,9 @@ Invoke-Plumber -Task ToDo
 ```text
 A code comment begins with the TODO marker.
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: ModuleConventions](ModuleConventions.md)
+- Previous: [PublicFunctions](PublicFunctions.md)

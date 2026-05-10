@@ -38,3 +38,10 @@ It 'returns a value' {
     Get-Thing | Should -BeNullOrEmpty
 }
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: CodeQuality](CodeQuality.md)
+- Previous: [LineLength](LineLength.md)
+- Next: [PesterUnit](PesterUnit.md)

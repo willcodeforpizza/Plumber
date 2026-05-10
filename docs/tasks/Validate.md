@@ -20,3 +20,8 @@ Runs all loaded validation task groups.
 ```powershell
 Invoke-Plumber -Task Validate
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- Previous: [ReleaseHygiene](ReleaseHygiene.md)

@@ -43,3 +43,9 @@ ModuleVersion = '1.2.3'
 ```powershell
 ModuleVersion = '1.2.2'
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: ReleaseHygiene](ReleaseHygiene.md)
+- Previous: [ChangelogUpdated](ChangelogUpdated.md)

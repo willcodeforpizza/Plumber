@@ -45,3 +45,9 @@ Get-Foo -DoBar -AddFizz
 ```text
 A PowerShell line whose final non-whitespace character is a backtick.
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: CodeQuality](CodeQuality.md)
+- Next: [CodeCoverage](CodeCoverage.md)

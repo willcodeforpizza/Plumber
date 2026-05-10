@@ -45,3 +45,9 @@ Public/Get-Thing.ps1 contains comment-based help with a SYNOPSIS section.
 ```text
 Public/Get-Thing.ps1 contains a function with no comment-based help.
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: ModuleConventions](ModuleConventions.md)
+- Next: [Manifest](Manifest.md)

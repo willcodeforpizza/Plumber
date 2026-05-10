@@ -18,3 +18,9 @@ Runs validation tasks that check release-facing version and changelog state.
 ```powershell
 Invoke-Plumber -Task ReleaseHygiene
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- Previous: [ModuleConventions](ModuleConventions.md)
+- Next: [Validate](Validate.md)

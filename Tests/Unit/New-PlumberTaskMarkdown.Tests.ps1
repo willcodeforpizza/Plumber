@@ -30,6 +30,9 @@ Describe 'New-PlumberTaskMarkdown' {
         Get-Content (Join-Path $outputRoot 'YAML.md') -Raw |
             Should -Match 'Invoke-Plumber -Task YAML'
 
+        Get-Content (Join-Path $outputRoot 'YAML.md') -Raw |
+            Should -Match '\[Group: Content\]\(Content\.md\)'
+
         $index = Get-Content (Join-Path $outputRoot 'index.md') -Raw
         $index | Should -Match '## Groups'
         $index | Should -Match '\| \[Content\]\(Content\.md\) \| `JSON`, `JSONSchema`, `YAML` \|'

@@ -56,3 +56,9 @@ function Get-Thing {
 function get-thing {
 }
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: CodeQuality](CodeQuality.md)
+- Previous: [PesterUnit](PesterUnit.md)

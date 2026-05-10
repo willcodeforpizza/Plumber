@@ -10,6 +10,9 @@ function ConvertTo-PlumberTaskMarkdown {
         .PARAMETER Help
         The parsed task help metadata.
 
+        .PARAMETER AllHelp
+        All parsed task help metadata, used to build navigation links.
+
         .EXAMPLE
         ConvertTo-PlumberTaskMarkdown -Help $help
 
@@ -20,7 +23,10 @@ function ConvertTo-PlumberTaskMarkdown {
     param (
         [Parameter(Mandatory)]
         [pscustomobject]
-        $Help
+        $Help,
+
+        [pscustomobject[]]
+        $AllHelp = @()
     )
 
     $lines = [System.Collections.Generic.List[string]]::new()
@@ -47,6 +53,36 @@ function ConvertTo-PlumberTaskMarkdown {
     Add-PlumberTaskMarkdownSection -Lines $lines -Title 'Run' -Content $Help.Run
     Add-PlumberTaskMarkdownSection -Lines $lines -Title 'Pass' -Content $Help.Pass
     Add-PlumberTaskMarkdownSection -Lines $lines -Title 'Fail' -Content $Help.Fail
+
+    $navigation = [System.Collections.Generic.List[string]]::new()
+    $navigation.Add('- [Task index](index.md)')
+
+    if ($Help.Group) {
+        $navigation.Add("- [Group: $($Help.Group)]($($Help.Group).md)")
+        $siblings = @(
+            $AllHelp |
+                Where-Object {$_.Group -eq $Help.Group -and -not $_.Includes} |
+                Sort-Object Name
+        )
+    } else {
+        $siblings = @(
+            $AllHelp |
+                Where-Object Includes |
+                Sort-Object Name
+        )
+    }
+
+    $currentIndex = [array]::IndexOf(@($siblings.Name), $Help.Name)
+    if ($currentIndex -gt 0) {
+        $previous = $siblings[$currentIndex - 1]
+        $navigation.Add("- Previous: [$($previous.Name)]($($previous.Name).md)")
+    }
+    if ($currentIndex -ge 0 -and $currentIndex -lt ($siblings.Count - 1)) {
+        $next = $siblings[$currentIndex + 1]
+        $navigation.Add("- Next: [$($next.Name)]($($next.Name).md)")
+    }
+
+    Add-PlumberTaskMarkdownSection -Lines $lines -Title 'Navigation' -Content ($navigation -join "`n")
 
     ($lines -join "`n").TrimEnd() + "`n"
 }

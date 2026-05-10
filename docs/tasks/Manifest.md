@@ -41,3 +41,10 @@ Test-ModuleManifest -Path ./MyModule.psd1
 ```powershell
 Test-ModuleManifest -Path ./Missing.psd1
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: ModuleConventions](ModuleConventions.md)
+- Previous: [Help](Help.md)
+- Next: [Naming](Naming.md)

@@ -42,3 +42,9 @@ Invoke-Plumber -Task ChangelogUpdated
 ```markdown
 ## 1.2.2
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- [Group: ReleaseHygiene](ReleaseHygiene.md)
+- Next: [ModuleVersion](ModuleVersion.md)

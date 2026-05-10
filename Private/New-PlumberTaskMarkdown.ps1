@@ -52,7 +52,7 @@ function New-PlumberTaskMarkdown {
     }
 
     foreach ($help in $taskHelp) {
-        $markdown = ConvertTo-PlumberTaskMarkdown -Help $help
+        $markdown = ConvertTo-PlumberTaskMarkdown -Help $help -AllHelp $taskHelp
         $outputPath = Join-Path $OutputRoot "$($help.Name).md"
         if ($PSCmdlet.ShouldProcess($outputPath, 'Write task Markdown')) {
             Set-Content -Path $outputPath -Value $markdown -NoNewline

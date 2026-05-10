@@ -22,3 +22,9 @@ naming, TODO comments, and function help.
 ```powershell
 Invoke-Plumber -Task ModuleConventions
 ```
+
+## Navigation
+
+- [Task index](index.md)
+- Previous: [Content](Content.md)
+- Next: [ReleaseHygiene](ReleaseHygiene.md)
