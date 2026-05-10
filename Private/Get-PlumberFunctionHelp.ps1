@@ -43,14 +43,30 @@ function Get-PlumberFunctionHelp {
         $true
     )
     $help = $function.GetHelpContent()
+    $synopsis = if ($help.Synopsis) {
+        $help.Synopsis.Trim()
+    }
+    $description = if ($help.Description) {
+        $help.Description.Trim()
+    }
+    $parameters = if ($help.Parameters) {
+        @($help.Parameters.Keys)
+    } else {
+        @()
+    }
+    $examples = if ($help.Examples) {
+        @($help.Examples)
+    } else {
+        @()
+    }
 
     [pscustomobject]@{
-        Name        = $function.Name
-        Path        = $Path
-        Synopsis    = $help.Synopsis.Trim()
-        Description = $help.Description.Trim()
-        Parameters  = @($help.Parameters.Keys)
-        Examples    = @($help.Examples)
+        Name         = $function.Name
+        Path         = $Path
+        Synopsis     = $synopsis
+        Description  = $description
+        Parameters   = $parameters
+        Examples     = $examples
         HasParameter = [bool] $function.Body.ParamBlock.Parameters
     }
 }

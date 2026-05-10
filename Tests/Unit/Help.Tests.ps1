@@ -113,4 +113,29 @@ function Invoke-Thing {
             $help.HasParameter | Should -BeTrue
         }
     }
+
+    It 'handles missing comment-based help without throwing' {
+        $functionPath = Join-Path $TestDrive 'Invoke-NoHelp.ps1'
+        @'
+function Invoke-NoHelp {
+    param (
+        [string]
+        $Name
+    )
+
+    $Name
+}
+'@ | Set-Content -Path $functionPath
+
+        InModuleScope Plumber -Parameters @{FunctionPath = $functionPath} {
+            $help = Get-PlumberFunctionHelp -Path $FunctionPath
+
+            $help.Name | Should -Be 'Invoke-NoHelp'
+            $help.Synopsis | Should -BeNullOrEmpty
+            $help.Description | Should -BeNullOrEmpty
+            $help.Parameters | Should -BeNullOrEmpty
+            $help.Examples | Should -BeNullOrEmpty
+            $help.HasParameter | Should -BeTrue
+        }
+    }
 }
