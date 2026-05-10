@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.16
+- Added: LocalTasks config for project-specific validation tasks under the Local group
+- Added: Local task documentation
+
 ## 0.0.15
 - Added: BuildModule task for creating a publishable module folder
 - Added: PublishModule task for publishing the staged module folder
