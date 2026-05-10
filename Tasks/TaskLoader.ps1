@@ -41,6 +41,7 @@ $defaults = @{
     ModuleManifest     = $null
     CoverageMinimum    = 75
     IncludeTestsInPssa = $true
+    JsonSchemas        = @()
     SkipTasks          = @()
 }
 
@@ -82,7 +83,7 @@ $taskGroups = @(
     }
     @{
         Parent   = 'Content'
-        Children = @('JSON', 'YAML')
+        Children = @('JSON', 'JSONSchema', 'YAML')
     }
     @{
         Parent   = 'ModuleConventions'

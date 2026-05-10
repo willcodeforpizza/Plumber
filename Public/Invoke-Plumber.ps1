@@ -35,6 +35,7 @@ function Invoke-Plumber {
         'CodeQuality',
         'Content',
         'JSON',
+        'JSONSchema',
         'License',
         'Manifest',
         'ModuleConventions',

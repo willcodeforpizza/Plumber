@@ -19,7 +19,7 @@ CI, and agent workflows use the same checks.
 | --- | --- | --- |
 | Code quality | `CodeQuality` | `PSScriptAnalyzer`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
 | Release hygiene | `ReleaseHygiene` | `ModuleVersion`, `Changelog` |
-| Content | `Content` | `JSON`, `YAML` |
+| Content | `Content` | `JSON`, `JSONSchema`, `YAML` |
 | Module conventions | `ModuleConventions` | `Manifest`, `PublicFunctions`, `Structure`, `Naming`, `ToDo` |
 
 `Validate` runs all four parent tasks:
@@ -57,6 +57,7 @@ Import-Module Plumber
     ModuleManifest     = 'MyModule.psd1'
     CoverageMinimum    = 75
     IncludeTestsInPssa = $true
+    JsonSchemas        = @()
     SkipTasks          = @()
 }
 ```
@@ -74,6 +75,7 @@ Invoke-Build Validate ./MyModule.build.ps1
 | `ModuleManifest` | First `*.psd1` in the build root | Module manifest path. Explicit config is recommended. |
 | `CoverageMinimum` | `75` | Minimum acceptable Pester coverage percentage. |
 | `IncludeTestsInPssa` | `$true` | Include files under `Tests/` when running PSScriptAnalyzer. |
+| `JsonSchemas` | `@()` | JSON file glob and schema mappings for `JSONSchema`. |
 | `SkipTasks` | `@()` | Task names to exclude from the loaded task graph. |
 
 `ModuleManifest` is recommended even though Plumber can fall back to discovery. Being explicit
@@ -82,9 +84,21 @@ avoids surprises in repos with analyzer settings, fixtures, examples or other da
 `SkipTasks` removes tasks before Invoke-Build runs. If all children of a parent task are skipped,
 the parent task is not loaded.
 
+Example JSON schema config:
+
+```powershell
+JsonSchemas = @(
+    @{
+        Path   = 'Resource/*.json'
+        Schema = 'Resource/Schema/config.schema.json'
+    }
+)
+```
+
 ## Task notes
 
 - `CodeCoverage` uses `CoverageMinimum`.
+- `JSONSchema` uses `JsonSchemas`.
 - `PSScriptAnalyzer` uses `IncludeTestsInPssa`.
 - `Manifest`, `ModuleVersion` and `Naming` use `ModuleManifest`.
 - Parent validation tasks aggregate child failures so all checks can report in one run.

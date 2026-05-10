@@ -44,7 +44,7 @@ Describe 'TaskLoader' {
         $script:invokeBuild = Get-Command Invoke-Build
     }
 
-    It 'does not load Content when all Content child tasks are skipped' {
+    It 'keeps Content when JSONSchema remains enabled' {
         $buildFile = Join-Path $TestDrive 'skip-content.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
@@ -57,8 +57,9 @@ Describe 'TaskLoader' {
         $tasks = & $script:invokeBuild -Task '??' -File $buildFile
         $tasks.Keys | Should -Not -Contain 'JSON'
         $tasks.Keys | Should -Not -Contain 'YAML'
-        $tasks.Keys | Should -Not -Contain 'Content'
-        $tasks['Validate'].Jobs | Should -Not -Contain '?Content'
+        $tasks.Keys | Should -Contain 'JSONSchema'
+        $tasks.Keys | Should -Contain 'Content'
+        $tasks['Content'].Jobs | Should -Contain '?JSONSchema'
     }
 
     It 'keeps a parent task when at least one child task remains enabled' {
@@ -97,6 +98,35 @@ Describe 'TaskLoader' {
         $tasks['CodeQuality'].Jobs | Should -Contain '?CodeCoverage'
     }
 
+    It 'loads JSONSchema directly under Content' {
+        $buildFile = Join-Path $TestDrive 'content.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Contain 'JSONSchema'
+        $tasks['Content'].Jobs | Should -Contain '?JSONSchema'
+    }
+
+    It 'does not load Content when all Content child tasks are skipped' {
+        $buildFile = Join-Path $TestDrive 'skip-all-content.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            "    SkipTasks = @('JSON', 'JSONSchema', 'YAML')"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Not -Contain 'Content'
+        $tasks['Validate'].Jobs | Should -Not -Contain '?Content'
+    }
+
     It 'sets default coverage and PSSA test inclusion config' {
         $buildFile = Join-Path $TestDrive 'default-config.build.ps1'
         @(
@@ -113,6 +143,7 @@ Describe 'TaskLoader' {
             '[pscustomobject]@{'
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
+            '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
 
@@ -122,6 +153,7 @@ Describe 'TaskLoader' {
 
         $result.CoverageMinimum | Should -Be 75
         $result.IncludeTestsInPssa | Should -BeTrue
+        $result.JsonSchemaCount | Should -Be 0
     }
 
     It 'sets configured coverage and PSSA test inclusion values' {
@@ -139,10 +171,17 @@ Describe 'TaskLoader' {
             '. (Get-PlumberTaskLoader) -Config @{'
             '    CoverageMinimum = 90'
             '    IncludeTestsInPssa = $false'
+            '    JsonSchemas = @('
+            '        @{'
+            "            Path = 'Resource/*.json'"
+            "            Schema = 'Resource/Schema/config.schema.json'"
+            '        }'
+            '    )'
             '}'
             '[pscustomobject]@{'
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
+            '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
 
@@ -152,5 +191,66 @@ Describe 'TaskLoader' {
 
         $result.CoverageMinimum | Should -Be 90
         $result.IncludeTestsInPssa | Should -BeFalse
+        $result.JsonSchemaCount | Should -Be 1
+    }
+
+    It 'validates configured JSON schema mappings' {
+        $moduleRoot = Join-Path $TestDrive 'SchemaModule'
+        $resourceRoot = Join-Path $moduleRoot 'Resource'
+        $schemaRoot = Join-Path $resourceRoot 'Schema'
+        New-Item -Path $schemaRoot -ItemType Directory | Out-Null
+
+        Set-Content -Path (Join-Path $resourceRoot 'config.json') -Value '{"name":"plumber"}'
+        Set-Content -Path (Join-Path $schemaRoot 'config.schema.json') -Value @'
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["name"],
+    "properties": {
+        "name": {
+            "type": "string"
+        }
+    }
+}
+'@
+
+        $buildFile = Join-Path $moduleRoot 'SchemaModule.build.ps1'
+        @(
+            '$ErrorActionPreference = ''Stop'''
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "JSONSchema") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            'function Write-Build {'
+            '    param ('
+            '        $Color,'
+            ''
+            '        $Message'
+            '    )'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            '    JsonSchemas = @('
+            '        @{'
+            "            Path = 'Resource/*.json'"
+            "            Schema = 'Resource/Schema/config.schema.json'"
+            '        }'
+            '    )'
+            '}'
+            "'ok'"
+        ) | Set-Content -Path $buildFile
+
+        & pwsh -NoLogo -NoProfile -File $buildFile |
+            Select-Object -Last 1 |
+                Should -Be 'ok'
     }
 }
