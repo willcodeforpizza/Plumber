@@ -61,12 +61,20 @@ Add-BuildTask -Name PSScriptAnalyzer -Jobs SetVariables, {
     )
 
     if (-not $script:PlumberConfig.IncludeTestsInPssa) {
-        $testRoot = Join-Path $BuildRoot 'Tests'
+        $testRoot = [System.IO.Path]::GetFullPath((Join-Path $BuildRoot 'Tests')).TrimEnd(
+            [System.IO.Path]::DirectorySeparatorChar,
+            [System.IO.Path]::AltDirectorySeparatorChar
+        )
+        $testRootWithSeparator = "$testRoot$([System.IO.Path]::DirectorySeparatorChar)"
         $scriptFiles = @(
             $scriptFiles |
                 Where-Object {
-                    -not $_.FullName.StartsWith(
+                    -not $_.FullName.Equals(
                         $testRoot,
+                        [System.StringComparison]::OrdinalIgnoreCase
+                    ) -and
+                    -not $_.FullName.StartsWith(
+                        $testRootWithSeparator,
                         [System.StringComparison]::OrdinalIgnoreCase
                     )
                 }

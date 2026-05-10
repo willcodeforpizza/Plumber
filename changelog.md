@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.18
+- Fixed: PSScriptAnalyzer test-folder filtering for similarly named directories
+- Added: PSScriptAnalyzer shared file discovery coverage
+
 ## 0.0.17
 - Added: Plumber local validation for task help comments
 - Fixed: Invoke-Plumber accepts local task names
