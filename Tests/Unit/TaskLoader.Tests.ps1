@@ -249,6 +249,24 @@ Describe 'TaskLoader' {
         $tasks['Validate'].Jobs | Should -Not -Contain '?Content'
     }
 
+    It 'does not load Content children when Content is skipped' {
+        $buildFile = Join-Path $TestDrive 'skip-content-parent.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            "    SkipTasks = @('Content')"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Not -Contain 'Content'
+        $tasks.Keys | Should -Not -Contain 'JSON'
+        $tasks.Keys | Should -Not -Contain 'JSONSchema'
+        $tasks.Keys | Should -Not -Contain 'YAML'
+        $tasks['Validate'].Jobs | Should -Not -Contain '?Content'
+    }
+
     It 'sets default coverage and PSSA test inclusion config' {
         $buildFile = Join-Path $TestDrive 'default-config.build.ps1'
         @(

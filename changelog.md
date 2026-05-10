@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.11
+- Added: Config examples for task skipping, coverage and line length
+- Changed: SkipTasks now supports skipping parent task groups
+
 ## 0.0.10
 - Added: LineLength task for configurable maximum line length validation
 
