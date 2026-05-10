@@ -8,8 +8,18 @@ Add-BuildTask -Name SetVariables -Jobs {
         if (Test-Path $_) { $script:moduleFolders += $_ }
     }
 
-    $script:moduleManifest = Get-ChildItem $BuildRoot -File -Filter '*.psd1' |
-        Select-Object -First 1
+    $manifestPath = if ($script:PlumberConfig.ModuleManifest) {
+        if ([System.IO.Path]::IsPathRooted($script:PlumberConfig.ModuleManifest)) {
+            $script:PlumberConfig.ModuleManifest
+        } else {
+            Join-Path $BuildRoot $script:PlumberConfig.ModuleManifest
+        }
+    } else {
+        Get-ChildItem $BuildRoot -File -Filter '*.psd1' |
+            Select-Object -First 1 -ExpandProperty FullName
+    }
+
+    $script:moduleManifest = Get-Item $manifestPath
     $script:moduleName = $script:moduleManifest.BaseName
     $script:psd1 = Import-PowerShellDataFile $script:moduleManifest.FullName
 

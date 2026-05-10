@@ -1,5 +1,11 @@
 # Plumber
 
+## 0.0.6
+- Add configurable task loading through Get-PlumberTaskLoader and Tasks/TaskLoader.ps1
+- Add PlumberConfig support for ModuleManifest, CoverageMinimum, IncludeTestsInPssa and SkipTasks
+- Update Plumber's build file to load tasks through the configurable loader
+- Load PesterUnit, PesterIntegration and CodeCoverage directly under CodeQuality
+
 ## 0.0.5
 - Add validation parent task groups: CodeQuality, ReleaseHygiene, Content and ModuleConventions
 - Add Manifest and YAML tasks
