@@ -75,6 +75,7 @@ function Invoke-Plumber {
         }
 
         $buildFile = Join-Path $moduleRoot 'Plumber.build.ps1'
+        # Self-validation can reload Plumber while Invoke-Plumber is running.
         $runtimeFunctions = 'Invoke-PlumberBuild', 'ConvertTo-PlumberResult', 'Write-PlumberResult'
         foreach ($runtimeFunction in $runtimeFunctions) {
             if (-not (Get-Command $runtimeFunction -ErrorAction SilentlyContinue)) {
