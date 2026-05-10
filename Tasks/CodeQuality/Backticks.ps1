@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-    Validates PowerShell files do not contain backticks
+    Validates PowerShell files do not use line-continuation backticks.
 #>
 Add-BuildTask -Name Backticks -Jobs {
     $powershellFiles = Get-ChildItem $BuildRoot -File -Recurse |
@@ -10,8 +10,8 @@ Add-BuildTask -Name Backticks -Jobs {
         $lineNumber = 0
         foreach ($line in Get-Content $file.FullName) {
             $lineNumber++
-            if ($line.Contains([char] 96)) {
-                "$($file.Name):$lineNumber - Backtick found"
+            if ($line -match '`\s*$') {
+                "$($file.Name):$lineNumber - Line-continuation backtick found"
             }
         }
     }

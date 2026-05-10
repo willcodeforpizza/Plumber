@@ -29,7 +29,11 @@ Task documentation will use a Plumber-specific schema with these sections:
 
 `.RUN` applies to every documented task and shows how to run that task explicitly.
 
-`.PASS` and `.FAIL` apply to leaf validation tasks and show concise examples of behavior that should pass or fail the task. Group tasks should not use `.PASS` or `.FAIL`; they should document the tasks they include.
+`.PASS` and `.FAIL` apply to leaf validation tasks and show concise examples of behavior that should pass or fail the task. Group tasks should not use `.PASS` or `.FAIL`.
+
+`.INCLUDES` applies only to group tasks and documents the task names in that group.
+
+`.GROUP` applies only to leaf validation tasks. Group tasks should omit it.
 
 Generated Markdown files will be written under `docs/tasks` and linked from a generated task table in `README.md`.
 
