@@ -157,6 +157,13 @@ Tasks are documented in detail in the [task index](docs/tasks/index.md).
 | [ChangelogUpdated](docs/tasks/ChangelogUpdated.md) | `ReleaseHygiene` |
 | [ModuleVersion](docs/tasks/ModuleVersion.md) | `ReleaseHygiene` |
 
+### Internal Tasks
+
+| Task | Purpose |
+| --- | --- |
+| [BuildModule](docs/tasks/BuildModule.md) | Builds a publishable Plumber module folder. |
+| [GenerateDocs](docs/tasks/GenerateDocs.md) | Generates Plumber documentation. |
+| [PublishModule](docs/tasks/PublishModule.md) | Publishes Plumber to PowerShell Gallery. |
 
 ## Configuration
 
