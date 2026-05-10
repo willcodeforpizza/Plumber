@@ -63,10 +63,18 @@ Import-Module Plumber
             Schema = 'Resource/Schema/config.schema.json'
         }
     )
+    LocalTasks              = @(
+        'Tasks/ValidateTaskDocs.ps1'
+        'Tasks/CheckGeneratedFiles.ps1'
+    )
     MaxLineLength           = 80
     PrivateHelpSynopsisOnly = $true
 }
 ```
+
+Use `LocalTasks` for project-specific validation that should run as part of
+`Validate` without becoming a Plumber core task. See
+[Local tasks](docs/local-tasks.md).
 
 You can also run the same tasks through Invoke-Build:
 
