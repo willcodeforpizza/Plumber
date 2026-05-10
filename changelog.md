@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.15
+- Added: BuildModule task for creating a publishable module folder
+- Added: PublishModule task for publishing the staged module folder
+- Added: PublishRelease task for creating GitHub tags and releases
+
 ## 0.0.14
 - Added: BuildFile parameter for Invoke-Plumber
 - Added: MIT license and gallery license metadata
