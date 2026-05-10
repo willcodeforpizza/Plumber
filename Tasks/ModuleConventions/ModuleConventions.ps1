@@ -4,12 +4,11 @@
 
     .DESCRIPTION
     Runs validation tasks that check module manifest, exported functions,
-    folder structure, naming, TODO comments, and function help.
+    naming, TODO comments, and function help.
 
     .INCLUDES
     Manifest
     PublicFunctions
-    Structure
     Naming
     ToDo
     Help

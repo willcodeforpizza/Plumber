@@ -4,15 +4,17 @@
 
     .DESCRIPTION
     Uses configured JSON schema mappings to validate matching `.json` files
-    with `Test-Json`.
+    under the build root with `Test-Json`.
 
     .GROUP
     Content
 
     .CONFIGURATION
     `JsonSchemas` defines the JSON files and schema files to validate. Each
-    mapping has a `Path` value for matching JSON files and a `Schema` value for
-    the schema file.
+    mapping has a repository-relative `Path` pattern for matching JSON files
+    and a `Schema` value for the schema file.
+
+    Use `**/*.json` to match JSON files recursively.
 
     `ExcludePaths.JSONSchema` excludes matching files from this task.
 
@@ -28,7 +30,7 @@
             }
         )
         ExcludePaths   = @{
-            JSONSchema = @('Resource/generated.json')
+            JSONSchema = @('Resource/Schema/*.json')
         }
     }
     ```
@@ -71,13 +73,6 @@ Add-BuildTask -Name JSONSchema -Jobs {
     }
 
     foreach ($mapping in $script:PlumberConfig.JsonSchemas) {
-        $jsonPath = Split-Path $mapping.Path -Parent
-        $jsonFilter = Split-Path $mapping.Path -Leaf
-        if (-not $jsonPath) {
-            $jsonPath = '.'
-        }
-        $jsonRoot = Join-Path $BuildRoot $jsonPath
-
         $schema = Join-Path $BuildRoot $mapping.Schema
 
         if (-not (Test-Path $schema)) {
@@ -85,14 +80,19 @@ Add-BuildTask -Name JSONSchema -Jobs {
             continue
         }
 
+        $normalizedPattern = $mapping.Path.Replace('\', '/')
+        $pathRegex = [regex]::Escape($normalizedPattern).
+            Replace('\*\*/', '(?:.*/)?').
+            Replace('\*\*', '.*').
+            Replace('\*', '[^/]*').
+            Replace('\?', '[^/]')
+        $pathRegex = "^$pathRegex$"
+
         $jsonFiles = @(
-            Get-PlumberTaskFile -Task JSONSchema -Extension '.json' -Path $jsonPath |
+            Get-PlumberTaskFile -Task JSONSchema -Extension '.json' |
                 Where-Object {
-                    $_.Name -like $jsonFilter -and
-                    $_.DirectoryName.Equals(
-                        $jsonRoot,
-                        [System.StringComparison]::OrdinalIgnoreCase
-                    )
+                    $relativePath = [System.IO.Path]::GetRelativePath($BuildRoot, $_.FullName)
+                    $relativePath.Replace('\', '/') -match $pathRegex
                 }
         )
         if (-not $jsonFiles) {

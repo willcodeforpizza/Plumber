@@ -3,8 +3,8 @@
     Validates JSON files can be parsed.
 
     .DESCRIPTION
-    Finds `.json` files directly under the `Resource` directory and verifies
-    that each file can be parsed from JSON and serialized back to JSON.
+    Finds `.json` files under the build root and verifies that each file can be
+    parsed from JSON and serialized back to JSON.
 
     .GROUP
     Content
@@ -50,14 +50,7 @@ Add-BuildTask -Name JSON -Jobs {
         . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
     }
 
-    $resourcePath = Join-Path $BuildRoot 'Resource'
-    $jsonFiles = Get-PlumberTaskFile -Task JSON -Extension '.json' -Path Resource |
-        Where-Object {
-            $_.DirectoryName.Equals(
-                $resourcePath,
-                [System.StringComparison]::OrdinalIgnoreCase
-            )
-        }
+    $jsonFiles = Get-PlumberTaskFile -Task JSON -Extension '.json'
     if (-not $jsonFiles) {
         Write-Build Yellow 'No JSON files found'
         return

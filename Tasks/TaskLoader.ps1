@@ -167,7 +167,7 @@ $taskGroups = @(
     }
     @{
         Parent   = 'ModuleConventions'
-        Children = @('Manifest', 'PublicFunctions', 'Structure', 'Naming', 'ToDo', 'Help')
+        Children = @('Manifest', 'PublicFunctions', 'Naming', 'ToDo', 'Help')
     }
 )
 

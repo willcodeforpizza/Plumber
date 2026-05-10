@@ -7,7 +7,7 @@ Validates JSON files against configured JSON schemas.
 ## Description
 
 Uses configured JSON schema mappings to validate matching `.json` files
-with `Test-Json`.
+under the build root with `Test-Json`.
 
 ## Group
 
@@ -16,8 +16,10 @@ Content
 ## Configuration
 
 `JsonSchemas` defines the JSON files and schema files to validate. Each
-mapping has a `Path` value for matching JSON files and a `Schema` value for
-the schema file.
+mapping has a repository-relative `Path` pattern for matching JSON files
+and a `Schema` value for the schema file.
+
+Use `**/*.json` to match JSON files recursively.
 
 `ExcludePaths.JSONSchema` excludes matching files from this task.
 
@@ -33,7 +35,7 @@ the schema file.
         }
     )
     ExcludePaths   = @{
-        JSONSchema = @('Resource/generated.json')
+        JSONSchema = @('Resource/Schema/*.json')
     }
 }
 ```

@@ -6,8 +6,8 @@ Validates JSON files can be parsed.
 
 ## Description
 
-Finds `.json` files directly under the `Resource` directory and verifies
-that each file can be parsed from JSON and serialized back to JSON.
+Finds `.json` files under the build root and verifies that each file can be
+parsed from JSON and serialized back to JSON.
 
 ## Group
 

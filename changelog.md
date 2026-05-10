@@ -2,8 +2,11 @@
 
 ## 0.0.14
 - Added: BuildFile parameter for Invoke-Plumber
+- Changed: JSON validation now scans JSON files across the build root
+- Changed: JSONSchema path mappings now match repository-relative JSON paths
 - Changed: Invoke-Plumber now resolves the build file from the current directory by default
 - Changed: ToDo now only reports TODO comment markers
+- Removed: Structure task
 
 ## 0.0.13
 - Added: ExcludePaths config for task-scoped file exclusions

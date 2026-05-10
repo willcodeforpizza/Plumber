@@ -60,7 +60,6 @@ function Invoke-Plumber {
         'PublicFunctions',
         'ReleaseHygiene',
         'SetVariables',
-        'Structure',
         'ToDo',
         'Validate',
         'YAML'

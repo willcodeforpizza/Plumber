@@ -130,7 +130,7 @@ Tasks are documented in detail in the [task index](docs/tasks/index.md).
 | --- | --- |
 | [CodeQuality](docs/tasks/CodeQuality.md) | `PSScriptAnalyzer`, `Backticks`, `LineLength`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
 | [Content](docs/tasks/Content.md) | `JSON`, `JSONSchema`, `YAML` |
-| [ModuleConventions](docs/tasks/ModuleConventions.md) | `Manifest`, `PublicFunctions`, `Structure`, `Naming`, `ToDo`, `Help` |
+| [ModuleConventions](docs/tasks/ModuleConventions.md) | `Manifest`, `PublicFunctions`, `Naming`, `ToDo`, `Help` |
 | [ReleaseHygiene](docs/tasks/ReleaseHygiene.md) | `ModuleVersion`, `ChangelogUpdated` |
 | [Validate](docs/tasks/Validate.md) | `CodeQuality`, `ReleaseHygiene`, `Content`, `ModuleConventions` |
 
@@ -151,7 +151,6 @@ Tasks are documented in detail in the [task index](docs/tasks/index.md).
 | [Manifest](docs/tasks/Manifest.md) | `ModuleConventions` |
 | [Naming](docs/tasks/Naming.md) | `ModuleConventions` |
 | [PublicFunctions](docs/tasks/PublicFunctions.md) | `ModuleConventions` |
-| [Structure](docs/tasks/Structure.md) | `ModuleConventions` |
 | [ToDo](docs/tasks/ToDo.md) | `ModuleConventions` |
 | [ChangelogUpdated](docs/tasks/ChangelogUpdated.md) | `ReleaseHygiene` |
 | [ModuleVersion](docs/tasks/ModuleVersion.md) | `ReleaseHygiene` |
