@@ -25,6 +25,8 @@ function ConvertTo-PlumberTaskMarkdownIndex {
     $lines = [System.Collections.Generic.List[string]]::new()
     $lines.Add('# Tasks')
     $lines.Add('')
+    $lines.Add('![Plumber logo](../images/Plumber-logo.png)')
+    $lines.Add('')
 
     $groups = @($Help | Where-Object Includes | Sort-Object Name)
     if ($groups) {

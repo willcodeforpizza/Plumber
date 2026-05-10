@@ -1,5 +1,7 @@
 # Plumber
 
+![Plumber banner](images/Plumber-banner.png)
+
 Shared Invoke-Build tasks for PowerShell validation pipelines.
 
 ## Documentation

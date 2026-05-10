@@ -1,5 +1,7 @@
 # Tasks
 
+![Plumber logo](../images/Plumber-logo.png)
+
 ## Groups
 
 | Group | Includes |
