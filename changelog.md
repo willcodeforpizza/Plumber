@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.13
+- Added: ExcludePaths config for task-scoped file exclusions
+- Changed: File-based validation tasks now use shared Plumber file discovery
+- Changed: Backticks now ignores escaped backticks and Markdown code fences
+
 ## 0.0.12
 - Added: Invoke-Plumber output modes for summary, table, JSON and raw output
 - Changed: Invoke-Plumber now defaults to concise summary output

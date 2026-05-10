@@ -179,6 +179,49 @@ Describe 'TaskLoader' {
         $result | Should -Match 'Backtick found'
     }
 
+    It 'excludes configured paths from Backticks validation' {
+        $moduleRoot = Join-Path $TestDrive 'BacktickExcludeModule'
+        $assetRoot = Join-Path $moduleRoot 'Tests/Assets'
+        New-Item -Path $assetRoot -ItemType Directory | Out-Null
+        [char] $backtick = 96
+
+        Set-Content -Path (Join-Path $assetRoot 'Fixture.ps1') -Value @(
+            'function Invoke-Fixture {'
+            "    'hello' $backtick"
+            '}'
+        )
+
+        $buildFile = Join-Path $moduleRoot 'BacktickExcludeModule.build.ps1'
+        @(
+            '$ErrorActionPreference = ''Stop'''
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "Backticks") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            '    ExcludePaths = @{'
+            "        Backticks = @('Tests/Assets/*')"
+            '    }'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1 |
+            Out-String
+
+        $LASTEXITCODE | Should -Be 0
+        $result | Should -Not -Match 'Line-continuation backtick found'
+    }
+
     It 'reports lines over the configured maximum length' {
         $moduleRoot = Join-Path $TestDrive 'LineLengthModule'
         $publicRoot = Join-Path $moduleRoot 'Public'
@@ -283,6 +326,7 @@ Describe 'TaskLoader' {
             '[pscustomobject]@{'
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
+            '        ExcludePathCount = $script:PlumberConfig.ExcludePaths.Count'
             '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
             '        MaxLineLength = $script:PlumberConfig.MaxLineLength'
             '        PrivateHelpSynopsisOnly = $script:PlumberConfig.PrivateHelpSynopsisOnly'
@@ -295,8 +339,9 @@ Describe 'TaskLoader' {
 
         $result.CoverageMinimum | Should -Be 75
         $result.IncludeTestsInPssa | Should -BeTrue
+        $result.ExcludePathCount | Should -Be 0
         $result.JsonSchemaCount | Should -Be 0
-        $result.MaxLineLength | Should -Be 120
+        $result.MaxLineLength | Should -Be 115
         $result.PrivateHelpSynopsisOnly | Should -BeTrue
     }
 
@@ -314,6 +359,9 @@ Describe 'TaskLoader' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             '    CoverageMinimum = 90'
+            '    ExcludePaths = @{'
+            "        Backticks = @('Tests/Assets/*')"
+            '    }'
             '    IncludeTestsInPssa = $false'
             '    MaxLineLength = 100'
             '    PrivateHelpSynopsisOnly = $false'
@@ -326,6 +374,7 @@ Describe 'TaskLoader' {
             '}'
             '[pscustomobject]@{'
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
+            '        BackticksExcludePath = $script:PlumberConfig.ExcludePaths.Backticks[0]'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
             '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
             '        MaxLineLength = $script:PlumberConfig.MaxLineLength'
@@ -338,10 +387,68 @@ Describe 'TaskLoader' {
                 ConvertFrom-Json
 
         $result.CoverageMinimum | Should -Be 90
+        $result.BackticksExcludePath | Should -Be 'Tests/Assets/*'
         $result.IncludeTestsInPssa | Should -BeFalse
         $result.JsonSchemaCount | Should -Be 1
         $result.MaxLineLength | Should -Be 100
         $result.PrivateHelpSynopsisOnly | Should -BeFalse
+    }
+
+    It 'tests task-scoped path exclusions' {
+        $moduleRoot = Join-Path $TestDrive 'ExcludeModule'
+        $assetRoot = Join-Path $moduleRoot 'Tests/Assets'
+        New-Item -Path $assetRoot -ItemType Directory | Out-Null
+        $excludedFile = Join-Path $assetRoot 'Fixture.ps1'
+        Set-Content -Path $excludedFile -Value '$value = 1'
+        $includedFile = Join-Path $moduleRoot 'Public.ps1'
+        Set-Content -Path $includedFile -Value '$value = 1'
+
+        $buildFile = Join-Path $moduleRoot 'ExcludeModule.build.ps1'
+        @(
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            '    ExcludePaths = @{'
+            "        Backticks = @('Tests/Assets/*')"
+            '    }'
+            '}'
+            '[pscustomobject]@{'
+            (
+                '    ExcludedForBackticks = ' +
+                'Test-PlumberTaskPathExcluded -Task Backticks -Path ''' +
+                $excludedFile +
+                ''''
+            )
+            (
+                '    ExcludedForPssa = ' +
+                'Test-PlumberTaskPathExcluded -Task PSScriptAnalyzer -Path ''' +
+                $excludedFile +
+                ''''
+            )
+            (
+                '    IncludedForBackticks = ' +
+                'Test-PlumberTaskPathExcluded -Task Backticks -Path ''' +
+                $includedFile +
+                ''''
+            )
+            '} | ConvertTo-Json -Compress'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile |
+            Select-Object -Last 1 |
+                ConvertFrom-Json
+
+        $result.ExcludedForBackticks | Should -BeTrue
+        $result.ExcludedForPssa | Should -BeFalse
+        $result.IncludedForBackticks | Should -BeFalse
     }
 
     It 'validates configured JSON schema mappings' {

@@ -3,6 +3,12 @@
     Validates YAML files can be parsed
 #>
 Add-BuildTask -Name YAML -Jobs {
+    # Scope can be lost when running Plumber on Plumber multiple times
+    if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
+    }
+
     $convertFromYaml = Get-Command ConvertFrom-Yaml -ErrorAction SilentlyContinue
     $convertToYaml = Get-Command ConvertTo-Yaml -ErrorAction SilentlyContinue
 
@@ -11,7 +17,7 @@ Add-BuildTask -Name YAML -Jobs {
         return
     }
 
-    $yamlFiles = Get-ChildItem $BuildRoot -File -Include '*.yml', '*.yaml' -Recurse -ErrorAction SilentlyContinue
+    $yamlFiles = Get-PlumberTaskFile -Task YAML -Extension '.yml', '.yaml'
     if (-not $yamlFiles) {
         Write-Build Yellow 'No YAML files found'
         return

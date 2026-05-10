@@ -3,9 +3,14 @@
     Validates PSScriptAnalyzer passes
 #>
 Add-BuildTask -Name PSScriptAnalyzer -Jobs SetVariables, {
+    # Scope can be lost when running Plumber on Plumber multiple times
+    if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
+    }
+
     $scriptFiles = @(
-        Get-ChildItem $BuildRoot -File -Recurse |
-            Where-Object {$_.Extension -in '.ps1', '.psd1', '.psm1'}
+        Get-PlumberTaskFile -Task PSScriptAnalyzer -Extension '.ps1', '.psd1', '.psm1'
     )
 
     if (-not $script:PlumberConfig.IncludeTestsInPssa) {

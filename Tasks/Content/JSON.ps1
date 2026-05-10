@@ -3,7 +3,20 @@
     Validates JSON files can be parsed
 #>
 Add-BuildTask -Name JSON -Jobs {
-    $jsonFiles = Get-ChildItem "$BuildRoot\Resource" -File -Filter '*.json' -ErrorAction SilentlyContinue
+    # Scope can be lost when running Plumber on Plumber multiple times
+    if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
+    }
+
+    $resourcePath = Join-Path $BuildRoot 'Resource'
+    $jsonFiles = Get-PlumberTaskFile -Task JSON -Extension '.json' -Path Resource |
+        Where-Object {
+            $_.DirectoryName.Equals(
+                $resourcePath,
+                [System.StringComparison]::OrdinalIgnoreCase
+            )
+        }
     if (-not $jsonFiles) {
         Write-Build Yellow 'No JSON files found'
         return

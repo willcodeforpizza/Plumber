@@ -3,6 +3,12 @@
     Validates JSON files against configured JSON schemas
 #>
 Add-BuildTask -Name JSONSchema -Jobs {
+    # Scope can be lost when running Plumber on Plumber multiple times
+    if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
+    }
+
     if (-not (Get-Command Test-Json -ErrorAction SilentlyContinue)) {
         Write-Error 'Test-Json is required for JSON schema validation'
         return
@@ -14,7 +20,13 @@ Add-BuildTask -Name JSONSchema -Jobs {
     }
 
     foreach ($mapping in $script:PlumberConfig.JsonSchemas) {
-        $path = Join-Path $BuildRoot $mapping.Path
+        $jsonPath = Split-Path $mapping.Path -Parent
+        $jsonFilter = Split-Path $mapping.Path -Leaf
+        if (-not $jsonPath) {
+            $jsonPath = '.'
+        }
+        $jsonRoot = Join-Path $BuildRoot $jsonPath
+
         $schema = Join-Path $BuildRoot $mapping.Schema
 
         if (-not (Test-Path $schema)) {
@@ -22,7 +34,16 @@ Add-BuildTask -Name JSONSchema -Jobs {
             continue
         }
 
-        $jsonFiles = @(Get-ChildItem $path -File -ErrorAction SilentlyContinue)
+        $jsonFiles = @(
+            Get-PlumberTaskFile -Task JSONSchema -Extension '.json' -Path $jsonPath |
+                Where-Object {
+                    $_.Name -like $jsonFilter -and
+                    $_.DirectoryName.Equals(
+                        $jsonRoot,
+                        [System.StringComparison]::OrdinalIgnoreCase
+                    )
+                }
+        )
         if (-not $jsonFiles) {
             Write-Build Yellow "No JSON files matched schema path: $($mapping.Path)"
             continue
