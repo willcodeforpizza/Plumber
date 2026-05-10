@@ -1,46 +1,30 @@
 function Invoke-Plumber {
     <#
         .SYNOPSIS
-        Run an Invoke-Build pipeline on the current folder path
+        Runs a Plumber Invoke-Build task pipeline.
 
         .DESCRIPTION
-        Run an Invoke-Build pipeline on the current folder path
-        By default will run the "Validation" pipeline
+        Runs Plumber's Invoke-Build pipeline by loading the module build file and
+        returning a summary of task errors. By default, Invoke-Plumber runs the
+        Validate task.
 
         .PARAMETER Task
-        The name of the task, or parent task to run against the module
-
-        Generate list with
-        gci .\Tasks\ -Recurse -file | select -expand BaseName | sort |
-        foreach {write-host ('"' + $_ + '",')}
+        The task, or parent task, to run. Defaults to Validate.
 
         .EXAMPLE
         Invoke-Plumber
 
-        Build Validate .\MyModule\MyModule.build.ps1
-        Task /Validate/SetVariables
-        ...
-        Build succeeded. 16 tasks, 0 errors, 0 warnings 00:00:00.1165774
-
-        # By default, runs the Validation pipeline on the current module
+        Runs the default Validate task and prints a task/error summary.
 
         .EXAMPLE
         Invoke-Plumber -Task Pester
 
-        Build Pester .\MyModule\MyModule.build.ps1
-        Task /Pester/?PesterUnit
-        No unit tests found
-        Done /Pester/?PesterUnit 00:00:00.0014656
-        Task /Pester/?CodeCoverage
-        No Pester unit test results found
-        Done /Pester/?CodeCoverage 00:00:00.0009108
-        Task /Pester/?PesterIntegration
-        No integration tests found
-        Done /Pester/?PesterIntegration 00:00:00.0008585
-        Done /Pester 00:00:00.0039792
-        Build succeeded. 4 tasks, 0 errors, 0 warnings 00:00:00.0830835
+        Runs the Pester parent task.
 
-        # Runs the Pester tests parent task
+        .EXAMPLE
+        Invoke-Plumber -Task PSScriptAnalyzer, PesterUnit
+
+        Runs specific validation tasks.
     #>
     [CmdletBinding()]
     param (
@@ -56,7 +40,6 @@ function Invoke-Plumber {
         'ModuleConventions',
         'ModuleVersion',
         'Naming',
-        'Pester',
         'PesterIntegration',
         'PesterUnit',
         'PSScriptAnalyzer',
@@ -66,16 +49,7 @@ function Invoke-Plumber {
         'Structure',
         'ToDo',
         'Validate',
-        'YAML',
-        'DemoPipeline',
-        'Task1',
-        'TaskErr',
-        'Task2',
-        'Task3',
-        'TaskA',
-        'TaskB',
-        'TaskLetters',
-        'NestedPipeline'
+        'YAML'
         )]
         [string[]]
         $Task = 'Validate'
@@ -88,6 +62,10 @@ function Invoke-Plumber {
         }
 
         $buildFile = Join-Path $moduleRoot 'Plumber.build.ps1'
+        if (-not (Get-Command Invoke-PlumberBuild -ErrorAction SilentlyContinue)) {
+            . (Join-Path $moduleRoot 'Private/Invoke-PlumberBuild.ps1')
+        }
+
         Write-Verbose "Build file: $buildFile"
         $buildResult = Invoke-PlumberBuild -Task $Task -BuildFile $buildFile
         $hasError = $buildResult.tasks | Where-Object {$_.Error}

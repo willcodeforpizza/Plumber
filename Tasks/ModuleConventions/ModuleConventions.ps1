@@ -2,4 +2,4 @@
     .SYNOPSIS
     Runs module convention validation
 #>
-Add-BuildTask -Name ModuleConventions -Jobs ?Manifest, ?PublicFunctions, ?Structure, ?Naming, ?ToDo
+Add-BuildTask -Name ModuleConventions -Jobs $script:PlumberTaskJobs.ModuleConventions

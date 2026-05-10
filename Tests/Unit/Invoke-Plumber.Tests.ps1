@@ -111,3 +111,44 @@ Describe 'Invoke-PlumberBuild' {
         }
     }
 }
+
+Describe 'Invoke-Plumber private wrapper recovery' {
+    It 'reloads Invoke-PlumberBuild when module state loses the private function' {
+        InModuleScope Plumber {
+            Remove-Item Function:\Invoke-PlumberBuild -Force
+
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    if (-not $File) {
+                        throw 'Build file is required'
+                    }
+
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = $null
+                            }
+                        )
+                    })
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            Invoke-Plumber -Task Content | Should -Match 'Content'
+            Invoke-Plumber -Task JSON | Should -Match 'JSON'
+        }
+    }
+}

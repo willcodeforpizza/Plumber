@@ -2,4 +2,4 @@
     .SYNOPSIS
     Runs content validation
 #>
-Add-BuildTask -Name Content -Jobs ?JSON, ?YAML
+Add-BuildTask -Name Content -Jobs $script:PlumberTaskJobs.Content

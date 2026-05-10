@@ -1,3 +1,5 @@
+ ![Plumber-banner](docs/images/Plumber-banner.png)
+
 # Plumber
 
 A set of Invoke-Build tasks for PowerShell validation pipelines.
@@ -15,7 +17,7 @@ CI, and agent workflows use the same checks.
 
 | Category | Parent task | Child tasks |
 | --- | --- | --- |
-| Code quality | `CodeQuality` | `PSScriptAnalyzer`, `Pester`, `CodeCoverage` |
+| Code quality | `CodeQuality` | `PSScriptAnalyzer`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
 | Release hygiene | `ReleaseHygiene` | `ModuleVersion`, `Changelog` |
 | Content | `Content` | `JSON`, `YAML` |
 | Module conventions | `ModuleConventions` | `Manifest`, `PublicFunctions`, `Structure`, `Naming`, `ToDo` |
@@ -32,7 +34,7 @@ Run a subset while iterating:
 ```powershell
 Invoke-Plumber -Task CodeQuality
 Invoke-Plumber -Task Content
-Invoke-Plumber -Task Pester
+Invoke-Plumber -Task PesterUnit
 Invoke-Plumber -Task YAML
 ```
 
@@ -40,11 +42,51 @@ Invoke-Plumber -Task YAML
 
 - Install or import the module.
 - Browse to the module you want to validate.
-- Copy `./Plumber/Resource/ModuleName.build.ps1` to the root of your module.
-- Rename it to match your module, for example `MyModule.build.ps1`.
+- Add a build file to the root of your module, for example `MyModule.build.ps1`.
 - Run `Invoke-Plumber`.
 
-## Notes
+Example build file:
 
-Plumber is intentionally plain Invoke-Build. The value is the shared task set and consistent
-task names, not a separate build framework.
+```powershell
+./MyModule.build.ps1
+--------------------
+
+Import-Module Plumber
+
+. (Get-PlumberTaskLoader) -Config @{
+    ModuleManifest     = 'MyModule.psd1'
+    CoverageMinimum    = 75
+    IncludeTestsInPssa = $true
+    SkipTasks          = @()
+}
+```
+
+You can also run the same tasks through Invoke-Build:
+
+```powershell
+Invoke-Build Validate ./MyModule.build.ps1
+```
+
+## Configuration
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `ModuleManifest` | First `*.psd1` in the build root | Module manifest path. Explicit config is recommended. |
+| `CoverageMinimum` | `75` | Minimum acceptable Pester coverage percentage. |
+| `IncludeTestsInPssa` | `$true` | Include files under `Tests/` when running PSScriptAnalyzer. |
+| `SkipTasks` | `@()` | Task names to exclude from the loaded task graph. |
+
+`ModuleManifest` is recommended even though Plumber can fall back to discovery. Being explicit
+avoids surprises in repos with analyzer settings, fixtures, examples or other data files.
+
+`SkipTasks` removes tasks before Invoke-Build runs. If all children of a parent task are skipped,
+the parent task is not loaded.
+
+## Task notes
+
+- `CodeCoverage` uses `CoverageMinimum`.
+- `PSScriptAnalyzer` uses `IncludeTestsInPssa`.
+- `Manifest`, `ModuleVersion` and `Naming` use `ModuleManifest`.
+- Parent validation tasks aggregate child failures so all checks can report in one run.
+
+ ![Plumber-bottom-banner](docs/images/Plumber-bottom-banner.png)
