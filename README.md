@@ -7,6 +7,8 @@ A set of Invoke-Build tasks for PowerShell validation pipelines.
 Plumber provides shared validation tasks you can import into module build files so local runs,
 CI, and agent workflows use the same checks.
 
+Documentation: https://willcodeforpizza.github.io/Plumber/
+
 ## Requirements
 
 - Windows or Linux
