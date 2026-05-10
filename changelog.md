@@ -5,6 +5,7 @@
 - Added: BuildFile parameter for Invoke-Plumber
 - Added: MIT license and gallery license metadata
 - Added: PublishModule task for publishing the staged module folder
+- Added: PublishRelease task for creating GitHub tags and releases
 - Changed: JSON validation now scans JSON files across the build root
 - Changed: JSONSchema path mappings now match repository-relative JSON paths
 - Changed: Invoke-Plumber now resolves the build file from the current directory by default
