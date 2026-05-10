@@ -59,6 +59,12 @@ function Get-PlumberTaskFile {
             Get-PlumberChangedFile -BuildRoot $BuildRoot -DiffBase $script:PlumberConfig.DiffBase
         )
         $script:PlumberChangedFilesLoaded = $true
+
+        if ($script:PlumberChangedFiles.Count -gt 0) {
+            Write-Build Yellow "FileScope Changed: $($script:PlumberChangedFiles.Count) file(s)"
+        } else {
+            Write-Build Yellow 'FileScope Changed: no changed files'
+        }
     }
 
     $basePath = if ($Path) {

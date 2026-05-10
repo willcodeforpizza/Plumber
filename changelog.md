@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.20
+- Added: FileScope Changed reports the selected changed file count
+- Changed: Clarified changed-file validation examples
+
 ## 0.0.19
 - Added: FileScope config for changed-file validation
 - Added: DiffBase config for pull request changed-file validation

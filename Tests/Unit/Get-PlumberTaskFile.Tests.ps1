@@ -104,6 +104,66 @@ Describe 'Get-PlumberTaskFile' {
         }
     }
 
+    It 'writes the changed file count when changed scope is loaded' {
+        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+            Mock Get-PlumberChangedFile {
+                Get-Item (Join-Path $BuildRoot 'Public/Invoke-Thing.ps1')
+            }
+            function Write-Build {
+                param ($Color, $Message)
+
+                $null = $Color
+                $null = $Message
+            }
+            Mock Write-Build {}
+
+            $script:PlumberFiles = $null
+            $script:PlumberChangedFiles = $null
+            $script:PlumberChangedFilesLoaded = $false
+            $script:PlumberConfig = @{
+                BuildRoot    = $BuildRoot
+                ExcludePaths = @{}
+                FileScope    = 'Changed'
+                ModuleRoot   = Split-Path $PSScriptRoot -Parent
+            }
+
+            Get-PlumberTaskFile -Task Backticks | Out-Null
+
+            Should -Invoke Write-Build -Times 1 -Exactly -ParameterFilter {
+                $Color -eq 'Yellow' -and $Message -eq 'FileScope Changed: 1 file(s)'
+            }
+        }
+    }
+
+    It 'writes when changed scope has no files' {
+        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+            Mock Get-PlumberChangedFile {}
+            function Write-Build {
+                param ($Color, $Message)
+
+                $null = $Color
+                $null = $Message
+            }
+            Mock Write-Build {}
+
+            $script:PlumberFiles = $null
+            $script:PlumberChangedFiles = $null
+            $script:PlumberChangedFilesLoaded = $false
+            $script:PlumberConfig = @{
+                BuildRoot    = $BuildRoot
+                ExcludePaths = @{}
+                FileScope    = 'Changed'
+                ModuleRoot   = Split-Path $PSScriptRoot -Parent
+            }
+
+            Get-PlumberTaskFile -Task Backticks | Out-Null
+
+            Should -Invoke Write-Build -Times 1 -Exactly -ParameterFilter {
+                $Color -eq 'Yellow' -and $Message -eq 'FileScope Changed: no changed files'
+            }
+        }
+    }
+
     It 'throws for unsupported file scopes' {
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
             $script:PlumberFiles = $null
