@@ -112,6 +112,59 @@ Describe 'TaskLoader' {
         $tasks['CodeQuality'].Jobs | Should -Contain '?CodeCoverage'
     }
 
+    It 'loads Backticks directly under CodeQuality' {
+        $buildFile = Join-Path $TestDrive 'backticks-loader.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Contain 'Backticks'
+        $tasks['CodeQuality'].Jobs | Should -Contain '?Backticks'
+    }
+
+    It 'reports PowerShell backticks' {
+        $moduleRoot = Join-Path $TestDrive 'BacktickModule'
+        $publicRoot = Join-Path $moduleRoot 'Public'
+        New-Item -Path $publicRoot -ItemType Directory | Out-Null
+        [char] $backtick = 96
+
+        Set-Content -Path (Join-Path $publicRoot 'Invoke-Thing.ps1') -Value @(
+            'function Invoke-Thing {'
+            "    'hello' $backtick"
+            '}'
+        )
+
+        $buildFile = Join-Path $moduleRoot 'BacktickModule.build.ps1'
+        @(
+            '$ErrorActionPreference = ''Stop'''
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "Backticks") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{}'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1 |
+            Out-String
+
+        $LASTEXITCODE | Should -Not -Be 0
+        $result | Should -Match 'Backtick found'
+    }
+
     It 'loads JSONSchema directly under Content' {
         $buildFile = Join-Path $TestDrive 'content.build.ps1'
         @(

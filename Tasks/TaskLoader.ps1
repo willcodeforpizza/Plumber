@@ -77,7 +77,7 @@ $script:PlumberTaskJobs = @{
 $taskGroups = @(
     @{
         Parent   = 'CodeQuality'
-        Children = @('PSScriptAnalyzer', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')
+        Children = @('PSScriptAnalyzer', 'Backticks', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')
     }
     @{
         Parent   = 'ReleaseHygiene'
