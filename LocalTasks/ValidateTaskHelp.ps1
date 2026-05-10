@@ -25,9 +25,21 @@ Add-BuildTask -Name ValidateTaskHelp -Jobs {
             }
         }
 
-        if ($help.IsGroup) {
+        $isInternalTask = $taskFile.Directory.FullName -eq $taskRoot
+        $isGroupTask =
+            $taskFile.BaseName -eq $taskFile.Directory.Name -or
+            ($taskFile.BaseName -eq 'Validate' -and $taskFile.Directory.Name -eq 'Pipeline')
+        $isLeafTask = -not $isInternalTask -and -not $isGroupTask
+
+        if ($isGroupTask) {
+            if (-not $help.Includes) {
+                $missingSections.Add('INCLUDES')
+            }
             if ($help.Group) {
                 $missingSections.Add('GROUP must be empty for group tasks')
+            }
+            if ($help.Configuration) {
+                $missingSections.Add('CONFIGURATION must be empty for group tasks')
             }
             if ($help.Pass) {
                 $missingSections.Add('PASS must be empty for group tasks')
@@ -35,17 +47,37 @@ Add-BuildTask -Name ValidateTaskHelp -Jobs {
             if ($help.Fail) {
                 $missingSections.Add('FAIL must be empty for group tasks')
             }
-        } elseif ($help.Group) {
-            foreach ($requiredSection in 'CONFIGURATION', 'PASS', 'FAIL') {
+        } elseif ($isLeafTask) {
+            foreach ($requiredSection in 'GROUP', 'CONFIGURATION', 'PASS', 'FAIL') {
                 if (-not $help.$requiredSection) {
                     $missingSections.Add($requiredSection)
                 }
+            }
+            if ($help.Includes) {
+                $missingSections.Add('INCLUDES must be empty for validation tasks')
+            }
+        } elseif ($isInternalTask) {
+            if ($help.Group) {
+                $missingSections.Add('GROUP must be empty for internal tasks')
+            }
+            if ($help.Includes) {
+                $missingSections.Add('INCLUDES must be empty for internal tasks')
+            }
+            if ($help.Configuration) {
+                $missingSections.Add('CONFIGURATION must be empty for internal tasks')
+            }
+            if ($help.Pass) {
+                $missingSections.Add('PASS must be empty for internal tasks')
+            }
+            if ($help.Fail) {
+                $missingSections.Add('FAIL must be empty for internal tasks')
             }
         }
 
         if ($missingSections.Count -gt 0) {
             $relativeTaskPath = [System.IO.Path]::GetRelativePath($BuildRoot, $taskFile.FullName)
-            "$relativeTaskPath ($($help.Name)): missing or invalid task help sections: $($missingSections -join ', ')"
+            $sectionList = $missingSections -join ', '
+            "$relativeTaskPath ($($help.Name)): missing or invalid task help sections: $sectionList"
         }
     }
 
