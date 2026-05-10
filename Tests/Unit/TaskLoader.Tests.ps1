@@ -263,6 +263,82 @@ Describe 'TaskLoader' {
         $result | Should -Match 'Line is'
     }
 
+    It 'reports TODO comments' {
+        $moduleRoot = Join-Path $TestDrive 'ToDoModule'
+        $publicRoot = Join-Path $moduleRoot 'Public'
+        New-Item -Path $publicRoot -ItemType Directory | Out-Null
+
+        Set-Content -Path (Join-Path $publicRoot 'Invoke-Thing.ps1') -Value @(
+            'function Invoke-Thing {'
+            '    # TODO: fix this'
+            '}'
+        )
+
+        $buildFile = Join-Path $moduleRoot 'ToDoModule.build.ps1'
+        @(
+            '$ErrorActionPreference = ''Stop'''
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "ToDo") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{}'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1 |
+            Out-String
+
+        $LASTEXITCODE | Should -Not -Be 0
+        $result | Should -Match 'Invoke-Thing.ps1: fix this'
+    }
+
+    It 'ignores TODO markers inside strings' {
+        $moduleRoot = Join-Path $TestDrive 'ToDoStringModule'
+        $publicRoot = Join-Path $moduleRoot 'Public'
+        New-Item -Path $publicRoot -ItemType Directory | Out-Null
+
+        Set-Content -Path (Join-Path $publicRoot 'Invoke-Thing.ps1') -Value @(
+            'function Invoke-Thing {'
+            '    "This text mentions #TODO: without creating a TODO comment"'
+            '}'
+        )
+
+        $buildFile = Join-Path $moduleRoot 'ToDoStringModule.build.ps1'
+        @(
+            '$ErrorActionPreference = ''Stop'''
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "ToDo") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{}'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1 |
+            Out-String
+
+        $LASTEXITCODE | Should -Be 0
+        $result | Should -Not -Match 'mentions'
+    }
+
     It 'loads JSONSchema directly under Content' {
         $buildFile = Join-Path $TestDrive 'content.build.ps1'
         @(

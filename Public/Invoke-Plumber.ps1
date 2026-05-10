@@ -4,12 +4,17 @@ function Invoke-Plumber {
         Runs a Plumber Invoke-Build task pipeline.
 
         .DESCRIPTION
-        Runs Plumber's Invoke-Build pipeline by loading the module build file and
-        returning a summary of task errors. By default, Invoke-Plumber runs the
-        Validate task.
+        Runs a Plumber Invoke-Build pipeline by resolving a build file from the
+        current directory and returning a summary of task errors. By default,
+        Invoke-Plumber runs the Validate task.
 
         .PARAMETER Task
         The task, or parent task, to run. Defaults to Validate.
+
+        .PARAMETER BuildFile
+        The build file to run. Relative paths are resolved from the current
+        directory. When omitted, Invoke-Plumber looks for a build file matching
+        the module manifest in the current directory.
 
         .PARAMETER OutputMode
         Controls Plumber output. Summary is quiet and concise, Table prints all
@@ -63,6 +68,9 @@ function Invoke-Plumber {
         [string[]]
         $Task = 'Validate',
 
+        [string]
+        $BuildFile,
+
         [ValidateSet('Json', 'Raw', 'Summary', 'Table')]
         [string]
         $OutputMode = 'Summary'
@@ -74,19 +82,25 @@ function Invoke-Plumber {
             Split-Path $PSScriptRoot -Parent
         }
 
-        $buildFile = Join-Path $moduleRoot 'Plumber.build.ps1'
         # Self-validation can reload Plumber while Invoke-Plumber is running.
-        $runtimeFunctions = 'Invoke-PlumberBuild', 'ConvertTo-PlumberResult', 'Write-PlumberResult'
+        $runtimeFunctions = @(
+            'Invoke-PlumberBuild',
+            'ConvertTo-PlumberResult',
+            'Write-PlumberResult',
+            'Resolve-PlumberBuildFile'
+        )
         foreach ($runtimeFunction in $runtimeFunctions) {
             if (-not (Get-Command $runtimeFunction -ErrorAction SilentlyContinue)) {
                 . (Join-Path $moduleRoot "Private/$runtimeFunction.ps1")
             }
         }
 
-        Write-Verbose "Build file: $buildFile"
+        $resolvedBuildFile = Resolve-PlumberBuildFile -BuildFile $BuildFile
+
+        Write-Verbose "Build file: $resolvedBuildFile"
         $buildSplat = @{
             Task      = $Task
-            BuildFile = $buildFile
+            BuildFile = $resolvedBuildFile
             RawOutput = $OutputMode -eq 'Raw'
         }
         $buildResult = Invoke-PlumberBuild @buildSplat

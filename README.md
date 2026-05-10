@@ -53,6 +53,12 @@ Invoke-Plumber -OutputMode Raw
 output for automation, and `Raw` preserves Invoke-Build output for debugging.
 Failed validation throws after writing the selected output so CI can fail correctly.
 
+Choose a build file explicitly when a repository has more than one build file:
+
+```powershell
+Invoke-Plumber -BuildFile ./MyModule.build.ps1
+```
+
 ## To run
 
 - Install or import the module.
@@ -73,7 +79,7 @@ Import-Module Plumber
     CoverageMinimum    = 75
     IncludeTestsInPssa = $true
     JsonSchemas        = @()
-    MaxLineLength      = 120
+    MaxLineLength      = 115
     PrivateHelpSynopsisOnly = $true
     SkipTasks          = @()
 }
@@ -93,7 +99,7 @@ Invoke-Build Validate ./MyModule.build.ps1
 | `CoverageMinimum` | `75` | Minimum acceptable Pester coverage percentage. |
 | `IncludeTestsInPssa` | `$true` | Include files under `Tests/` when running PSScriptAnalyzer. |
 | `JsonSchemas` | `@()` | JSON file glob and schema mappings for `JSONSchema`. |
-| `MaxLineLength` | `120` | Maximum line length for `LineLength`. |
+| `MaxLineLength` | `115` | Maximum line length for `LineLength`. |
 | `PrivateHelpSynopsisOnly` | `$true` | Only require synopsis help for private functions. |
 | `SkipTasks` | `@()` | Task names to exclude from the loaded task graph. |
 

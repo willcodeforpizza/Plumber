@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.14
+- Added: BuildFile parameter for Invoke-Plumber
+- Changed: Invoke-Plumber now resolves the build file from the current directory by default
+- Changed: ToDo now only reports TODO comment markers
+
 ## 0.0.13
 - Added: ExcludePaths config for task-scoped file exclusions
 - Changed: File-based validation tasks now use shared Plumber file discovery

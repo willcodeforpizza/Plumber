@@ -35,6 +35,26 @@ Describe 'Invoke-Plumber' {
         }
     }
 
+    It 'uses an explicit build file when provided' {
+        $moduleRoot = Join-Path $TestDrive 'ExplicitModule'
+        New-Item -Path $moduleRoot -ItemType Directory | Out-Null
+        Set-Content -Path (Join-Path $moduleRoot 'custom.build.ps1') -Value ''
+
+        Push-Location $moduleRoot
+        try {
+            InModuleScope Plumber {
+                Invoke-Plumber -BuildFile 'custom.build.ps1' |
+                    Should -Match 'Plumber validation passed'
+
+                Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
+                    (Split-Path $BuildFile -Leaf) -eq 'custom.build.ps1'
+                }
+            }
+        } finally {
+            Pop-Location
+        }
+    }
+
     It 'passes explicit tasks to the build runner' {
         InModuleScope Plumber {
             Invoke-Plumber -Task JSON, YAML | Should -Match 'Plumber validation passed'
