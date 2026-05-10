@@ -39,6 +39,7 @@ function Invoke-Plumber {
         'JSON',
         'JSONSchema',
         'License',
+        'LineLength',
         'Manifest',
         'ModuleConventions',
         'ModuleVersion',

@@ -126,6 +126,20 @@ Describe 'TaskLoader' {
         $tasks['CodeQuality'].Jobs | Should -Contain '?Backticks'
     }
 
+    It 'loads LineLength directly under CodeQuality' {
+        $buildFile = Join-Path $TestDrive 'line-length-loader.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Contain 'LineLength'
+        $tasks['CodeQuality'].Jobs | Should -Contain '?LineLength'
+    }
+
     It 'reports PowerShell backticks' {
         $moduleRoot = Join-Path $TestDrive 'BacktickModule'
         $publicRoot = Join-Path $moduleRoot 'Public'
@@ -163,6 +177,47 @@ Describe 'TaskLoader' {
 
         $LASTEXITCODE | Should -Not -Be 0
         $result | Should -Match 'Backtick found'
+    }
+
+    It 'reports lines over the configured maximum length' {
+        $moduleRoot = Join-Path $TestDrive 'LineLengthModule'
+        $publicRoot = Join-Path $moduleRoot 'Public'
+        New-Item -Path $publicRoot -ItemType Directory | Out-Null
+        $longLine = 'x' * 11
+
+        Set-Content -Path (Join-Path $publicRoot 'Invoke-Thing.ps1') -Value @(
+            'function Invoke-Thing {'
+            "    '$longLine'"
+            '}'
+        )
+
+        $buildFile = Join-Path $moduleRoot 'LineLengthModule.build.ps1'
+        @(
+            '$ErrorActionPreference = ''Stop'''
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "LineLength") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            '    MaxLineLength = 10'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1 |
+            Out-String
+
+        $LASTEXITCODE | Should -Not -Be 0
+        $result | Should -Match 'Line is'
     }
 
     It 'loads JSONSchema directly under Content' {
@@ -211,6 +266,7 @@ Describe 'TaskLoader' {
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
             '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
+            '        MaxLineLength = $script:PlumberConfig.MaxLineLength'
             '        PrivateHelpSynopsisOnly = $script:PlumberConfig.PrivateHelpSynopsisOnly'
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
@@ -222,6 +278,7 @@ Describe 'TaskLoader' {
         $result.CoverageMinimum | Should -Be 75
         $result.IncludeTestsInPssa | Should -BeTrue
         $result.JsonSchemaCount | Should -Be 0
+        $result.MaxLineLength | Should -Be 120
         $result.PrivateHelpSynopsisOnly | Should -BeTrue
     }
 
@@ -240,6 +297,7 @@ Describe 'TaskLoader' {
             '. (Get-PlumberTaskLoader) -Config @{'
             '    CoverageMinimum = 90'
             '    IncludeTestsInPssa = $false'
+            '    MaxLineLength = 100'
             '    PrivateHelpSynopsisOnly = $false'
             '    JsonSchemas = @('
             '        @{'
@@ -252,6 +310,7 @@ Describe 'TaskLoader' {
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
             '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
+            '        MaxLineLength = $script:PlumberConfig.MaxLineLength'
             '        PrivateHelpSynopsisOnly = $script:PlumberConfig.PrivateHelpSynopsisOnly'
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
@@ -263,6 +322,7 @@ Describe 'TaskLoader' {
         $result.CoverageMinimum | Should -Be 90
         $result.IncludeTestsInPssa | Should -BeFalse
         $result.JsonSchemaCount | Should -Be 1
+        $result.MaxLineLength | Should -Be 100
         $result.PrivateHelpSynopsisOnly | Should -BeFalse
     }
 

@@ -42,6 +42,7 @@ $defaults = @{
     CoverageMinimum    = 75
     IncludeTestsInPssa = $true
     JsonSchemas        = @()
+    MaxLineLength      = 120
     PrivateHelpSynopsisOnly = $true
     SkipTasks          = @()
 }
@@ -77,7 +78,7 @@ $script:PlumberTaskJobs = @{
 $taskGroups = @(
     @{
         Parent   = 'CodeQuality'
-        Children = @('PSScriptAnalyzer', 'Backticks', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')
+        Children = @('PSScriptAnalyzer', 'Backticks', 'LineLength', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')
     }
     @{
         Parent   = 'ReleaseHygiene'
