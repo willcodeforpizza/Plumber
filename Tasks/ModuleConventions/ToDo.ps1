@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-    Validates no #TODOs are left as code comments
+    Validates no TODO comments are left in files.
 #>
 Add-BuildTask -Name ToDo -Jobs {
     if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
@@ -12,8 +12,8 @@ Add-BuildTask -Name ToDo -Jobs {
         Where-Object {$_.Name -ne 'ToDo.ps1'} |
         ForEach-Object {
         $file = $_
-        Get-Content $_.FullName | Where-Object { $_ -match '#TODO' } | ForEach-Object {
-            "$($file.Name): $(($_ -replace '#TODO: ').Trim())"
+        Get-Content $_.FullName | Where-Object {$_ -match '^\s*#\s*TODO\b'} | ForEach-Object {
+            "$($file.Name): $(($_ -replace '^\s*#\s*TODO:?\s*', '').Trim())"
         }
     }
     if ($toDos) {
