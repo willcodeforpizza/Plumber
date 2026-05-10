@@ -5,8 +5,8 @@
     .DESCRIPTION
     This is an internal build task for Plumber, and not part of the core task list.
 
-    Builds a clean module folder with `BuildModule` and publishes `out/Plumber`
-    using `Publish-PSResource`.
+    Builds a clean module folder with `BuildModule` and publishes it with
+    `Publish-PSResource`.
 
     The PowerShell Gallery API key is read from `PSGALLERY_API_KEY`.
 
