@@ -44,12 +44,12 @@ param (
 $defaults = @{
     ModuleManifest          = $null
     CoverageMinimum         = 75
-    ExcludePaths            = @{}
     IncludeTestsInPssa      = $true
     JsonSchemas             = @()
     MaxLineLength           = 115
     PrivateHelpSynopsisOnly = $true
     ExcludeTasks            = @()
+    ExcludePaths            = @{}
     LocalTasks              = @()
 }
 
