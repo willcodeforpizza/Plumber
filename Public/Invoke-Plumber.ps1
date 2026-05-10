@@ -62,6 +62,10 @@ function Invoke-Plumber {
         }
 
         $buildFile = Join-Path $moduleRoot 'Plumber.build.ps1'
+        if (-not (Get-Command Invoke-PlumberBuild -ErrorAction SilentlyContinue)) {
+            . (Join-Path $moduleRoot 'Private/Invoke-PlumberBuild.ps1')
+        }
+
         Write-Verbose "Build file: $buildFile"
         $buildResult = Invoke-PlumberBuild -Task $Task -BuildFile $buildFile
         $hasError = $buildResult.tasks | Where-Object {$_.Error}
