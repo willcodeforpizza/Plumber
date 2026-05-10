@@ -3,9 +3,16 @@
     Validates PSScriptAnalyzer passes
 #>
 Add-BuildTask -Name PSScriptAnalyzer -Jobs SetVariables, {
+    if (-not (Get-Command Test-PlumberTaskPathExcluded -ErrorAction SilentlyContinue)) {
+        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
+    }
+
     $scriptFiles = @(
         Get-ChildItem $BuildRoot -File -Recurse |
-            Where-Object {$_.Extension -in '.ps1', '.psd1', '.psm1'}
+            Where-Object {
+                $_.Extension -in '.ps1', '.psd1', '.psm1' -and
+                -not (Test-PlumberTaskPathExcluded -Task PSScriptAnalyzer -Path $_.FullName)
+            }
     )
 
     if (-not $script:PlumberConfig.IncludeTestsInPssa) {

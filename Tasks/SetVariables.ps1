@@ -3,6 +3,7 @@
     Defines variables used by other tasks in the pipeline
 #>
 Add-BuildTask -Name SetVariables -Jobs {
+    $script:PlumberConfig.BuildRoot = $BuildRoot
     $script:moduleFolders = @()
     (Join-Path $BuildRoot 'Public'), (Join-Path $BuildRoot 'Private') | ForEach-Object {
         if (Test-Path $_) { $script:moduleFolders += $_ }

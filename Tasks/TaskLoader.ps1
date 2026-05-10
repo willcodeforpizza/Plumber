@@ -12,7 +12,8 @@
 
     .PARAMETER Config
     Repository-specific Plumber configuration. Supported keys are
-    ModuleManifest, CoverageMinimum, IncludeTestsInPssa and SkipTasks.
+    ModuleManifest, CoverageMinimum, ExcludePaths, IncludeTestsInPssa and
+    SkipTasks.
 
     .EXAMPLE
     . (Get-PlumberTaskLoader) -Config @{
@@ -25,6 +26,9 @@
     . (Get-PlumberTaskLoader) -Config @{
         ModuleManifest     = 'MyModule.psd1'
         CoverageMinimum    = 80
+        ExcludePaths       = @{
+            Backticks = @('Tests/Assets/*')
+        }
         IncludeTestsInPssa = $false
         SkipTasks          = @('YAML', 'Changelog')
     }
@@ -40,6 +44,7 @@ param (
 $defaults = @{
     ModuleManifest     = $null
     CoverageMinimum    = 75
+    ExcludePaths       = @{}
     IncludeTestsInPssa = $true
     JsonSchemas        = @()
     MaxLineLength      = 120
@@ -55,6 +60,12 @@ foreach ($key in $Config.Keys) {
 if (-not $script:PlumberConfig.SkipTasks) {
     $script:PlumberConfig.SkipTasks = @()
 }
+if (-not $script:PlumberConfig.ExcludePaths) {
+    $script:PlumberConfig.ExcludePaths = @{}
+}
+if (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
+    $script:PlumberConfig.BuildRoot = $BuildRoot
+}
 
 $module = Get-Module Plumber
 if (-not $module) {
@@ -65,6 +76,7 @@ $moduleRoot = $module.ModuleBase
 $script:PlumberConfig.ModuleRoot = $moduleRoot
 $taskRoot = Join-Path $moduleRoot 'Tasks'
 . (Join-Path $moduleRoot 'Private/Test-PlumberTaskEnabled.ps1')
+. (Join-Path $moduleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
 . (Join-Path $moduleRoot 'Private/Import-PlumberTask.ps1')
 
 $script:PlumberTaskJobs = @{
