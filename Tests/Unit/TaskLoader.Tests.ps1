@@ -62,6 +62,20 @@ Describe 'TaskLoader' {
         $tasks['Content'].Jobs | Should -Contain '?JSONSchema'
     }
 
+    It 'loads Help directly under ModuleConventions' {
+        $buildFile = Join-Path $TestDrive 'module-conventions.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Contain 'Help'
+        $tasks['ModuleConventions'].Jobs | Should -Contain '?Help'
+    }
+
     It 'keeps a parent task when at least one child task remains enabled' {
         $buildFile = Join-Path $TestDrive 'partial-code-quality.build.ps1'
         @(
@@ -144,6 +158,7 @@ Describe 'TaskLoader' {
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
             '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
+            '        PrivateHelpSynopsisOnly = $script:PlumberConfig.PrivateHelpSynopsisOnly'
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
 
@@ -154,6 +169,7 @@ Describe 'TaskLoader' {
         $result.CoverageMinimum | Should -Be 75
         $result.IncludeTestsInPssa | Should -BeTrue
         $result.JsonSchemaCount | Should -Be 0
+        $result.PrivateHelpSynopsisOnly | Should -BeTrue
     }
 
     It 'sets configured coverage and PSSA test inclusion values' {
@@ -171,6 +187,7 @@ Describe 'TaskLoader' {
             '. (Get-PlumberTaskLoader) -Config @{'
             '    CoverageMinimum = 90'
             '    IncludeTestsInPssa = $false'
+            '    PrivateHelpSynopsisOnly = $false'
             '    JsonSchemas = @('
             '        @{'
             "            Path = 'Resource/*.json'"
@@ -182,6 +199,7 @@ Describe 'TaskLoader' {
             '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
             '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
             '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
+            '        PrivateHelpSynopsisOnly = $script:PlumberConfig.PrivateHelpSynopsisOnly'
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
 
@@ -192,6 +210,7 @@ Describe 'TaskLoader' {
         $result.CoverageMinimum | Should -Be 90
         $result.IncludeTestsInPssa | Should -BeFalse
         $result.JsonSchemaCount | Should -Be 1
+        $result.PrivateHelpSynopsisOnly | Should -BeFalse
     }
 
     It 'validates configured JSON schema mappings' {

@@ -42,6 +42,7 @@ $defaults = @{
     CoverageMinimum    = 75
     IncludeTestsInPssa = $true
     JsonSchemas        = @()
+    PrivateHelpSynopsisOnly = $true
     SkipTasks          = @()
 }
 
@@ -60,6 +61,7 @@ if (-not $module) {
 }
 
 $moduleRoot = $module.ModuleBase
+$script:PlumberConfig.ModuleRoot = $moduleRoot
 $taskRoot = Join-Path $moduleRoot 'Tasks'
 . (Join-Path $moduleRoot 'Private/Test-PlumberTaskEnabled.ps1')
 . (Join-Path $moduleRoot 'Private/Import-PlumberTask.ps1')
@@ -87,7 +89,7 @@ $taskGroups = @(
     }
     @{
         Parent   = 'ModuleConventions'
-        Children = @('Manifest', 'PublicFunctions', 'Structure', 'Naming', 'ToDo')
+        Children = @('Manifest', 'PublicFunctions', 'Structure', 'Naming', 'ToDo', 'Help')
     }
 )
 

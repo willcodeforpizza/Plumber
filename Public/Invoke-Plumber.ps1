@@ -34,6 +34,7 @@ function Invoke-Plumber {
         'CodeCoverage',
         'CodeQuality',
         'Content',
+        'Help',
         'JSON',
         'JSONSchema',
         'License',
