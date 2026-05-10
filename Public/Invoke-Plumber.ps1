@@ -84,10 +84,9 @@ function Invoke-Plumber {
 
         Write-Verbose "Build file: $buildFile"
         $buildSplat = @{
-            Task        = $Task
-            BuildFile   = $buildFile
-            QuietOutput = $OutputMode -ne 'Raw'
-            RawOutput   = $OutputMode -eq 'Raw'
+            Task      = $Task
+            BuildFile = $buildFile
+            RawOutput = $OutputMode -eq 'Raw'
         }
         $buildResult = Invoke-PlumberBuild @buildSplat
         foreach ($runtimeFunction in $runtimeFunctions) {

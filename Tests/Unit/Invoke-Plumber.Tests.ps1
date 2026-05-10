@@ -30,7 +30,6 @@ Describe 'Invoke-Plumber' {
                 $Task.Count -eq 1 -and
                 $Task[0] -eq 'Validate' -and
                 (Split-Path $BuildFile -Leaf) -eq 'Plumber.build.ps1' -and
-                $QuietOutput -and
                 -not $RawOutput
             }
         }
@@ -85,7 +84,7 @@ Describe 'Invoke-Plumber' {
             Invoke-Plumber -OutputMode Raw | Should -Match 'Validate'
 
             Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
-                $RawOutput -and -not $QuietOutput
+                $RawOutput
             }
         }
     }
@@ -151,8 +150,9 @@ Describe 'Invoke-PlumberBuild' {
         }
     }
 
-    It 'passes quiet output to Invoke-Build when requested' {
+    It 'suppresses Invoke-Build output unless raw output is requested' {
         InModuleScope Plumber {
+            Mock Out-Host {}
             Mock Get-Command {
                 {
                     param (
@@ -170,6 +170,7 @@ Describe 'Invoke-PlumberBuild' {
                         throw 'Build file is required'
                     }
 
+                    'suppressed output'
                     Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
                         Tasks = @(
                             [pscustomobject]@{
@@ -184,9 +185,10 @@ Describe 'Invoke-PlumberBuild' {
             }
 
             $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
-            $result = Invoke-PlumberBuild -Task QuietSmoke -BuildFile $BuildFile -QuietOutput
+            $result = Invoke-PlumberBuild -Task QuietSmoke -BuildFile $BuildFile
 
             $result.Tasks.Name | Should -Contain 'QuietSmoke'
+            Should -Invoke Out-Host -Times 0 -Exactly
         }
     }
 
