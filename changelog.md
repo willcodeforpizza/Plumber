@@ -2,6 +2,7 @@
 
 ## 0.0.17
 - Added: Plumber local validation for task help comments
+- Fixed: Invoke-Plumber accepts local task names
 
 ## 0.0.16
 - Added: LocalTasks config for project-specific validation tasks under the Local group
