@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.10
+- Added: LineLength task for configurable maximum line length validation
+
 ## 0.0.9
 - Added: Backticks task for PowerShell line-continuation style validation
 

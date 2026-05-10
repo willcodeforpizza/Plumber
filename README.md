@@ -17,7 +17,7 @@ CI, and agent workflows use the same checks.
 
 | Category | Parent task | Child tasks |
 | --- | --- | --- |
-| Code quality | `CodeQuality` | `PSScriptAnalyzer`, `Backticks`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
+| Code quality | `CodeQuality` | `PSScriptAnalyzer`, `Backticks`, `LineLength`, Pester tasks, `CodeCoverage` |
 | Release hygiene | `ReleaseHygiene` | `ModuleVersion`, `Changelog` |
 | Content | `Content` | `JSON`, `JSONSchema`, `YAML` |
 | Module conventions | `ModuleConventions` | `Manifest`, `PublicFunctions`, `Structure`, `Naming`, `ToDo`, `Help` |
@@ -34,6 +34,7 @@ Run a subset while iterating:
 ```powershell
 Invoke-Plumber -Task CodeQuality
 Invoke-Plumber -Task Backticks
+Invoke-Plumber -Task LineLength
 Invoke-Plumber -Task Content
 Invoke-Plumber -Task PesterUnit
 Invoke-Plumber -Task YAML
@@ -59,6 +60,7 @@ Import-Module Plumber
     CoverageMinimum    = 75
     IncludeTestsInPssa = $true
     JsonSchemas        = @()
+    MaxLineLength      = 120
     PrivateHelpSynopsisOnly = $true
     SkipTasks          = @()
 }
@@ -78,6 +80,7 @@ Invoke-Build Validate ./MyModule.build.ps1
 | `CoverageMinimum` | `75` | Minimum acceptable Pester coverage percentage. |
 | `IncludeTestsInPssa` | `$true` | Include files under `Tests/` when running PSScriptAnalyzer. |
 | `JsonSchemas` | `@()` | JSON file glob and schema mappings for `JSONSchema`. |
+| `MaxLineLength` | `120` | Maximum line length for `LineLength`. |
 | `PrivateHelpSynopsisOnly` | `$true` | Only require synopsis help for private functions. |
 | `SkipTasks` | `@()` | Task names to exclude from the loaded task graph. |
 
@@ -102,6 +105,7 @@ JsonSchemas = @(
 
 - `CodeCoverage` uses `CoverageMinimum`.
 - `JSONSchema` uses `JsonSchemas`.
+- `LineLength` uses `MaxLineLength`.
 - `PSScriptAnalyzer` uses `IncludeTestsInPssa`.
 - `Help` uses `PrivateHelpSynopsisOnly`.
 - `Manifest`, `ModuleVersion` and `Naming` use `ModuleManifest`.
