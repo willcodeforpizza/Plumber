@@ -130,6 +130,12 @@ function Add-PlumberTask {
 . (Join-Path $taskRoot 'SetVariables.ps1')
 
 foreach ($taskGroup in $taskGroups) {
+    if (
+        -not (Test-PlumberTaskEnabled -Name $taskGroup.Parent -SkipTasks $script:PlumberConfig.SkipTasks)
+    ) {
+        continue
+    }
+
     foreach ($childTask in $taskGroup.Children) {
         if (
             $childTask -eq 'CodeCoverage' -and

@@ -96,8 +96,8 @@ Example config overrides:
 # Skip one child task
 SkipTasks = @('YAML')
 
-# Skip every Content child task
-SkipTasks = @('JSON', 'JSONSchema', 'YAML')
+# Skip the Content task group
+SkipTasks = @("Content")
 
 # Require higher code coverage
 CoverageMinimum = 90
