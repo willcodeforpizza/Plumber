@@ -87,8 +87,8 @@ Invoke-Build Validate ./MyModule.build.ps1
 `ModuleManifest` is recommended even though Plumber can fall back to discovery. Being explicit
 avoids surprises in repos with analyzer settings, fixtures, examples or other data files.
 
-`SkipTasks` removes tasks before Invoke-Build runs. If all children of a parent task are skipped,
-the parent task is not loaded.
+`SkipTasks` removes tasks before Invoke-Build runs. Parent task names skip the full task group.
+If all children of a parent task are skipped, the parent task is not loaded.
 
 Example config overrides:
 
