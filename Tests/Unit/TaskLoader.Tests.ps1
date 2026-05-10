@@ -5,16 +5,16 @@ BeforeAll {
 }
 
 Describe 'Test-PlumberTaskEnabled' {
-    It 'returns true when the task is not skipped' {
+    It 'returns true when the task is not excluded' {
         InModuleScope Plumber {
-            Test-PlumberTaskEnabled -Name JSON -SkipTasks YAML |
+            Test-PlumberTaskEnabled -Name JSON -ExcludeTasks YAML |
                 Should -BeTrue
         }
     }
 
-    It 'returns false when the task is skipped' {
+    It 'returns false when the task is excluded' {
         InModuleScope Plumber {
-            Test-PlumberTaskEnabled -Name YAML -SkipTasks YAML |
+            Test-PlumberTaskEnabled -Name YAML -ExcludeTasks YAML |
                 Should -BeFalse
         }
     }
@@ -31,9 +31,9 @@ Describe 'Import-PlumberTask' {
         }
     }
 
-    It 'returns nothing when the task is skipped' {
+    It 'returns nothing when the task is excluded' {
         InModuleScope Plumber {
-            Import-PlumberTask -Name YAML -Path 'Content/YAML.ps1' -TaskRoot $TestDrive -SkipTasks YAML |
+            Import-PlumberTask -Name YAML -Path 'Content/YAML.ps1' -TaskRoot $TestDrive -ExcludeTasks YAML |
                 Should -BeNullOrEmpty
         }
     }
@@ -50,7 +50,7 @@ Describe 'TaskLoader' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    SkipTasks = @('JSON', 'YAML')"
+            "    ExcludeTasks = @('JSON', 'YAML')"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -82,7 +82,7 @@ Describe 'TaskLoader' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    SkipTasks = @('PesterUnit', 'PesterIntegration', 'CodeCoverage')"
+            "    ExcludeTasks = @('PesterUnit', 'PesterIntegration', 'CodeCoverage')"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -140,7 +140,7 @@ Describe 'TaskLoader' {
         $tasks['CodeQuality'].Jobs | Should -Contain '?LineLength'
     }
 
-    It 'reports PowerShell backticks' {
+    It 'reports PowerShell line-continuation backticks' {
         $moduleRoot = Join-Path $TestDrive 'BacktickModule'
         $publicRoot = Join-Path $moduleRoot 'Public'
         New-Item -Path $publicRoot -ItemType Directory | Out-Null
@@ -176,7 +176,46 @@ Describe 'TaskLoader' {
             Out-String
 
         $LASTEXITCODE | Should -Not -Be 0
-        $result | Should -Match 'Backtick found'
+        $result | Should -Match 'Line-continuation backtick found'
+    }
+
+    It 'allows PowerShell backticks inside lines' {
+        $moduleRoot = Join-Path $TestDrive 'BacktickStringModule'
+        $publicRoot = Join-Path $moduleRoot 'Public'
+        New-Item -Path $publicRoot -ItemType Directory | Out-Null
+        [char] $backtick = 96
+
+        Set-Content -Path (Join-Path $publicRoot 'Invoke-Thing.ps1') -Value @(
+            'function Invoke-Thing {'
+            "    `"hello$($backtick)nworld`""
+            '}'
+        )
+
+        $buildFile = Join-Path $moduleRoot 'BacktickStringModule.build.ps1'
+        @(
+            '$ErrorActionPreference = ''Stop'''
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "Backticks") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{}'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1 |
+            Out-String
+
+        $LASTEXITCODE | Should -Be 0
+        $result | Should -Not -Match 'Line-continuation backtick found'
     }
 
     It 'excludes configured paths from Backticks validation' {
@@ -353,13 +392,13 @@ Describe 'TaskLoader' {
         $tasks['Content'].Jobs | Should -Contain '?JSONSchema'
     }
 
-    It 'does not load Content when all Content child tasks are skipped' {
+    It 'does not load Content when all Content child tasks are excluded' {
         $buildFile = Join-Path $TestDrive 'skip-all-content.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    SkipTasks = @('JSON', 'JSONSchema', 'YAML')"
+            "    ExcludeTasks = @('JSON', 'JSONSchema', 'YAML')"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -368,13 +407,13 @@ Describe 'TaskLoader' {
         $tasks['Validate'].Jobs | Should -Not -Contain '?Content'
     }
 
-    It 'does not load Content children when Content is skipped' {
+    It 'does not load Content children when Content is excluded' {
         $buildFile = Join-Path $TestDrive 'skip-content-parent.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    SkipTasks = @('Content')"
+            "    ExcludeTasks = @('Content')"
             '}'
         ) | Set-Content -Path $buildFile
 

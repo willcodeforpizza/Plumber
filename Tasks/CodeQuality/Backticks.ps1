@@ -1,6 +1,42 @@
 <#
     .SYNOPSIS
     Validates PowerShell files do not use line-continuation backticks.
+
+    .DESCRIPTION
+    Checks `.ps1`, `.psm1`, and `.psd1` files and fails when a backtick is used
+    as the final non-whitespace character on a line.
+
+    .GROUP
+    CodeQuality
+
+    .CONFIGURATION
+    `ExcludePaths.Backticks` excludes matching files from this task.
+
+    ### Example
+
+    ```powershell
+    . (Get-PlumberTaskLoader) -Config @{
+        ModuleManifest = 'MyModule.psd1'
+        ExcludePaths   = @{
+            Backticks = @('Tests/Assets/TaskHelp/*.ps1')
+        }
+    }
+    ```
+
+    .RUN
+    ```powershell
+    Invoke-Plumber -Task Backticks
+    ```
+
+    .PASS
+    ```powershell
+    Get-Foo -DoBar -AddFizz
+    ```
+
+    .FAIL
+    ```text
+    A PowerShell line whose final non-whitespace character is a backtick.
+    ```
 #>
 Add-BuildTask -Name Backticks -Jobs {
     # Scope can be lost when running Plumber on Plumber multiple times

@@ -41,7 +41,7 @@ function Invoke-Plumber {
     # The name of the task, or parent task to run against the module
     [ValidateSet(
         'Backticks',
-        'Changelog',
+        'ChangelogUpdated',
         'CodeCoverage',
         'CodeQuality',
         'Content',

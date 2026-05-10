@@ -1,6 +1,35 @@
 <#
     .SYNOPSIS
-    Runs unit tests and validates they pass
+    Runs unit tests and validates they pass.
+
+    .DESCRIPTION
+    Runs Pester tests from `Tests/Unit`, captures code coverage for module
+    source folders, and fails when any unit test fails.
+
+    .GROUP
+    CodeQuality
+
+    .CONFIGURATION
+    None.
+
+    .RUN
+    ```powershell
+    Invoke-Plumber -Task PesterUnit
+    ```
+
+    .PASS
+    ```powershell
+    It 'returns the expected value' {
+        Get-Thing | Should -Be 'value'
+    }
+    ```
+
+    .FAIL
+    ```powershell
+    It 'returns the expected value' {
+        Get-Thing | Should -Be 'other'
+    }
+    ```
 #>
 Add-BuildTask -Name PesterUnit -Jobs SetVariables, {
     if (-not (Test-Path "$BuildRoot\Tests\Unit")) {

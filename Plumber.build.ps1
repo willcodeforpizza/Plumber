@@ -6,7 +6,6 @@ if (-not $module) {
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'Plumber.psd1'
     ExcludePaths = @{
-        Backticks        = @('Tests/Assets/TaskHelp/*')
         PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
     }
     JsonSchemas = @(

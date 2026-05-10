@@ -1,6 +1,57 @@
 <#
     .SYNOPSIS
-    Validates JSON files against configured JSON schemas
+    Validates JSON files against configured JSON schemas.
+
+    .DESCRIPTION
+    Uses configured JSON schema mappings to validate matching `.json` files
+    with `Test-Json`.
+
+    .GROUP
+    Content
+
+    .CONFIGURATION
+    `JsonSchemas` defines the JSON files and schema files to validate. Each
+    mapping has a `Path` value for matching JSON files and a `Schema` value for
+    the schema file.
+
+    `ExcludePaths.JSONSchema` excludes matching files from this task.
+
+    ### Example
+
+    ```powershell
+    . (Get-PlumberTaskLoader) -Config @{
+        ModuleManifest = 'MyModule.psd1'
+        JsonSchemas    = @(
+            @{
+                Path   = 'Resource/*.json'
+                Schema = 'Resource/Schema/config.schema.json'
+            }
+        )
+        ExcludePaths   = @{
+            JSONSchema = @('Resource/generated.json')
+        }
+    }
+    ```
+
+    .RUN
+    ```powershell
+    Invoke-Plumber -Task JSONSchema
+    ```
+
+    .PASS
+    ```json
+    {
+      "name": "Plumber",
+      "enabled": true
+    }
+    ```
+
+    .FAIL
+    ```json
+    {
+      "enabled": true
+    }
+    ```
 #>
 Add-BuildTask -Name JSONSchema -Jobs {
     # Scope can be lost when running Plumber on Plumber multiple times
