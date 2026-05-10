@@ -7,7 +7,7 @@ Shared Invoke-Build tasks for PowerShell validation pipelines.
 - [Task index](tasks/index.md)
 - [Writing tasks](writing-tasks.md)
 - [Architecture decisions](adr/001-record-architecture-decisions.md)
-- [Repository README](../README.md)
+- [Repository README](https://github.com/willcodeforpizza/Plumber#readme)
 
 ## Task Groups
 
