@@ -11,20 +11,25 @@ function Invoke-Plumber {
         .PARAMETER Task
         The task, or parent task, to run. Defaults to Validate.
 
+        .PARAMETER OutputMode
+        Controls Plumber output. Summary is quiet and concise, Table prints all
+        task results, Json emits structured output, and Raw preserves
+        Invoke-Build output.
+
         .EXAMPLE
         Invoke-Plumber
 
-        Runs the default Validate task and prints a task/error summary.
+        Runs the default Validate task and prints a concise summary.
 
         .EXAMPLE
-        Invoke-Plumber -Task Pester
+        Invoke-Plumber -Task PesterUnit -OutputMode Table
 
-        Runs the Pester parent task.
+        Runs PesterUnit and prints all task results as a table.
 
         .EXAMPLE
-        Invoke-Plumber -Task PSScriptAnalyzer, PesterUnit
+        Invoke-Plumber -Task PSScriptAnalyzer, PesterUnit -OutputMode Json
 
-        Runs specific validation tasks.
+        Runs specific validation tasks and emits JSON output.
     #>
     [CmdletBinding()]
     param (
@@ -56,7 +61,11 @@ function Invoke-Plumber {
         'YAML'
         )]
         [string[]]
-        $Task = 'Validate'
+        $Task = 'Validate',
+
+        [ValidateSet('Json', 'Raw', 'Summary', 'Table')]
+        [string]
+        $OutputMode = 'Summary'
     )
     process {
         $moduleRoot = if ($script:moduleRoot) {
@@ -66,22 +75,32 @@ function Invoke-Plumber {
         }
 
         $buildFile = Join-Path $moduleRoot 'Plumber.build.ps1'
-        if (-not (Get-Command Invoke-PlumberBuild -ErrorAction SilentlyContinue)) {
-            . (Join-Path $moduleRoot 'Private/Invoke-PlumberBuild.ps1')
+        $runtimeFunctions = 'Invoke-PlumberBuild', 'ConvertTo-PlumberResult', 'Write-PlumberResult'
+        foreach ($runtimeFunction in $runtimeFunctions) {
+            if (-not (Get-Command $runtimeFunction -ErrorAction SilentlyContinue)) {
+                . (Join-Path $moduleRoot "Private/$runtimeFunction.ps1")
+            }
         }
 
         Write-Verbose "Build file: $buildFile"
-        $buildResult = Invoke-PlumberBuild -Task $Task -BuildFile $buildFile
-        $hasError = $buildResult.tasks | Where-Object {$_.Error}
-        if($hasError) {
-            Write-Error 'Build failed!'
+        $buildSplat = @{
+            Task        = $Task
+            BuildFile   = $buildFile
+            QuietOutput = $OutputMode -ne 'Raw'
+            RawOutput   = $OutputMode -eq 'Raw'
+        }
+        $buildResult = Invoke-PlumberBuild @buildSplat
+        foreach ($runtimeFunction in $runtimeFunctions) {
+            if (-not (Get-Command $runtimeFunction -ErrorAction SilentlyContinue)) {
+                . (Join-Path $moduleRoot "Private/$runtimeFunction.ps1")
+            }
         }
 
-        Write-Output "$(
-            $buildResult.tasks |
-            Select-Object Name, Error |
-            Format-Table |
-                Out-String
-        )"
+        $plumberResult = ConvertTo-PlumberResult -BuildResult $buildResult
+        Write-PlumberResult -Result $plumberResult -OutputMode $OutputMode
+
+        if (-not $plumberResult.Success) {
+            throw 'Build failed!'
+        }
     }
 }

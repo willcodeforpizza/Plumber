@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.12
+- Added: Invoke-Plumber output modes for summary, table, JSON and raw output
+- Changed: Invoke-Plumber now defaults to concise summary output
+- Changed: Failed Invoke-Plumber validation now throws after writing output
+
 ## 0.0.11
 - Added: Config examples for task skipping, coverage and line length
 - Changed: SkipTasks now supports skipping parent task groups

@@ -14,6 +14,12 @@ function Invoke-PlumberBuild {
         .PARAMETER BuildFile
         The build script file to execute.
 
+        .PARAMETER QuietOutput
+        Suppresses Invoke-Build output streams.
+
+        .PARAMETER RawOutput
+        Writes Invoke-Build success output before returning the result object.
+
         .EXAMPLE
         Invoke-PlumberBuild -Task Validate -BuildFile ./Plumber.build.ps1
 
@@ -28,12 +34,27 @@ function Invoke-PlumberBuild {
 
         [Parameter(Mandatory)]
         [string]
-        $BuildFile
+        $BuildFile,
+
+        [switch]
+        $QuietOutput,
+
+        [switch]
+        $RawOutput
     )
 
     $invokeBuild = Get-Command Invoke-Build
     $resultVariable = "plumberBuildResult_$([guid]::NewGuid().ToString('N'))"
-    $null = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable
+
+    if ($QuietOutput) {
+        $null = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable *> $null
+    } elseif ($RawOutput) {
+        $buildOutput = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable
+        $buildOutput | Out-Host
+    } else {
+        $null = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable
+    }
+
     Get-Variable -Name $resultVariable -ValueOnly
     Remove-Variable -Name $resultVariable -ErrorAction SilentlyContinue
 }
