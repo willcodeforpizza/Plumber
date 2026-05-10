@@ -90,6 +90,22 @@ avoids surprises in repos with analyzer settings, fixtures, examples or other da
 `SkipTasks` removes tasks before Invoke-Build runs. If all children of a parent task are skipped,
 the parent task is not loaded.
 
+Example config overrides:
+
+```powershell
+# Skip one child task
+SkipTasks = @('YAML')
+
+# Skip every Content child task
+SkipTasks = @('JSON', 'JSONSchema', 'YAML')
+
+# Require higher code coverage
+CoverageMinimum = 90
+
+# Allow longer lines
+MaxLineLength = 140
+```
+
 Example JSON schema config:
 
 ```powershell
