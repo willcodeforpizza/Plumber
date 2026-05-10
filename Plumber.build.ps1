@@ -20,4 +20,7 @@ if (-not $module) {
             Schema = 'Resource/Schema/RequiredModulesSchema.json'
         }
     )
+    LocalTasks = @(
+        'LocalTasks/ValidateTaskHelp.ps1'
+    )
 }
