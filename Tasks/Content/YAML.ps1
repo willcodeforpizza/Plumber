@@ -43,8 +43,7 @@ Add-BuildTask -Name YAML -Jobs {
     $convertToYaml = Get-Command ConvertTo-Yaml -ErrorAction SilentlyContinue
 
     if (-not $convertFromYaml -or -not $convertToYaml) {
-        Write-Build Yellow 'ConvertFrom-Yaml and ConvertTo-Yaml are not available'
-        return
+        throw 'ConvertFrom-Yaml and ConvertTo-Yaml are required. Install the powershell-yaml module.'
     }
 
     $yamlFiles = Get-PlumberTaskFile -Task YAML -Extension '.yml', '.yaml'
