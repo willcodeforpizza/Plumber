@@ -26,6 +26,7 @@ function New-PlumberConfig {
         PrivateHelpSynopsisOnly = $true
         PublicFunctionPrefix    = $null
         PublicFunctionPrefixExclusions = @()
+        StreamPesterOutput      = $true
         ExcludeTasks            = @()
         ExcludePaths            = @{}
         LocalTasks              = @()
@@ -47,6 +48,11 @@ function New-PlumberConfig {
     }
     if (-not $plumberConfig.PublicFunctionPrefixExclusions) {
         $plumberConfig.PublicFunctionPrefixExclusions = @()
+    }
+    if (Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue) {
+        $plumberConfig.StreamPesterOutput = [bool](
+            Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly
+        )
     }
     if (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
         $plumberConfig.BuildRoot = $BuildRoot

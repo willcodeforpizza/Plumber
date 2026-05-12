@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.25
+- Added: Invoke-Plumber GitHub Actions workflow and CI output mode
+- Changed: Module dependencies are listed in the module manifest ModuleList
+
 ## 0.0.24
 - Added: PublicFunctionPrefix task for validating public command noun prefixes
 

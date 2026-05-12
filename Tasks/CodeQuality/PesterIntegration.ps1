@@ -40,6 +40,7 @@ Add-BuildTask -Name PesterIntegration -Jobs SetVariables, {
     $pesterSplat = @{
         Path           = "$BuildRoot\Tests\Integration"
         ModuleManifest = Join-Path $BuildRoot "$script:moduleName.psd1"
+        StreamOutput   = $script:PlumberConfig.StreamPesterOutput
     }
     $result = Invoke-PlumberPester @pesterSplat
 

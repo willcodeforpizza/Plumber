@@ -18,8 +18,8 @@ function Invoke-Plumber {
 
         .PARAMETER OutputMode
         Controls Plumber output. Summary is quiet and concise, Table prints all
-        task results, Json emits structured output, and Raw preserves
-        Invoke-Build output.
+        task results, Json emits structured output, Raw preserves Invoke-Build
+        output, and CI preserves Invoke-Build output with a concise summary.
 
         .EXAMPLE
         Invoke-Plumber
@@ -45,7 +45,7 @@ function Invoke-Plumber {
         [string]
         $BuildFile,
 
-        [ValidateSet('Json', 'Raw', 'Summary', 'Table')]
+        [ValidateSet('CI', 'Json', 'Raw', 'Summary', 'Table')]
         [string]
         $OutputMode = 'Summary'
     )
@@ -75,7 +75,7 @@ function Invoke-Plumber {
         $buildSplat = @{
             Task      = $Task
             BuildFile = $resolvedBuildFile
-            RawOutput = $OutputMode -eq 'Raw'
+            RawOutput = $OutputMode -in 'CI', 'Raw'
         }
         $buildResult = Invoke-PlumberBuild @buildSplat
         foreach ($runtimeFunction in $runtimeFunctions) {

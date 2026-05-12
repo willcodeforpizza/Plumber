@@ -6,8 +6,8 @@ function Invoke-PlumberPester {
         .DESCRIPTION
         Starts a background job so Pester runs in a separate process from the
         caller. This prevents loaded modules, mocks, aliases and other session
-        state from leaking into tests while still streaming test output back to
-        the Invoke-Build task.
+        state from leaking into tests. Job output is streamed only when
+        Invoke-Plumber requests raw output.
 
         .PARAMETER Path
         Pester test path.
@@ -34,7 +34,10 @@ function Invoke-PlumberPester {
         $ModuleManifest,
 
         [string[]]
-        $CodeCoveragePath
+        $CodeCoveragePath,
+
+        [switch]
+        $StreamOutput
     )
 
     $resultPath = Join-Path ([System.IO.Path]::GetTempPath()) (
@@ -53,7 +56,10 @@ function Invoke-PlumberPester {
             $CoveragePath,
 
             [string]
-            $PesterResultPath
+            $PesterResultPath,
+
+            [bool]
+            $StreamOutput
         )
 
         Import-Module $ManifestPath -Force
@@ -61,6 +67,9 @@ function Invoke-PlumberPester {
         $configuration = New-PesterConfiguration
         $configuration.Run.Path = $TestPath
         $configuration.Run.PassThru = $true
+        if (-not $StreamOutput) {
+            $configuration.Output.Verbosity = 'None'
+        }
 
         if ($CoveragePath) {
             $configuration.CodeCoverage.Enabled = $true
@@ -69,10 +78,14 @@ function Invoke-PlumberPester {
 
         $result = Invoke-Pester -Configuration $configuration
         $result | Export-Clixml -Path $PesterResultPath
-    } -ArgumentList $Path, $ModuleManifest, $CodeCoveragePath, $resultPath
+    } -ArgumentList $Path, $ModuleManifest, $CodeCoveragePath, $resultPath, $StreamOutput.IsPresent
 
     try {
-        Receive-Job -Job $job -Wait
+        if ($StreamOutput) {
+            Receive-Job -Job $job -Wait
+        } else {
+            $null = Receive-Job -Job $job -Wait *> $null
+        }
 
         if ($job.State -ne 'Completed') {
             throw "Pester job ended with state '$($job.State)'."
