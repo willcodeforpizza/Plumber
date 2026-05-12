@@ -39,12 +39,31 @@ function Invoke-PlumberBuild {
 
     $invokeBuild = Get-Command Invoke-Build
     $resultVariable = "plumberBuildResult_$([guid]::NewGuid().ToString('N'))"
+    $streamVariableSplat = @{
+        Name        = 'PlumberStreamPesterOutput'
+        Scope       = 'Global'
+        ErrorAction = 'SilentlyContinue'
+    }
+    $streamVariableExists = Get-Variable @streamVariableSplat
+    $previousStreamPesterOutput = if ($streamVariableExists) {
+        Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly
+    }
 
-    if ($RawOutput) {
-        & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable |
-            Out-Host
-    } else {
-        $null = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable *> $null
+    try {
+        Set-Variable -Name PlumberStreamPesterOutput -Scope Global -Value ([bool]$RawOutput)
+
+        if ($RawOutput) {
+            & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable |
+                Out-Host
+        } else {
+            $null = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable *> $null
+        }
+    } finally {
+        if (-not $streamVariableExists) {
+            Remove-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue
+        } else {
+            Set-Variable -Name PlumberStreamPesterOutput -Scope Global -Value $previousStreamPesterOutput
+        }
     }
 
     Get-Variable -Name $resultVariable -ValueOnly

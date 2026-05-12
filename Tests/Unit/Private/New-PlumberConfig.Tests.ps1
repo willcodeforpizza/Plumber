@@ -17,6 +17,7 @@ Describe 'New-PlumberConfig' {
             $config.LocalTasks | Should -Be @()
             $config.PublicFunctionPrefix | Should -BeNullOrEmpty
             $config.PublicFunctionPrefixExclusions | Should -Be @()
+            $config.StreamPesterOutput | Should -BeTrue
         }
     }
 
@@ -30,6 +31,7 @@ Describe 'New-PlumberConfig' {
                 FileScope       = 'Changed'
                 PublicFunctionPrefix = 'Thing'
                 PublicFunctionPrefixExclusions = $null
+                StreamPesterOutput = $false
             }
 
             $config.CoverageMinimum | Should -Be 90
@@ -39,6 +41,23 @@ Describe 'New-PlumberConfig' {
             $config.LocalTasks | Should -Be @()
             $config.PublicFunctionPrefix | Should -Be 'Thing'
             $config.PublicFunctionPrefixExclusions | Should -Be @()
+            $config.StreamPesterOutput | Should -BeFalse
+        }
+    }
+
+    It 'uses the build invocation Pester output mode when provided' {
+        InModuleScope Plumber {
+            Set-Variable -Name PlumberStreamPesterOutput -Scope Global -Value $false
+
+            try {
+                $config = New-PlumberConfig -Config @{
+                    StreamPesterOutput = $true
+                }
+
+                $config.StreamPesterOutput | Should -BeFalse
+            } finally {
+                Remove-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue
+            }
         }
     }
 }
