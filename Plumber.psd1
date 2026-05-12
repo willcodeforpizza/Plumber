@@ -1,6 +1,6 @@
 @{
     RootModule    = 'Plumber.psm1'
-    ModuleVersion = '0.0.24'
+    ModuleVersion = '0.0.25'
     GUID          = '03d665a4-c447-470b-acfc-ee7195c019e0'
     Author        = 'WillCodeForPizza'
     CompanyName   = 'WillCodeForPizza'
@@ -9,6 +9,24 @@
     FunctionsToExport = @(
         'Get-PlumberTaskLoader'
         'Invoke-Plumber'
+    )
+    ModuleList = @(
+        @{
+            ModuleName    = 'InvokeBuild'
+            ModuleVersion = '5.14.23'
+        }
+        @{
+            ModuleName    = 'Pester'
+            ModuleVersion = '5.2.0'
+        }
+        @{
+            ModuleName    = 'PSScriptAnalyzer'
+            ModuleVersion = '1.24.0'
+        }
+        @{
+            ModuleName    = 'powershell-yaml'
+            ModuleVersion = '0.4.12'
+        }
     )
     PrivateData = @{
         PSData = @{

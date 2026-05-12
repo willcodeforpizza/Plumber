@@ -121,6 +121,16 @@ Describe 'Invoke-Plumber' {
         }
     }
 
+    It 'requests raw build output and writes concise output in CI mode' {
+        InModuleScope Plumber {
+            Invoke-Plumber -OutputMode CI | Should -Match 'Plumber validation passed'
+
+            Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
+                $RawOutput
+            }
+        }
+    }
+
     It 'reloads result helpers when build execution removes them' {
         InModuleScope Plumber {
             Mock Invoke-PlumberBuild {

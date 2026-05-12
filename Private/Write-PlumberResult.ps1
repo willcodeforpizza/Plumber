@@ -10,7 +10,7 @@ function Write-PlumberResult {
         $Result,
 
         [Parameter(Mandatory)]
-        [ValidateSet('Json', 'Raw', 'Summary', 'Table')]
+        [ValidateSet('CI', 'Json', 'Raw', 'Summary', 'Table')]
         [string]
         $OutputMode
     )

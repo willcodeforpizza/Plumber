@@ -16,12 +16,6 @@ if (-not $module) {
         ToDo             = @('out/**')
         YAML             = @('out/**')
     }
-    JsonSchemas = @(
-        @{
-            Path   = 'Resource/RequiredModules.json'
-            Schema = 'Resource/Schema/RequiredModulesSchema.json'
-        }
-    )
     LocalTasks = @(
         'LocalTasks/ValidateTaskHelp.ps1'
     )
