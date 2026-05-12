@@ -1,0 +1,38 @@
+BeforeAll {
+    if (-not (Get-Module Plumber)) {
+        Import-Module "$PSScriptRoot/../../../Plumber.psd1" -Force
+    }
+}
+
+Describe 'New-PlumberConfig' {
+    It 'sets defaults for optional configuration' {
+        InModuleScope Plumber {
+            $config = New-PlumberConfig
+
+            $config.CoverageMinimum | Should -Be 75
+            $config.FileScope | Should -Be 'All'
+            $config.IncludeTestsInPssa | Should -BeTrue
+            $config.ExcludeTasks | Should -Be @()
+            $config.ExcludePaths.Count | Should -Be 0
+            $config.LocalTasks | Should -Be @()
+        }
+    }
+
+    It 'overrides configured values and normalizes empty collections' {
+        InModuleScope Plumber {
+            $config = New-PlumberConfig -Config @{
+                CoverageMinimum = 90
+                ExcludeTasks    = $null
+                ExcludePaths    = $null
+                LocalTasks      = $null
+                FileScope       = 'Changed'
+            }
+
+            $config.CoverageMinimum | Should -Be 90
+            $config.FileScope | Should -Be 'Changed'
+            $config.ExcludeTasks | Should -Be @()
+            $config.ExcludePaths.Count | Should -Be 0
+            $config.LocalTasks | Should -Be @()
+        }
+    }
+}

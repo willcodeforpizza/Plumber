@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.22
+- Changed: Split TaskLoader internals into focused private helper functions
+
 ## 0.0.21
 - Changed: PesterUnit and PesterIntegration run Pester in isolated PowerShell jobs
 - Fixed: Self-validation when another Plumber module version is already loaded

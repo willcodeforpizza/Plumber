@@ -3,8 +3,8 @@
     Runs integration tests and validates they pass.
 
     .DESCRIPTION
-    Runs Pester tests from `Tests/Integration` when that directory exists and
-    fails when any integration test fails.
+    Runs Pester tests from `Tests/Integration` in a separate PowerShell process
+    when that directory exists, and fails when any integration test fails.
 
     .GROUP
     CodeQuality
