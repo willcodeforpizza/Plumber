@@ -24,3 +24,6 @@ if (-not $module) {
         'LocalTasks/ValidateTaskHelp.ps1'
     )
 }
+
+. (Join-Path $PSScriptRoot 'build/Publish.ps1') -ModuleBuildExtraItems @('Tasks', 'docs')
+. (Join-Path $PSScriptRoot 'LocalTasks/GenerateDocs.ps1')
