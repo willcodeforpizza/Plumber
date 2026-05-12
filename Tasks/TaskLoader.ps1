@@ -13,7 +13,8 @@
     .PARAMETER Config
     Repository-specific Plumber configuration. Supported keys are
     ModuleManifest, CoverageMinimum, ExcludePaths, FileScope, DiffBase,
-    IncludeTestsInPssa, LocalTasks and ExcludeTasks.
+    IncludeTestsInPssa, LocalTasks, PublicFunctionPrefix,
+    PublicFunctionPrefixExclusions and ExcludeTasks.
 
     .EXAMPLE
     . (Get-PlumberTaskLoader) -Config @{

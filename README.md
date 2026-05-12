@@ -71,6 +71,10 @@ Import-Module Plumber
     )
     MaxLineLength           = 80
     PrivateHelpSynopsisOnly = $true
+    PublicFunctionPrefix    = 'MyModule'
+    PublicFunctionPrefixExclusions = @(
+        'New-Thing'
+    )
 }
 ```
 

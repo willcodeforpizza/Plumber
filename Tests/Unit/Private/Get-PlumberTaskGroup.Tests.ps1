@@ -15,6 +15,8 @@ Describe 'Get-PlumberTaskGroup' {
             $groups.Parent | Should -Contain 'ModuleConventions'
             ($groups | Where-Object Parent -EQ 'CodeQuality').Children |
                 Should -Contain 'PesterUnit'
+            ($groups | Where-Object Parent -EQ 'ModuleConventions').Children |
+                Should -Contain 'PublicFunctionPrefix'
         }
     }
 }

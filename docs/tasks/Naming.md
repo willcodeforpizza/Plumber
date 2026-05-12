@@ -48,4 +48,4 @@ RootModule = 'mymodule.psm1'
 - [Task index](index.md)
 - [Group: ModuleConventions](ModuleConventions.md)
 - Previous: [Manifest](Manifest.md)
-- Next: [PublicFunctions](PublicFunctions.md)
+- Next: [PublicFunctionPrefix](PublicFunctionPrefix.md)

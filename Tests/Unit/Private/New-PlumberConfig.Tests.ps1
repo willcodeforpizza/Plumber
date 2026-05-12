@@ -15,6 +15,8 @@ Describe 'New-PlumberConfig' {
             $config.ExcludeTasks | Should -Be @()
             $config.ExcludePaths.Count | Should -Be 0
             $config.LocalTasks | Should -Be @()
+            $config.PublicFunctionPrefix | Should -BeNullOrEmpty
+            $config.PublicFunctionPrefixExclusions | Should -Be @()
         }
     }
 
@@ -26,6 +28,8 @@ Describe 'New-PlumberConfig' {
                 ExcludePaths    = $null
                 LocalTasks      = $null
                 FileScope       = 'Changed'
+                PublicFunctionPrefix = 'Thing'
+                PublicFunctionPrefixExclusions = $null
             }
 
             $config.CoverageMinimum | Should -Be 90
@@ -33,6 +37,8 @@ Describe 'New-PlumberConfig' {
             $config.ExcludeTasks | Should -Be @()
             $config.ExcludePaths.Count | Should -Be 0
             $config.LocalTasks | Should -Be @()
+            $config.PublicFunctionPrefix | Should -Be 'Thing'
+            $config.PublicFunctionPrefixExclusions | Should -Be @()
         }
     }
 }

@@ -50,5 +50,5 @@ FunctionsToExport = @()
 
 - [Task index](index.md)
 - [Group: ModuleConventions](ModuleConventions.md)
-- Previous: [Naming](Naming.md)
+- Previous: [PublicFunctionPrefix](PublicFunctionPrefix.md)
 - Next: [ToDo](ToDo.md)

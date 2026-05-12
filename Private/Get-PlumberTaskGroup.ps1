@@ -29,7 +29,7 @@ function Get-PlumberTaskGroup {
         }
         @{
             Parent   = 'ModuleConventions'
-            Children = @('Manifest', 'PublicFunctions', 'Naming', 'ToDo', 'Help')
+            Children = @('Manifest', 'PublicFunctions', 'PublicFunctionPrefix', 'Naming', 'ToDo', 'Help')
         }
     )
 }

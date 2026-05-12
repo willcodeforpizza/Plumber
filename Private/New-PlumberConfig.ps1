@@ -24,6 +24,8 @@ function New-PlumberConfig {
         JsonSchemas             = @()
         MaxLineLength           = 115
         PrivateHelpSynopsisOnly = $true
+        PublicFunctionPrefix    = $null
+        PublicFunctionPrefixExclusions = @()
         ExcludeTasks            = @()
         ExcludePaths            = @{}
         LocalTasks              = @()
@@ -42,6 +44,9 @@ function New-PlumberConfig {
     }
     if (-not $plumberConfig.LocalTasks) {
         $plumberConfig.LocalTasks = @()
+    }
+    if (-not $plumberConfig.PublicFunctionPrefixExclusions) {
+        $plumberConfig.PublicFunctionPrefixExclusions = @()
     }
     if (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
         $plumberConfig.BuildRoot = $BuildRoot
