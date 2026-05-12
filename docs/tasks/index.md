@@ -28,6 +28,7 @@
 | [Help](Help.md) | `ModuleConventions` |
 | [Manifest](Manifest.md) | `ModuleConventions` |
 | [Naming](Naming.md) | `ModuleConventions` |
+| [PublicFunctionPrefix](PublicFunctionPrefix.md) | `ModuleConventions` |
 | [PublicFunctions](PublicFunctions.md) | `ModuleConventions` |
 | [ToDo](ToDo.md) | `ModuleConventions` |
 | [ChangelogUpdated](ChangelogUpdated.md) | `ReleaseHygiene` |

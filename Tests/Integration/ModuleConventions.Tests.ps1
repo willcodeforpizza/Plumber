@@ -13,7 +13,10 @@ BeforeAll {
 
             [Parameter(Mandatory)]
             [string[]]
-            $FunctionsToExport
+            $FunctionsToExport,
+
+            [string[]]
+            $ConfigLines = @()
         )
 
         $moduleRoot = Join-Path $TestDrive $Name
@@ -28,10 +31,11 @@ BeforeAll {
             '}'
         )
         Set-Content -Path (Join-Path $moduleRoot "$Name.psm1") -Value ''
+        $buildConfigLines = @("    ModuleManifest = '$Name.psd1'") + $ConfigLines
         Set-Content -Path (Join-Path $moduleRoot "$Name.build.ps1") -Value @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
-            "    ModuleManifest = '$Name.psd1'"
+            $buildConfigLines
             '}'
         )
 
@@ -113,5 +117,63 @@ Describe 'Module convention integration' {
         {
             & $script:invokeBuild -Task PublicFunctions -File "$moduleRoot/PrivateExportModule.build.ps1"
         } | Should -Throw -ExpectedMessage '*Invoke-Helper is exported from Private/Invoke-Helper.ps1*'
+    }
+
+    It 'passes when public functions use the module name as the default prefix' {
+        $moduleRoot = Initialize-TestModuleFixture -Name 'ThingDefault' -FunctionsToExport @(
+            'Get-ThingDefaultItem'
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'Public/Get-ThingDefaultItem.ps1') -Value @(
+            'function Get-ThingDefaultItem {'
+            '}'
+        )
+
+        & $script:invokeBuild -Task PublicFunctionPrefix -File "$moduleRoot/ThingDefault.build.ps1"
+    }
+
+    It 'fails when a public function does not use the default prefix' {
+        $moduleRoot = Initialize-TestModuleFixture -Name 'ThingFail' -FunctionsToExport @('Get-Item')
+        Set-Content -Path (Join-Path $moduleRoot 'Public/Get-Item.ps1') -Value @(
+            'function Get-Item {'
+            '}'
+        )
+
+        {
+            & $script:invokeBuild -Task PublicFunctionPrefix -File "$moduleRoot/ThingFail.build.ps1"
+        } | Should -Throw -ExpectedMessage "*Get-Item does not use public function prefix 'ThingFail'*"
+    }
+
+    It 'uses the configured public function prefix' {
+        $fixtureSplat = @{
+            Name              = 'CustomModule'
+            FunctionsToExport = @('Get-CustomItem')
+            ConfigLines       = @("    PublicFunctionPrefix = 'Custom'")
+        }
+        $moduleRoot = Initialize-TestModuleFixture @fixtureSplat
+        Set-Content -Path (Join-Path $moduleRoot 'Public/Get-CustomItem.ps1') -Value @(
+            'function Get-CustomItem {'
+            '}'
+        )
+
+        & $script:invokeBuild -Task PublicFunctionPrefix -File "$moduleRoot/CustomModule.build.ps1"
+    }
+
+    It 'excludes configured public functions from prefix validation' {
+        $moduleRoot = Initialize-TestModuleFixture -Name 'ThingExcluded' -FunctionsToExport @(
+            'Get-ThingExcludedItem',
+            'New-Item'
+        ) -ConfigLines @(
+            "    PublicFunctionPrefixExclusions = @('New-Item')"
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'Public/Get-ThingExcludedItem.ps1') -Value @(
+            'function Get-ThingExcludedItem {'
+            '}'
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'Public/New-Item.ps1') -Value @(
+            'function New-Item {'
+            '}'
+        )
+
+        & $script:invokeBuild -Task PublicFunctionPrefix -File "$moduleRoot/ThingExcluded.build.ps1"
     }
 }

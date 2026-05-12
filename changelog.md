@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.24
+- Added: PublicFunctionPrefix task for validating public command noun prefixes
+
 ## 0.0.23
 - Changed: Expanded PublicFunctions to validate public file, export, and private function boundaries
 
