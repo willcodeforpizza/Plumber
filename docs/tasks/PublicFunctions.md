@@ -7,7 +7,9 @@ Validates all public functions are declared in the PSD1.
 ## Description
 
 Checks files under `Public` and fails when a public function file name is
-not listed in the manifest `FunctionsToExport` value.
+not listed in the manifest `FunctionsToExport` value, an exported function
+has no matching public file, a public file does not define a matching
+function, or a private function is exported.
 
 ## Group
 

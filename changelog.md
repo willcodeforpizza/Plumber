@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.23
+- Changed: Expanded PublicFunctions to validate public file, export, and private function boundaries
+
 ## 0.0.22
 - Changed: Split TaskLoader internals into focused private helper functions
 
