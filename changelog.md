@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.21
+- Changed: PesterUnit and PesterIntegration run Pester in isolated PowerShell jobs
+- Fixed: Self-validation when another Plumber module version is already loaded
+
 ## 0.0.20
 - Added: FileScope Changed reports the selected changed file count
 - Changed: Clarified changed-file validation examples

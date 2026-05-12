@@ -135,7 +135,7 @@ function Add-PlumberTask {
 }
 
 
-$moduleRoot = $module.ModuleBase
+$moduleRoot = Split-Path $PSScriptRoot -Parent
 $script:PlumberConfig.ModuleRoot = $moduleRoot
 $taskRoot = Join-Path $moduleRoot 'Tasks'
 . (Join-Path $moduleRoot 'Private/Test-PlumberTaskEnabled.ps1')
@@ -143,6 +143,7 @@ $taskRoot = Join-Path $moduleRoot 'Tasks'
 . (Join-Path $moduleRoot 'Private/Get-PlumberChangedFile.ps1')
 . (Join-Path $moduleRoot 'Private/Get-PlumberTaskFile.ps1')
 . (Join-Path $moduleRoot 'Private/Import-PlumberTask.ps1')
+. (Join-Path $moduleRoot 'Private/Invoke-PlumberPester.ps1')
 
 $script:PlumberTaskJobs = @{
     CodeQuality       = @()

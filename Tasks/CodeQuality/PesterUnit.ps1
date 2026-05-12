@@ -37,12 +37,12 @@ Add-BuildTask -Name PesterUnit -Jobs SetVariables, {
         return
     }
 
-    $config = New-PesterConfiguration
-    $config.Run.Path = "$BuildRoot\Tests\Unit"
-    $config.Run.PassThru = $true
-    $config.CodeCoverage.Enabled = $true
-    $config.CodeCoverage.Path = $script:moduleFolders
-    $result = Invoke-Pester -Configuration $config
+    $pesterSplat = @{
+        Path             = "$BuildRoot\Tests\Unit"
+        ModuleManifest   = Join-Path $BuildRoot "$script:moduleName.psd1"
+        CodeCoveragePath = $script:moduleFolders
+    }
+    $result = Invoke-PlumberPester @pesterSplat
     $script:pesterResult = $result
 
     $failures = $result | Where-Object { $_.Result -eq 'Failed' }

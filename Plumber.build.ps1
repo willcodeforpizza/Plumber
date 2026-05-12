@@ -1,6 +1,8 @@
-$module = Get-Module Plumber
+$module = Get-Module Plumber |
+    Where-Object { $_.ModuleBase -eq $PSScriptRoot } |
+        Select-Object -First 1
 if (-not $module) {
-    $module = Import-Module (Join-Path $PSScriptRoot 'Plumber.psd1') -PassThru
+    $module = Import-Module (Join-Path $PSScriptRoot 'Plumber.psd1') -Force -PassThru
 }
 
 . (Get-PlumberTaskLoader) -Config @{
