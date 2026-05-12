@@ -180,10 +180,6 @@ $taskGroups = @(
 )
 
 . (Join-Path $taskRoot 'SetVariables.ps1')
-. (Join-Path $taskRoot 'BuildModule.ps1')
-. (Join-Path $taskRoot 'GenerateDocs.ps1')
-. (Join-Path $taskRoot 'PublishModule.ps1')
-. (Join-Path $taskRoot 'PublishRelease.ps1')
 
 foreach ($taskGroup in $taskGroups) {
     if (

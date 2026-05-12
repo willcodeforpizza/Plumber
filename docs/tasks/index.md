@@ -32,12 +32,3 @@
 | [ToDo](ToDo.md) | `ModuleConventions` |
 | [ChangelogUpdated](ChangelogUpdated.md) | `ReleaseHygiene` |
 | [ModuleVersion](ModuleVersion.md) | `ReleaseHygiene` |
-
-## Internal
-
-| Task | Purpose |
-| --- | --- |
-| [BuildModule](BuildModule.md) | Builds a publishable Plumber module folder. |
-| [GenerateDocs](GenerateDocs.md) | Generates Plumber documentation. |
-| [PublishModule](PublishModule.md) | Publishes Plumber to PowerShell Gallery. |
-| [PublishRelease](PublishRelease.md) | Creates the GitHub tag and release for Plumber. |
