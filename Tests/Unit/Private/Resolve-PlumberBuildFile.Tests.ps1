@@ -1,6 +1,6 @@
 BeforeAll {
     if (-not (Get-Module Plumber)) {
-        Import-Module "$PSScriptRoot/../../Plumber.psd1" -Force
+        Import-Module "$PSScriptRoot/../../../Plumber.psd1" -Force
     }
 }
 

@@ -1,6 +1,6 @@
 BeforeAll {
     if (-not (Get-Module Plumber)) {
-        Import-Module "$PSScriptRoot/../../Plumber.psd1" -Force
+        Import-Module "$PSScriptRoot/../../../Plumber.psd1" -Force
     }
 }
 
@@ -9,8 +9,8 @@ Describe 'New-PlumberTaskMarkdown' {
         $taskRoot = Join-Path $TestDrive 'Tasks'
         $outputRoot = Join-Path $TestDrive 'docs/tasks'
         New-Item -Path (Join-Path $taskRoot 'Content') -ItemType Directory | Out-Null
-        $contentSource = Join-Path $PSScriptRoot '../Assets/TaskHelp/Content.ps1'
-        $yamlSource = Join-Path $PSScriptRoot '../Assets/TaskHelp/YAML.ps1'
+        $contentSource = Join-Path $PSScriptRoot '../../Assets/TaskHelp/Content.ps1'
+        $yamlSource = Join-Path $PSScriptRoot '../../Assets/TaskHelp/YAML.ps1'
         Copy-Item -Path $contentSource -Destination (Join-Path $taskRoot 'Content/Content.ps1')
         Copy-Item -Path $yamlSource -Destination (Join-Path $taskRoot 'Content/YAML.ps1')
         Set-Content -Path (Join-Path $taskRoot 'Content/NoHelp.ps1') -Value 'Add-BuildTask -Name NoHelp -Jobs {}'

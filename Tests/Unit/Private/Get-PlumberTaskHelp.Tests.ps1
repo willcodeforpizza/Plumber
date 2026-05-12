@@ -1,12 +1,12 @@
 BeforeAll {
     if (-not (Get-Module Plumber)) {
-        Import-Module "$PSScriptRoot/../../Plumber.psd1" -Force
+        Import-Module "$PSScriptRoot/../../../Plumber.psd1" -Force
     }
 }
 
 Describe 'Get-PlumberTaskHelp' {
     BeforeAll {
-        $script:assetRoot = Join-Path $PSScriptRoot '../Assets/TaskHelp'
+        $script:assetRoot = Join-Path $PSScriptRoot '../../Assets/TaskHelp'
     }
 
     It 'reads group task help from a task file' {

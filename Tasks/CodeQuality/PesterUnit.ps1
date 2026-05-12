@@ -3,8 +3,9 @@
     Runs unit tests and validates they pass.
 
     .DESCRIPTION
-    Runs Pester tests from `Tests/Unit`, captures code coverage for module
-    source folders, and fails when any unit test fails.
+    Runs Pester tests from `Tests/Unit` in a separate PowerShell process,
+    captures code coverage for module source folders, and fails when any unit
+    test fails.
 
     .GROUP
     CodeQuality
