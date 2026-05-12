@@ -238,6 +238,50 @@ Describe 'Invoke-PlumberBuild' {
         }
     }
 
+    It 'disables Pester job output while suppressing build output' {
+        InModuleScope Plumber {
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    $File | Should -Not -BeNullOrEmpty
+                    Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly |
+                        Should -BeFalse
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = $null
+                            }
+                        )
+                    })
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            Set-Variable -Name PlumberStreamPesterOutput -Scope Global -Value 'previous'
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            try {
+                Invoke-PlumberBuild -Task QuietSmoke -BuildFile $BuildFile | Out-Null
+
+                Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly |
+                    Should -Be 'previous'
+            } finally {
+                Remove-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
     It 'streams raw output without returning it as the build result' {
         InModuleScope Plumber {
             Mock Out-Host {}
@@ -278,6 +322,47 @@ Describe 'Invoke-PlumberBuild' {
             $result.Tasks.Name | Should -Contain 'RawSmoke'
             $result | Should -Not -Contain 'raw output'
             Should -Invoke Out-Host -Times 1 -Exactly
+        }
+    }
+
+    It 'enables Pester job output while streaming raw output' {
+        InModuleScope Plumber {
+            Mock Out-Host {}
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    $File | Should -Not -BeNullOrEmpty
+                    Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly |
+                        Should -BeTrue
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = $null
+                            }
+                        )
+                    })
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            Remove-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            Invoke-PlumberBuild -Task RawSmoke -BuildFile $BuildFile -RawOutput | Out-Null
+
+            Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue |
+                Should -BeNullOrEmpty
         }
     }
 }
