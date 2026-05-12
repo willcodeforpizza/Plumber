@@ -14,9 +14,14 @@ Documentation: https://willcodeforpizza.github.io/Plumber/
 - Windows or Linux
 - PowerShell 7
 
+## Install
+
+```powershell
+Install-Module Plumber -Scope CurrentUser
+```
+
 ## To run
 
-- Install Plumber `Install-Module Plumber -Scope CurrentUser`
 - Browse to the module you want to validate.
 - Add a build file to the root of your module `MyModule.build.ps1` (see configuration below).
 - Run `Invoke-Plumber`.
