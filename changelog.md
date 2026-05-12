@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.26
+- Changed: Document PowerShell Gallery installation in the README
+
 ## 0.0.25
 - Added: Invoke-Plumber GitHub Actions workflow and CI output mode
 - Changed: Module dependencies are listed in the module manifest ModuleList
