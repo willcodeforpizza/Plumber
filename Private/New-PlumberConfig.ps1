@@ -16,20 +16,23 @@ function New-PlumberConfig {
     )
 
     $defaults = @{
-        ModuleManifest          = $null
-        CoverageMinimum         = 75
-        DiffBase                = $null
-        FileScope               = 'All'
-        IncludeTestsInPssa      = $true
-        JsonSchemas             = @()
-        MaxLineLength           = 115
-        PrivateHelpSynopsisOnly = $true
-        PublicFunctionPrefix    = $null
+        ModuleManifest                 = $null
+        CoverageMinimum                = 75
+        DiffBase                       = $null
+        FileScope                      = 'All'
+        IncludeTestsInPssa             = $true
+        JsonSchemas                    = @()
+        MaxLineLength                  = 115
+        PrivateHelpSynopsisOnly        = $true
+        PublicFunctionPrefix           = $null
         PublicFunctionPrefixExclusions = @()
-        StreamPesterOutput      = $true
-        ExcludeTasks            = @()
-        ExcludePaths            = @{}
-        LocalTasks              = @()
+        StreamPesterOutput             = $true
+        VersionIncludePrerelease       = $false
+        VersionRemote                  = 'origin'
+        VersionSource                  = 'PSGallery'
+        ExcludeTasks                   = @()
+        ExcludePaths                   = @{}
+        LocalTasks                     = @()
     }
 
     $plumberConfig = $defaults.Clone()
