@@ -50,7 +50,6 @@ Add-BuildTask -Name BuildModule -Jobs {
         'LICENSE',
         'README.md',
         'CHANGELOG.md',
-        'changelog.md',
         "$ModuleName.psd1",
         "$ModuleName.psm1"
     ) + @($ModuleBuildExtraItems)

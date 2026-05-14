@@ -6,7 +6,7 @@ Validates the changelog has been updated.
 
 ## Description
 
-Compares the latest version heading in `changelog.md` with the configured
+Compares the latest version heading in `CHANGELOG.md` with the configured
 module manifest version and fails when they do not match.
 
 ## Group
