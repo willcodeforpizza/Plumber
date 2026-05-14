@@ -18,6 +18,9 @@ Describe 'New-PlumberConfig' {
             $config.PublicFunctionPrefix | Should -BeNullOrEmpty
             $config.PublicFunctionPrefixExclusions | Should -Be @()
             $config.StreamPesterOutput | Should -BeTrue
+            $config.VersionIncludePrerelease | Should -BeFalse
+            $config.VersionRemote | Should -Be 'origin'
+            $config.VersionSource | Should -Be 'PSGallery'
         }
     }
 
@@ -32,6 +35,9 @@ Describe 'New-PlumberConfig' {
                 PublicFunctionPrefix = 'Thing'
                 PublicFunctionPrefixExclusions = $null
                 StreamPesterOutput = $false
+                VersionIncludePrerelease = $true
+                VersionRemote = 'upstream'
+                VersionSource = 'GitTag'
             }
 
             $config.CoverageMinimum | Should -Be 90
@@ -42,6 +48,9 @@ Describe 'New-PlumberConfig' {
             $config.PublicFunctionPrefix | Should -Be 'Thing'
             $config.PublicFunctionPrefixExclusions | Should -Be @()
             $config.StreamPesterOutput | Should -BeFalse
+            $config.VersionIncludePrerelease | Should -BeTrue
+            $config.VersionRemote | Should -Be 'upstream'
+            $config.VersionSource | Should -Be 'GitTag'
         }
     }
 
