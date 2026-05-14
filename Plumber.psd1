@@ -33,7 +33,7 @@
             Tags = @('Validation', 'Pipeline', 'Invoke-Build')
             LicenseUri = 'https://github.com/willcodeforpizza/Plumber/blob/main/LICENSE'
             ProjectUri = 'https://github.com/willcodeforpizza/Plumber'
-            ReleaseNotes = 'https://github.com/willcodeforpizza/Plumber/blob/main/changelog.md'
+            ReleaseNotes = 'https://github.com/willcodeforpizza/Plumber/blob/main/CHANGELOG.md'
         }
     }
 }

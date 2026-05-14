@@ -3,7 +3,7 @@
     Validates the changelog has been updated.
 
     .DESCRIPTION
-    Compares the latest version heading in `changelog.md` with the configured
+    Compares the latest version heading in `CHANGELOG.md` with the configured
     module manifest version and fails when they do not match.
 
     .GROUP
@@ -36,7 +36,7 @@
     ```
 #>
 Add-BuildTask -Name ChangelogUpdated -Jobs {
-    $changelog = Get-Content "$BuildRoot\changelog.md" -ErrorAction SilentlyContinue
+    $changelog = Get-Content "$BuildRoot\CHANGELOG.md" -ErrorAction SilentlyContinue
     if (-not $changelog) {
         Write-Build Yellow 'No changelog found'
         return

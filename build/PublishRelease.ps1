@@ -56,9 +56,6 @@ Add-BuildTask -Name PublishRelease -Jobs {
     }
 
     $changelogPath = Join-Path $ModuleRoot 'CHANGELOG.md'
-    if (-not (Test-Path $changelogPath)) {
-        $changelogPath = Join-Path $ModuleRoot 'changelog.md'
-    }
     $changelog = Get-Content $changelogPath
     $sectionStart = [array]::IndexOf($changelog, "## $version")
     if ($sectionStart -lt 0) {
