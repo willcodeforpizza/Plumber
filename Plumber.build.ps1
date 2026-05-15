@@ -5,9 +5,6 @@ if (-not $module) {
     $module = Import-Module (Join-Path $PSScriptRoot 'Plumber.psd1') -Force -PassThru
 }
 
-Import-Module Plumber.Release -RequiredVersion 0.1.0 -Force
-Import-Module (Join-Path $PSScriptRoot 'Plumber.psd1') -Force
-
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'Plumber.psd1'
     ExcludePaths = @{
@@ -18,8 +15,16 @@ Import-Module (Join-Path $PSScriptRoot 'Plumber.psd1') -Force
     )
 }
 
-. (Get-PlumberReleaseTaskLoader) -Config @{
-    ModuleManifest = 'Plumber.psd1'
+$releaseTasks = @('Release', 'BuildModule', 'PublishModule', 'PublishGitHubRelease')
+$requestedTasks = @($BuildTask)
+$shouldLoadReleaseTasks = @($requestedTasks | Where-Object { $PSItem -in $releaseTasks })
+if ($shouldLoadReleaseTasks) {
+    Import-Module Plumber.Release -RequiredVersion 0.1.0 -Force
+    Import-Module (Join-Path $PSScriptRoot 'Plumber.psd1') -Force
+
+    . (Get-PlumberReleaseTaskLoader) -Config @{
+        ModuleManifest = 'Plumber.psd1'
+    }
 }
 
 . (Join-Path $PSScriptRoot 'LocalTasks/GenerateDocs.ps1')
