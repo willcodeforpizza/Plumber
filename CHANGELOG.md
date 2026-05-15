@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.27
+- Added: ModuleVersion can validate against semantic git tags from a configured remote
+- Changed: ModuleVersion ignores prerelease git tags by default
+
 ## 0.0.26
 - Changed: Document PowerShell Gallery installation in the README
 
