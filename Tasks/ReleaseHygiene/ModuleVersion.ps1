@@ -58,7 +58,10 @@ Add-BuildTask -Name ModuleVersion -Jobs SetVariables, {
         'PSGallery' {
             $publishedModule = Find-Module $script:moduleName -ErrorAction SilentlyContinue
             if (-not $publishedModule) {
-                Write-Build Yellow "$script:moduleName is not published to PSGallery"
+                Write-Error (
+                    "$script:moduleName is not published to PSGallery. " +
+                    "Set VersionSource to GitTag for modules published from git tags."
+                )
                 return
             }
 

@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.28
+- Changed: ModuleVersion fails when PSGallery source cannot find the module
+
 ## 0.0.27
 - Added: ModuleVersion can validate against semantic git tags from a configured remote
 - Changed: ModuleVersion ignores prerelease git tags by default

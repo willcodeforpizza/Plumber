@@ -21,6 +21,8 @@ and `ModuleVersion`.
 
 `VersionSource` controls where the published version is read from. Supported
 values are `PSGallery` and `GitTag`. `PSGallery` is the default.
+`PSGallery` fails when the module is not published. Use `GitTag` for modules
+published from git tags instead of PowerShell Gallery.
 
 `VersionRemote` controls which git remote supplies tags for `GitTag` checks.
 The default is `origin`.
