@@ -27,6 +27,14 @@
             ModuleName    = 'powershell-yaml'
             ModuleVersion = '0.4.12'
         }
+        @{
+            ModuleName    = 'Microsoft.PowerShell.PSResourceGet'
+            ModuleVersion = '1.2.0'
+        }
+        @{
+            ModuleName    = 'Plumber.Release'
+            ModuleVersion = '0.1.0'
+        }
     )
     PrivateData = @{
         PSData = @{
