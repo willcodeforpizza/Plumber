@@ -15,18 +15,22 @@ $files = Get-PlumberTaskFile -Task Backticks -Extension '.ps1', '.psm1', '.psd1'
 
 `Get-PlumberTaskFile` caches the build-root file list for the current run,
 applies `FileScope = 'Changed'` when configured, applies optional extension and
-path filters, and applies task-scoped `ExcludePaths` configuration.
+path filters, and applies task-scoped `Tasks.<Task>.Exclude` configuration.
 
 ## Task Exclusions
 
-`ExcludePaths` is task-scoped. A file excluded from one task can still be used by
-another task.
+`Tasks.<Task>.Exclude` is task-scoped. A file excluded from one task can still be
+used by another task.
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
-    ExcludePaths = @{
-        Backticks        = @('Tests/Assets/TaskHelp/*')
-        PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
+    Tasks = @{
+        Backticks        = @{
+            Exclude = @('Tests/Assets/TaskHelp/*')
+        }
+        PSScriptAnalyzer = @{
+            Exclude = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
+        }
     }
 }
 ```
@@ -106,31 +110,34 @@ task validates.
 ## Configuration Help
 
 Use `.CONFIGURATION` for config that changes the task's behavior. Include
-task-specific `ExcludePaths` when the task uses `Get-PlumberTaskFile`.
+task-specific `Tasks.<Task>.Exclude` when the task uses `Get-PlumberTaskFile`.
 
 Use `### Example` as the configuration example heading so the generated
 Markdown nests it under `## Configuration`.
 
 ````text
 .CONFIGURATION
-`MaxLineLength` controls the maximum allowed line length. The default is `115`.
+`Tasks.LineLength.MaxLength` controls the maximum allowed line length. The
+default is `115`.
 
-`ExcludePaths.LineLength` excludes matching files from this task.
+`Tasks.LineLength.Exclude` excludes matching files from this task.
 
 ### Example
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'MyModule.psd1'
-    MaxLineLength = 80
-    ExcludePaths = @{
-        LineLength = @('Tests/Assets/LongLines.ps1')
+    Tasks = @{
+        LineLength = @{
+            MaxLength = 80
+            Exclude   = @('Tests/Assets/LongLines.ps1')
+        }
     }
 }
 ```
 ````
 
-Do not include global loader config such as `ExcludeTasks` in each task page.
+Do not include graph config such as `Tasks.Exclude` in each task page.
 Document global config once in global user documentation.
 
 ## Help Examples

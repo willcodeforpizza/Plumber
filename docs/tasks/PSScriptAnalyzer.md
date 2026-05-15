@@ -15,10 +15,10 @@ CodeQuality
 
 ## Configuration
 
-`IncludeTestsInPssa` controls whether files under `Tests` are analyzed. The
-default is `$true`.
+Set `Tasks.PSScriptAnalyzer.IncludeTests` to control whether files under
+`Tests` are analyzed. The default is `$true`.
 
-`ExcludePaths.PSScriptAnalyzer` excludes matching files from this task.
+`Tasks.PSScriptAnalyzer.Exclude` excludes matching files from this task.
 
 PSScriptAnalyzer settings can be supplied at the build root in
 `PSScriptAnalyzerSettings.psd1`.
@@ -27,10 +27,12 @@ PSScriptAnalyzer settings can be supplied at the build root in
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
-    ModuleManifest     = 'MyModule.psd1'
-    IncludeTestsInPssa = $false
-    ExcludePaths       = @{
-        PSScriptAnalyzer = @('Tests/Assets/*.ps1')
+    ModuleManifest = 'MyModule.psd1'
+    Tasks          = @{
+        PSScriptAnalyzer = @{
+            IncludeTests = $false
+            Exclude      = @('Tests/Assets/*.ps1')
+        }
     }
 }
 ```

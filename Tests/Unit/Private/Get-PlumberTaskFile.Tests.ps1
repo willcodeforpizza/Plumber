@@ -26,9 +26,9 @@ Describe 'Get-PlumberTaskFile' {
             $script:PlumberChangedFiles = $null
             $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
-                BuildRoot    = $BuildRoot
-                ExcludePaths = @{}
-                FileScope    = 'All'
+                BuildRoot = $BuildRoot
+                FileScope = 'All'
+                Tasks     = @{}
             }
 
             $files = Get-PlumberTaskFile -Task PSScriptAnalyzer -Extension '.ps1'
@@ -45,11 +45,13 @@ Describe 'Get-PlumberTaskFile' {
             $script:PlumberChangedFiles = $null
             $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
-                BuildRoot    = $BuildRoot
-                ExcludePaths = @{
-                    Backticks = @('Tests/Assets/*')
+                BuildRoot = $BuildRoot
+                FileScope = 'All'
+                Tasks     = @{
+                    Backticks = @{
+                        Exclude = @('Tests/Assets/*')
+                    }
                 }
-                FileScope    = 'All'
             }
 
             $files = Get-PlumberTaskFile -Task Backticks -Extension '.ps1'
@@ -65,9 +67,9 @@ Describe 'Get-PlumberTaskFile' {
             $script:PlumberChangedFiles = $null
             $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
-                BuildRoot    = $BuildRoot
-                ExcludePaths = @{}
-                FileScope    = 'All'
+                BuildRoot = $BuildRoot
+                FileScope = 'All'
+                Tasks     = @{}
             }
 
             $files = Get-PlumberTaskFile -Task JSON -Extension '.json' -Path Resource
@@ -88,11 +90,13 @@ Describe 'Get-PlumberTaskFile' {
                 Get-Item (Join-Path $BuildRoot 'Tests/Assets/Fixture.ps1')
             )
             $script:PlumberConfig = @{
-                BuildRoot    = $BuildRoot
-                ExcludePaths = @{
-                    JSON = @('Tests/Assets/*')
+                BuildRoot = $BuildRoot
+                FileScope = 'Changed'
+                Tasks     = @{
+                    JSON = @{
+                        Exclude = @('Tests/Assets/*')
+                    }
                 }
-                FileScope    = 'Changed'
             }
 
             $files = Get-PlumberTaskFile -Task JSON -Extension '.json' -Path Resource
@@ -121,10 +125,10 @@ Describe 'Get-PlumberTaskFile' {
             $script:PlumberChangedFiles = $null
             $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
-                BuildRoot    = $BuildRoot
-                ExcludePaths = @{}
-                FileScope    = 'Changed'
-                ModuleRoot   = Split-Path $PSScriptRoot -Parent
+                BuildRoot  = $BuildRoot
+                FileScope  = 'Changed'
+                ModuleRoot = Split-Path $PSScriptRoot -Parent
+                Tasks      = @{}
             }
 
             Get-PlumberTaskFile -Task Backticks | Out-Null
@@ -150,10 +154,10 @@ Describe 'Get-PlumberTaskFile' {
             $script:PlumberChangedFiles = $null
             $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
-                BuildRoot    = $BuildRoot
-                ExcludePaths = @{}
-                FileScope    = 'Changed'
-                ModuleRoot   = Split-Path $PSScriptRoot -Parent
+                BuildRoot  = $BuildRoot
+                FileScope  = 'Changed'
+                ModuleRoot = Split-Path $PSScriptRoot -Parent
+                Tasks      = @{}
             }
 
             Get-PlumberTaskFile -Task Backticks | Out-Null
@@ -170,9 +174,9 @@ Describe 'Get-PlumberTaskFile' {
             $script:PlumberChangedFiles = $null
             $script:PlumberChangedFilesLoaded = $false
             $script:PlumberConfig = @{
-                BuildRoot    = $BuildRoot
-                ExcludePaths = @{}
-                FileScope    = 'Touched'
+                BuildRoot = $BuildRoot
+                FileScope = 'Touched'
+                Tasks     = @{}
             }
 
             {Get-PlumberTaskFile -Task JSON} |

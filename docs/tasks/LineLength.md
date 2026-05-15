@@ -15,19 +15,21 @@ CodeQuality
 
 ## Configuration
 
-`MaxLineLength` controls the maximum allowed line length. The default is
-`115`.
+`Tasks.LineLength.MaxLength` controls the maximum allowed line length. The
+default is `115`.
 
-`ExcludePaths.LineLength` excludes matching files from this task.
+`Tasks.LineLength.Exclude` excludes matching files from this task.
 
 ### Example
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'MyModule.psd1'
-    MaxLineLength  = 80
-    ExcludePaths   = @{
-        LineLength = @('Tests/Assets/LongLines.ps1')
+    Tasks          = @{
+        LineLength = @{
+            MaxLength = 80
+            Exclude   = @('Tests/Assets/LongLines.ps1')
+        }
     }
 }
 ```
@@ -48,7 +50,7 @@ $name = 'LineLength'
 ## Fail
 
 ```powershell
-$line = '<more than MaxLineLength characters on one physical line>'
+$line = '<more than configured maximum characters on one physical line>'
 ```
 
 ## Navigation

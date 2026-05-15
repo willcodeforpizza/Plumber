@@ -10,27 +10,29 @@
     Content
 
     .CONFIGURATION
-    `JsonSchemas` defines the JSON files and schema files to validate. Each
-    mapping has a repository-relative `Path` pattern for matching JSON files
-    and a `Schema` value for the schema file.
+    `Tasks.JSONSchema.Schemas` defines the JSON files and schema files to
+    validate. Each mapping has a repository-relative `Path` pattern for matching
+    JSON files and a `Schema` value for the schema file.
 
     Use `**/*.json` to match JSON files recursively.
 
-    `ExcludePaths.JSONSchema` excludes matching files from this task.
+    `Tasks.JSONSchema.Exclude` excludes matching files from this task.
 
     ### Example
 
     ```powershell
     . (Get-PlumberTaskLoader) -Config @{
         ModuleManifest = 'MyModule.psd1'
-        JsonSchemas    = @(
-            @{
-                Path   = 'Resource/*.json'
-                Schema = 'Resource/Schema/config.schema.json'
+        Tasks          = @{
+            JSONSchema = @{
+                Schemas = @(
+                    @{
+                        Path   = 'Resource/*.json'
+                        Schema = 'Resource/Schema/config.schema.json'
+                    }
+                )
+                Exclude = @('Resource/Schema/*.json')
             }
-        )
-        ExcludePaths   = @{
-            JSONSchema = @('Resource/Schema/*.json')
         }
     }
     ```
@@ -67,12 +69,12 @@ Add-BuildTask -Name JSONSchema -Jobs {
         return
     }
 
-    if (-not $script:PlumberConfig.JsonSchemas) {
+    if (-not $script:PlumberConfig.Tasks.JSONSchema.Schemas) {
         Write-Build Yellow 'No JSON schema mappings configured'
         return
     }
 
-    foreach ($mapping in $script:PlumberConfig.JsonSchemas) {
+    foreach ($mapping in $script:PlumberConfig.Tasks.JSONSchema.Schemas) {
         $schema = Join-Path $BuildRoot $mapping.Schema
 
         if (-not (Test-Path $schema)) {

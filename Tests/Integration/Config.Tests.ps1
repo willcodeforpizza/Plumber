@@ -19,14 +19,14 @@ Describe 'Get-PlumberTaskLoader config integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader)'
             '[pscustomobject]@{'
-            '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
+            '        CoverageMinimum = $script:PlumberConfig.Tasks.CodeCoverage.Minimum'
             '        DiffBase = $script:PlumberConfig.DiffBase'
             '        FileScope = $script:PlumberConfig.FileScope'
-            '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
-            '        ExcludePathCount = $script:PlumberConfig.ExcludePaths.Count'
-            '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
-            '        MaxLineLength = $script:PlumberConfig.MaxLineLength'
-            '        PrivateHelpSynopsisOnly = $script:PlumberConfig.PrivateHelpSynopsisOnly'
+            '        IncludeTestsInPssa = $script:PlumberConfig.Tasks.PSScriptAnalyzer.IncludeTests'
+            '        BackticksExcludePathCount = $script:PlumberConfig.Tasks.Backticks.Exclude.Count'
+            '        JsonSchemaCount = $script:PlumberConfig.Tasks.JSONSchema.Schemas.Count'
+            '        MaxLineLength = $script:PlumberConfig.Tasks.LineLength.MaxLength'
+            '        PrivateHelpSynopsisOnly = $script:PlumberConfig.Tasks.Help.PrivateSynopsisOnly'
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
 
@@ -38,7 +38,7 @@ Describe 'Get-PlumberTaskLoader config integration' {
         $result.DiffBase | Should -BeNullOrEmpty
         $result.FileScope | Should -Be 'All'
         $result.IncludeTestsInPssa | Should -BeTrue
-        $result.ExcludePathCount | Should -Be 0
+        $result.BackticksExcludePathCount | Should -Be 0
         $result.JsonSchemaCount | Should -Be 0
         $result.MaxLineLength | Should -Be 115
         $result.PrivateHelpSynopsisOnly | Should -BeTrue
@@ -57,31 +57,43 @@ Describe 'Get-PlumberTaskLoader config integration' {
             '}'
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
-            '    CoverageMinimum = 90'
-            '    ExcludePaths = @{'
-            "        Backticks = @('Tests/Assets/*')"
-            '    }'
             "    DiffBase = 'origin/main'"
             "    FileScope = 'Changed'"
-            '    IncludeTestsInPssa = $false'
-            '    MaxLineLength = 100'
-            '    PrivateHelpSynopsisOnly = $false'
-            '    JsonSchemas = @('
-            '        @{'
-            "            Path = 'Resource/*.json'"
-            "            Schema = 'Resource/Schema/config.schema.json'"
+            '    Tasks = @{'
+            '        Backticks = @{'
+            "            Exclude = @('Tests/Assets/*')"
             '        }'
-            '    )'
+            '        CodeCoverage = @{'
+            '            Minimum = 90'
+            '        }'
+            '        Help = @{'
+            '            PrivateSynopsisOnly = $false'
+            '        }'
+            '        JSONSchema = @{'
+            '            Schemas = @('
+            '                @{'
+            "                    Path = 'Resource/*.json'"
+            "                    Schema = 'Resource/Schema/config.schema.json'"
+            '                }'
+            '            )'
+            '        }'
+            '        LineLength = @{'
+            '            MaxLength = 100'
+            '        }'
+            '        PSScriptAnalyzer = @{'
+            '            IncludeTests = $false'
+            '        }'
+            '    }'
             '}'
             '[pscustomobject]@{'
-            '        CoverageMinimum = $script:PlumberConfig.CoverageMinimum'
-            '        BackticksExcludePath = $script:PlumberConfig.ExcludePaths.Backticks[0]'
+            '        CoverageMinimum = $script:PlumberConfig.Tasks.CodeCoverage.Minimum'
+            '        BackticksExcludePath = $script:PlumberConfig.Tasks.Backticks.Exclude[0]'
             '        DiffBase = $script:PlumberConfig.DiffBase'
             '        FileScope = $script:PlumberConfig.FileScope'
-            '        IncludeTestsInPssa = $script:PlumberConfig.IncludeTestsInPssa'
-            '        JsonSchemaCount = $script:PlumberConfig.JsonSchemas.Count'
-            '        MaxLineLength = $script:PlumberConfig.MaxLineLength'
-            '        PrivateHelpSynopsisOnly = $script:PlumberConfig.PrivateHelpSynopsisOnly'
+            '        IncludeTestsInPssa = $script:PlumberConfig.Tasks.PSScriptAnalyzer.IncludeTests'
+            '        JsonSchemaCount = $script:PlumberConfig.Tasks.JSONSchema.Schemas.Count'
+            '        MaxLineLength = $script:PlumberConfig.Tasks.LineLength.MaxLength'
+            '        PrivateHelpSynopsisOnly = $script:PlumberConfig.Tasks.Help.PrivateSynopsisOnly'
             '} | ConvertTo-Json -Compress'
         ) | Set-Content -Path $buildFile
 

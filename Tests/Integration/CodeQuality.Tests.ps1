@@ -46,7 +46,9 @@ Describe 'Get-PlumberTaskLoader code-quality integration' {
             '}'
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
-            "    ExcludeTasks = @('Backticks', 'LineLength', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')"
+            '    Tasks = @{'
+            "        Exclude = @('Backticks', 'LineLength', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')"
+            '    }'
             '}'
             '$script:AnalyzedPaths | ForEach-Object { Split-Path $_ -Leaf }'
         ) | Set-Content -Path $buildFile
@@ -103,11 +105,13 @@ Describe 'Get-PlumberTaskLoader code-quality integration' {
             '}'
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
-            '    IncludeTestsInPssa = $false'
-            '    ExcludePaths = @{'
-            "        PSScriptAnalyzer = @('Private/*')"
+            '    Tasks = @{'
+            '        PSScriptAnalyzer = @{'
+            '            IncludeTests = $false'
+            "            Exclude = @('Private/*')"
+            '        }'
+            "        Exclude = @('Backticks', 'LineLength', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')"
             '    }'
-            "    ExcludeTasks = @('Backticks', 'LineLength', 'PesterUnit', 'PesterIntegration', 'CodeCoverage')"
             '}'
             '$script:AnalyzedPaths | ForEach-Object { Split-Path $_ -Leaf }'
         ) | Set-Content -Path $buildFile
@@ -228,8 +232,10 @@ Describe 'Get-PlumberTaskLoader code-quality integration' {
             '}'
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
-            '    ExcludePaths = @{'
-            "        Backticks = @('Tests/Assets/*')"
+            '    Tasks = @{'
+            '        Backticks = @{'
+            "            Exclude = @('Tests/Assets/*')"
+            '        }'
             '    }'
             '}'
         ) | Set-Content -Path $buildFile
@@ -271,7 +277,11 @@ Describe 'Get-PlumberTaskLoader code-quality integration' {
             '}'
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
-            '    MaxLineLength = 10'
+            '    Tasks = @{'
+            '        LineLength = @{'
+            '            MaxLength = 10'
+            '        }'
+            '    }'
             '}'
         ) | Set-Content -Path $buildFile
 

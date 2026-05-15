@@ -30,7 +30,7 @@ function Add-PlumberTask {
         Path         = $Path
         TaskRoot     = $TaskRoot
         Parent       = $Parent
-        ExcludeTasks = $script:PlumberConfig.ExcludeTasks
+        ExcludeTasks = $script:PlumberConfig.Tasks.Exclude
     }
     $task = Import-PlumberTask @taskSplat
     if (-not $task) {

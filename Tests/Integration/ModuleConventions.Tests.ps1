@@ -147,7 +147,11 @@ Describe 'Module convention integration' {
         $fixtureSplat = @{
             Name              = 'CustomModule'
             FunctionsToExport = @('Get-CustomItem')
-            ConfigLines       = @("    PublicFunctionPrefix = 'Custom'")
+            ConfigLines       = @(
+                '    Tasks = @{'
+                "        PublicFunctionPrefix = @{ Prefix = 'Custom' }"
+                '    }'
+            )
         }
         $moduleRoot = Initialize-TestModuleFixture @fixtureSplat
         Set-Content -Path (Join-Path $moduleRoot 'Public/Get-CustomItem.ps1') -Value @(
@@ -163,7 +167,9 @@ Describe 'Module convention integration' {
             'Get-ThingExcludedItem',
             'New-Item'
         ) -ConfigLines @(
-            "    PublicFunctionPrefixExclusions = @('New-Item')"
+            '    Tasks = @{'
+            "        PublicFunctionPrefix = @{ Exclusions = @('New-Item') }"
+            '    }'
         )
         Set-Content -Path (Join-Path $moduleRoot 'Public/Get-ThingExcludedItem.ps1') -Value @(
             'function Get-ThingExcludedItem {'

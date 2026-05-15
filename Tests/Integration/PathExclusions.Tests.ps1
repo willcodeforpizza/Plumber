@@ -27,8 +27,10 @@ Describe 'Test-PlumberTaskPathExcluded integration' {
             '}'
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
-            '    ExcludePaths = @{'
-            "        Backticks = @('Tests/Assets/*')"
+            '    Tasks = @{'
+            '        Backticks = @{'
+            "            Exclude = @('Tests/Assets/*')"
+            '        }'
             '    }'
             '}'
             '[pscustomobject]@{'

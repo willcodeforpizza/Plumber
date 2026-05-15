@@ -10,15 +10,17 @@
     ModuleConventions
 
     .CONFIGURATION
-    `ExcludePaths.ToDo` excludes matching files from this task.
+    `Tasks.ToDo.Exclude` excludes matching files from this task.
 
     ### Example
 
     ```powershell
     . (Get-PlumberTaskLoader) -Config @{
         ModuleManifest = 'MyModule.psd1'
-        ExcludePaths   = @{
-            ToDo = @('docs/examples/*.ps1')
+        Tasks          = @{
+            ToDo = @{
+                Exclude = @('docs/examples/*.ps1')
+            }
         }
     }
     ```

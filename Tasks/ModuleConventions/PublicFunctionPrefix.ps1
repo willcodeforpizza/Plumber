@@ -10,18 +10,22 @@
     ModuleConventions
 
     .CONFIGURATION
-    `PublicFunctionPrefix` overrides the expected prefix. The default is the
-    configured module name.
+    `Tasks.PublicFunctionPrefix.Prefix` overrides the expected prefix. The
+    default is the configured module name.
 
-    `PublicFunctionPrefixExclusions` excludes exact public function names from
-    this check.
+    `Tasks.PublicFunctionPrefix.Exclusions` excludes exact public function names
+    from this check.
 
     ### Example
 
     ```powershell
     . (Get-PlumberTaskLoader) -Config @{
-        PublicFunctionPrefix           = 'My'
-        PublicFunctionPrefixExclusions = @('New-Thing')
+        Tasks = @{
+            PublicFunctionPrefix = @{
+                Prefix     = 'My'
+                Exclusions = @('New-Thing')
+            }
+        }
     }
     ```
 
@@ -41,12 +45,12 @@
     ```
 #>
 Add-BuildTask -Name PublicFunctionPrefix -Jobs SetVariables, {
-    $prefix = if ($script:PlumberConfig.PublicFunctionPrefix) {
-        $script:PlumberConfig.PublicFunctionPrefix
+    $prefix = if ($script:PlumberConfig.Tasks.PublicFunctionPrefix.Prefix) {
+        $script:PlumberConfig.Tasks.PublicFunctionPrefix.Prefix
     } else {
         $script:moduleName
     }
-    $exclusions = @($script:PlumberConfig.PublicFunctionPrefixExclusions)
+    $exclusions = @($script:PlumberConfig.Tasks.PublicFunctionPrefix.Exclusions)
     $publicRoot = Join-Path $BuildRoot 'Public'
     if (-not (Test-Path $publicRoot)) {
         return

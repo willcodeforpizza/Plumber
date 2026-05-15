@@ -14,22 +14,26 @@
     ModuleManifest controls which module manifest supplies the module name
     and ModuleVersion.
 
-    VersionSource controls where the published version is read from. Supported
-    values are PSGallery and GitTag. PSGallery is the default.
+    Tasks.ModuleVersion.Source controls where the published version is read
+    from. Supported values are PSGallery and GitTag. PSGallery is the default.
 
-    VersionRemote controls which git remote supplies tags for GitTag checks.
-    The default is origin.
+    Tasks.ModuleVersion.Remote controls which git remote supplies tags for
+    GitTag checks. The default is origin.
 
-    VersionIncludePrerelease controls whether prerelease git tags are included.
-    The default is false.
+    Tasks.ModuleVersion.IncludePrerelease controls whether prerelease git tags
+    are included. The default is false.
 
     ### Example
 
     ```powershell
     . (Get-PlumberTaskLoader) -Config @{
         ModuleManifest = 'MyModule.psd1'
-        VersionSource = 'GitTag'
-        VersionRemote = 'origin'
+        Tasks          = @{
+            ModuleVersion = @{
+                Source = 'GitTag'
+                Remote = 'origin'
+            }
+        }
     }
     ```
 
@@ -53,14 +57,14 @@ Add-BuildTask -Name ModuleVersion -Jobs SetVariables, {
     . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Invoke-PlumberGit.ps1')
     . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberGitTagVersion.ps1')
 
-    $versionSource = $script:PlumberConfig.VersionSource
+    $versionSource = $script:PlumberConfig.Tasks.ModuleVersion.Source
     switch ($versionSource) {
         'PSGallery' {
             $publishedModule = Find-Module $script:moduleName -ErrorAction SilentlyContinue
             if (-not $publishedModule) {
                 Write-Error (
                     "$script:moduleName is not published to PSGallery. " +
-                    "Set VersionSource to GitTag for modules published from git tags."
+                    "Set Tasks.ModuleVersion.Source to GitTag for modules published from git tags."
                 )
                 return
             }
@@ -70,12 +74,13 @@ Add-BuildTask -Name ModuleVersion -Jobs SetVariables, {
         }
         'GitTag' {
             $gitTagVersionSplat = @{
-                Remote            = $script:PlumberConfig.VersionRemote
-                IncludePrerelease = $script:PlumberConfig.VersionIncludePrerelease
+                Remote            = $script:PlumberConfig.Tasks.ModuleVersion.Remote
+                IncludePrerelease = $script:PlumberConfig.Tasks.ModuleVersion.IncludePrerelease
             }
             $publishedVersionInfo = Get-PlumberGitTagVersion @gitTagVersionSplat
             if (-not $publishedVersionInfo) {
-                Write-Build Yellow "No semantic versions found from $($script:PlumberConfig.VersionRemote) tags"
+                $remoteName = $script:PlumberConfig.Tasks.ModuleVersion.Remote
+                Write-Build Yellow "No semantic versions found from $remoteName tags"
                 return
             }
 
@@ -87,7 +92,7 @@ Add-BuildTask -Name ModuleVersion -Jobs SetVariables, {
             $psd1Version = $psd1VersionInfo.Version
         }
         default {
-            throw "Unsupported VersionSource '$versionSource'."
+            throw "Unsupported Tasks.ModuleVersion.Source '$versionSource'."
         }
     }
 

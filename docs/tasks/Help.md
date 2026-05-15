@@ -16,15 +16,19 @@ ModuleConventions
 
 ## Configuration
 
-`PrivateHelpSynopsisOnly` controls whether private functions require only a
-synopsis or full help. The default is `$true`.
+`Tasks.Help.PrivateSynopsisOnly` controls whether private functions require
+only a synopsis or full help. The default is `$true`.
 
 ### Example
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
-    ModuleManifest          = 'MyModule.psd1'
-    PrivateHelpSynopsisOnly = $false
+    ModuleManifest = 'MyModule.psd1'
+    Tasks          = @{
+        Help = @{
+            PrivateSynopsisOnly = $false
+        }
+    }
 }
 ```
 

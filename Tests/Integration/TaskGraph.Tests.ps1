@@ -36,7 +36,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    LocalTasks = @('Tasks/ValidateTaskDocs.ps1')"
+            "    Tasks = @{ Local = @('Tasks/ValidateTaskDocs.ps1') }"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -60,8 +60,10 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    LocalTasks = @('Tasks/ValidateTaskDocs.ps1')"
-            "    ExcludeTasks = @('Local')"
+            "    Tasks = @{"
+            "        Local = @('Tasks/ValidateTaskDocs.ps1')"
+            "        Exclude = @('Local')"
+            "    }"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -88,11 +90,13 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            '    LocalTasks = @('
+            '    Tasks = @{'
+            '        Local = @('
             "        'Tasks/ValidateTaskDocs.ps1'"
             "        'Tasks/CheckGeneratedFiles.ps1'"
-            '    )'
-            "    ExcludeTasks = @('ValidateTaskDocs')"
+            '        )'
+            "        Exclude = @('ValidateTaskDocs')"
+            '    }'
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -111,7 +115,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    ExcludeTasks = @('JSON', 'YAML')"
+            "    Tasks = @{ Exclude = @('JSON', 'YAML') }"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -143,7 +147,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    ExcludeTasks = @('PesterUnit', 'PesterIntegration', 'CodeCoverage')"
+            "    Tasks = @{ Exclude = @('PesterUnit', 'PesterIntegration', 'CodeCoverage') }"
             '}'
         ) | Set-Content -Path $buildFile
 

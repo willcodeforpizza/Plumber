@@ -52,38 +52,50 @@ Check the [task index](docs/tasks/index.md) for details on each task configurati
 Import-Module Plumber
 
 . (Get-PlumberTaskLoader) -Config @{
-    ModuleManifest          = 'MyModule.psd1'
-    ExcludeTasks            = @(
-        'Backticks',
-        'ToDo'
-    )
-    ExcludePaths            = @{
-        PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
-    }
-    FileScope               = 'All'
-    DiffBase                = $null
-    CoverageMinimum         = 75
-    IncludeTestsInPssa      = $false
-    JsonSchemas             = @(
-        @{
-            Path   = 'Resource/*.json'
-            Schema = 'Resource/Schema/config.schema.json'
+    ModuleManifest = 'MyModule.psd1'
+    FileScope      = 'All'
+    DiffBase       = $null
+    Tasks          = @{
+        Exclude              = @(
+            'Backticks',
+            'ToDo'
+        )
+        Local                = @(
+            'Tasks/ValidateTaskDocs.ps1'
+            'Tasks/CheckGeneratedFiles.ps1'
+        )
+        CodeCoverage         = @{
+            Minimum = 75
         }
-    )
-    LocalTasks              = @(
-        'Tasks/ValidateTaskDocs.ps1'
-        'Tasks/CheckGeneratedFiles.ps1'
-    )
-    MaxLineLength           = 80
-    PrivateHelpSynopsisOnly = $true
-    PublicFunctionPrefix    = 'MyModule'
-    PublicFunctionPrefixExclusions = @(
-        'New-Thing'
-    )
+        Help                 = @{
+            PrivateSynopsisOnly = $true
+        }
+        JSONSchema           = @{
+            Schemas = @(
+                @{
+                    Path   = 'Resource/*.json'
+                    Schema = 'Resource/Schema/config.schema.json'
+                }
+            )
+        }
+        LineLength           = @{
+            MaxLength = 80
+        }
+        PSScriptAnalyzer     = @{
+            IncludeTests = $false
+            Exclude      = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
+        }
+        PublicFunctionPrefix = @{
+            Prefix     = 'MyModule'
+            Exclusions = @(
+                'New-Thing'
+            )
+        }
+    }
 }
 ```
 
-Use `LocalTasks` for project-specific validation that should run as part of
+Use `Tasks.Local` for project-specific validation that should run as part of
 `Validate` without becoming a Plumber core task. See
 [Local tasks](docs/local-tasks.md).
 
@@ -186,29 +198,32 @@ Review the details per task help in the [task index](docs/tasks/index.md).
 
 ### Global
 
-#### ExcludeTasks
+#### Tasks.Exclude
 
-`ExcludeTasks` removes tasks before `Invoke-Build` runs. Excluding a group task excludes all of
+`Tasks.Exclude` removes tasks before `Invoke-Build` runs. Excluding a group task excludes all of
 its children, for example `Content` excludes `JSON`, `JSONSchema` and `YAML`. If all children of a
 parent task are excluded, the parent task is not loaded.
 
 You can also exclude individual tasks.
 
-#### ExcludePaths
+#### Tasks.<Task>.Exclude
 
-`ExcludePaths` is task-scoped. A file excluded from one task can still be used by another task.
+`Tasks.<Task>.Exclude` is task-scoped. A file excluded from one task can still be used by another
+task.
 
 For example, to exclude a test asset from PSScriptAnalyzer, you would do:
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
-    ExcludePaths = @{
-        PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
+    Tasks = @{
+        PSScriptAnalyzer = @{
+            Exclude = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
+        }
     }
 }
 ```
 
-Review the details per task help in the [task index](docs/tasks/index.md) for details on what tasks support `ExcludePaths`.
+Review the details per task help in the [task index](docs/tasks/index.md) for details on what tasks support path exclusions.
 
 Patterns use PowerShell wildcard matching against repository-relative paths
 normalized with `/`.
