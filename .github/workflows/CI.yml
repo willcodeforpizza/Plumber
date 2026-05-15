@@ -37,12 +37,6 @@ jobs:
                   -Force `
                   -SkipPublisherCheck
               }
-          Install-Module `
-            -Name Plumber.Release `
-            -RequiredVersion 0.1.0 `
-            -Scope CurrentUser `
-            -Force `
-            -SkipPublisherCheck
 
       - name: Invoke-Plumber
         shell: pwsh
