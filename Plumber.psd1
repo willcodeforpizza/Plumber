@@ -17,7 +17,7 @@
         }
         @{
             ModuleName    = 'Pester'
-            ModuleVersion = '5.2.0'
+            ModuleVersion = '5.7.1'
         }
         @{
             ModuleName    = 'PSScriptAnalyzer'
