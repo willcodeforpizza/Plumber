@@ -84,7 +84,7 @@ Describe 'Get-PlumberTaskHelp' {
 Finds `.yml` and `.yaml` files under the build root and verifies that each
 file can be parsed from YAML and serialized back to YAML.
 '@
-            $help.Description | Should -Be $expected
+            $help.Description -replace '\r?\n', "`n" | Should -Be ($expected -replace '\r?\n', "`n")
         }
     }
 

@@ -2,6 +2,8 @@
 
 ## 0.0.28
 - Changed: ModuleVersion fails when PSGallery source cannot find the module
+- Changed: Release automation now uses Plumber.Release
+- Changed: Pester dependency now uses version 5.7.1
 
 ## 0.0.27
 - Added: ModuleVersion can validate against semantic git tags from a configured remote

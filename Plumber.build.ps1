@@ -8,18 +8,23 @@ if (-not $module) {
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'Plumber.psd1'
     ExcludePaths = @{
-        Backticks        = @('out/**')
-        JSON             = @('out/**')
-        JSONSchema       = @('out/**')
-        LineLength       = @('out/**')
-        PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1', 'out/**')
-        ToDo             = @('out/**')
-        YAML             = @('out/**')
+        PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
     }
     LocalTasks = @(
         'LocalTasks/ValidateTaskHelp.ps1'
     )
 }
 
-. (Join-Path $PSScriptRoot 'build/Publish.ps1') -ModuleBuildExtraItems @('Tasks', 'docs')
+$releaseTasks = @('Release', 'BuildModule', 'PublishModule', 'PublishGitHubRelease')
+$requestedTasks = @($BuildTask)
+$shouldLoadReleaseTasks = @($requestedTasks | Where-Object { $PSItem -in $releaseTasks })
+if ($shouldLoadReleaseTasks) {
+    Import-Module Plumber.Release -RequiredVersion 0.1.0 -Force
+    Import-Module (Join-Path $PSScriptRoot 'Plumber.psd1') -Force
+
+    . (Get-PlumberReleaseTaskLoader) -Config @{
+        ModuleManifest = 'Plumber.psd1'
+    }
+}
+
 . (Join-Path $PSScriptRoot 'LocalTasks/GenerateDocs.ps1')
