@@ -6,6 +6,7 @@ if (-not $module) {
 }
 
 Import-Module Plumber.Release -RequiredVersion 0.1.0 -Force
+Import-Module (Join-Path $PSScriptRoot 'Plumber.psd1') -Force
 
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'Plumber.psd1'

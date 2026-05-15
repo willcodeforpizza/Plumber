@@ -34,7 +34,8 @@ jobs:
                   -Name $_.ModuleName `
                   -RequiredVersion $_.ModuleVersion `
                   -Scope CurrentUser `
-                  -Force
+                  -Force `
+                  -SkipPublisherCheck
               }
 
       - name: Invoke-Plumber
@@ -68,7 +69,8 @@ jobs:
                   -Name $_.ModuleName `
                   -RequiredVersion $_.ModuleVersion `
                   -Scope CurrentUser `
-                  -Force
+                  -Force `
+                  -SkipPublisherCheck
               }
 
       - name: Run Release
