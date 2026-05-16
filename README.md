@@ -214,7 +214,7 @@ Tasks are documented in detail in the [task index](docs/tasks/index.md).
 
 | Group | Includes |
 | --- | --- |
-| [CodeQuality](docs/tasks/CodeQuality.md) | `PSScriptAnalyzer`, `Backticks`, `LineLength`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
+| [CodeQuality](docs/tasks/CodeQuality.md) | `PSScriptAnalyzer`, `Backticks`, `LineLength`, `PathSeparator`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
 | [Content](docs/tasks/Content.md) | `JSON`, `JSONSchema`, `YAML` |
 | [ModuleConventions](docs/tasks/ModuleConventions.md) | `Manifest`, `PublicFunctions`, `PublicFunctionPrefix`, `FunctionFiles`, `Naming`, `ToDo`, `Help` |
 | [ReleaseHygiene](docs/tasks/ReleaseHygiene.md) | `ModuleVersion`, `ChangelogUpdated` |
@@ -227,6 +227,7 @@ Tasks are documented in detail in the [task index](docs/tasks/index.md).
 | [Backticks](docs/tasks/Backticks.md) | `CodeQuality` |
 | [CodeCoverage](docs/tasks/CodeCoverage.md) | `CodeQuality` |
 | [LineLength](docs/tasks/LineLength.md) | `CodeQuality` |
+| [PathSeparator](docs/tasks/PathSeparator.md) | `CodeQuality` |
 | [PesterIntegration](docs/tasks/PesterIntegration.md) | `CodeQuality` |
 | [PesterUnit](docs/tasks/PesterUnit.md) | `CodeQuality` |
 | [PSScriptAnalyzer](docs/tasks/PSScriptAnalyzer.md) | `CodeQuality` |

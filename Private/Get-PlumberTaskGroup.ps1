@@ -14,6 +14,7 @@ function Get-PlumberTaskGroup {
                 'PSScriptAnalyzer',
                 'Backticks',
                 'LineLength',
+                'PathSeparator',
                 'PesterUnit',
                 'PesterIntegration',
                 'CodeCoverage'

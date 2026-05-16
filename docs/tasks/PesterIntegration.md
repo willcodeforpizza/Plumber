@@ -43,5 +43,5 @@ It 'returns a value' {
 
 - [Task index](index.md)
 - [Group: CodeQuality](CodeQuality.md)
-- Previous: [LineLength](LineLength.md)
+- Previous: [PathSeparator](PathSeparator.md)
 - Next: [PesterUnit](PesterUnit.md)
