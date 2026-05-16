@@ -1,5 +1,11 @@
 # Plumber
 
+## 0.0.32
+- Changed: Plumber installs missing internal task dependencies when the module loads
+- Added: `Install-PlumberDependency` for opt-in repository build dependencies
+- Documented: Plumber dependency behavior for local development and CI
+- Added: ADR for separating runtime dependencies from build dependencies
+
 ## 0.0.31
 - Changed: `Invoke-Plumber` preserves and returns Invoke-Build task context even when tasks fail
 - Changed: Summary output prints full failure details without table truncation

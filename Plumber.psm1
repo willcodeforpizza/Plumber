@@ -1,19 +1,25 @@
+param (
+    [object]
+    $ImportOptions = @{}
+)
+
 $script:moduleRoot = $PSScriptRoot
 
 $manifest = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'Plumber.psd1')
-foreach ($requiredModule in $manifest.ModuleList) {
-    try {
-        $name = $requiredModule.ModuleName
-        $version = $requiredModule.ModuleVersion
-        Import-Module -Name $name -MinimumVersion $version -ErrorAction Stop
-    }
-    catch {
-        throw (
-            "Could not load $name v$version. " +
-            "Install with 'Install-Module $name -Scope CurrentUser -Force'. Error: $_"
-        )
-    }
+. (Join-Path $PSScriptRoot 'Private/Install-PlumberModuleDependency.ps1')
+. (Join-Path $PSScriptRoot 'Private/Import-PlumberDependency.ps1')
+$dependencySplat = @{
+    Dependency = $manifest.ModuleList
 }
+$installMissingDependencies = if ($ImportOptions -is [hashtable]) {
+    $ImportOptions.InstallMissingDependencies -eq $true
+} else {
+    $ImportOptions -eq $true
+}
+if ($installMissingDependencies) {
+    $dependencySplat.InstallMissing = $true
+}
+Import-PlumberDependency @dependencySplat
 
 Get-ChildItem "$PSScriptRoot\Public", "$PSScriptRoot\Private" |
     ForEach-Object {. $_.FullName}
