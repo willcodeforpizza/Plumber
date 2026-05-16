@@ -76,7 +76,11 @@ function Invoke-PlumberPester {
             $configuration.CodeCoverage.Path = $CoveragePath
         }
 
-        $result = Invoke-Pester -Configuration $configuration
+        $result = if ($StreamOutput) {
+            Invoke-Pester -Configuration $configuration
+        } else {
+            Invoke-Pester -Configuration $configuration | Out-Null
+        }
         $result | Export-Clixml -Path $PesterResultPath
     } -ArgumentList $Path, $ModuleManifest, $CodeCoveragePath, $resultPath, $StreamOutput.IsPresent
 
@@ -84,7 +88,7 @@ function Invoke-PlumberPester {
         if ($StreamOutput) {
             Receive-Job -Job $job -Wait
         } else {
-            $null = Receive-Job -Job $job -Wait *> $null
+            Wait-Job -Job $job | Out-Null
         }
 
         if ($job.State -ne 'Completed') {

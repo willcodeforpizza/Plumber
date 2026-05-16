@@ -10,7 +10,7 @@
 
     .RUN
     ```powershell
-    Invoke-Build -File ./Plumber.build.ps1 -Task GenerateDocs
+    Invoke-Plumber -Task GenerateDocs
     ```
 #>
 Add-BuildTask -Name GenerateDocs -Jobs {

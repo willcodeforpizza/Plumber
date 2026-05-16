@@ -36,11 +36,9 @@ function Write-PlumberResult {
     }
 
     Write-Output 'Plumber validation failed.'
-    Write-Output "$(
-        $Result.Failures |
-            Select-Object Name, Error |
-                Format-Table |
-                    Out-String
-    )"
+    foreach ($failure in $Result.Failures) {
+        Write-Output "$($failure.Name):"
+        Write-Output $failure.Error
+    }
     Write-Output "Passed: $($Result.Passed). Failed: $($Result.Failed)."
 }

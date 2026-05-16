@@ -95,6 +95,39 @@ Describe 'Invoke-Plumber' {
         }
     }
 
+    It 'writes full failure details in summary mode before throwing' {
+        InModuleScope Plumber {
+            $longError = @(
+                'PSD1 version might be out of date.'
+                'Expected version marker: 1234567890abcdefghijklmnopqrstuvwxyz'
+                'Actual version marker: zyxwvutsrqponmlkjihgfedcba0987654321'
+            ) -join [Environment]::NewLine
+            $script:mockBuildResult = [pscustomobject]@{
+                Tasks = @(
+                    [pscustomobject]@{
+                        Name  = 'SetVariables'
+                        Error = $null
+                    }
+                    [pscustomobject]@{
+                        Name  = 'ModuleVersion'
+                        Error = $longError
+                    }
+                )
+            }
+
+            $output = try {
+                Invoke-Plumber -Task Validate
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+
+            $output | Should -Contain 'Plumber validation failed.'
+            $output | Should -Contain 'ModuleVersion:'
+            $output | Should -Contain $longError
+            $output | Should -Contain 'Passed: 1. Failed: 1.'
+        }
+    }
+
     It 'writes JSON output when requested' {
         InModuleScope Plumber {
             $result = Invoke-Plumber -OutputMode Json | ConvertFrom-Json
@@ -249,6 +282,106 @@ Describe 'Invoke-PlumberBuild' {
             $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
             {Invoke-PlumberBuild -Task MissingResult -BuildFile $BuildFile} |
                 Should -Throw -ExpectedMessage 'Invoke-Build did not return a result object.'
+        }
+    }
+
+    It 'returns the result object when Invoke-Build throws after writing the result variable' {
+        InModuleScope Plumber {
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    $File | Should -Not -BeNullOrEmpty
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = 'SetVariables'
+                                Error = $null
+                            }
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = 'Task failed with full context'
+                            }
+                        )
+                    })
+                    throw 'One or more Plumber validation tasks failed: ModuleVersion'
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            $result = Invoke-PlumberBuild -Task ModuleVersion -BuildFile $BuildFile
+
+            $result.Tasks.Name | Should -Contain 'SetVariables'
+            $result.Tasks.Name | Should -Contain 'ModuleVersion'
+            $result.Tasks.Error | Should -Contain 'Task failed with full context'
+        }
+    }
+
+    It 'streams raw output and returns result after Invoke-Build writes it then throws' {
+        InModuleScope Plumber {
+            Mock Out-Host {}
+            Mock Get-Command {
+                {
+                    param (
+                        [string[]]
+                        $Task,
+
+                        [string]
+                        $File,
+
+                        [string]
+                        $Result
+                    )
+
+                    $File | Should -Not -BeNullOrEmpty
+                    'raw failure output'
+                    Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{
+                        Tasks = @(
+                            [pscustomobject]@{
+                                Name  = $Task[0]
+                                Error = 'Task failed with full context'
+                            }
+                        )
+                    })
+                    throw 'One or more Plumber validation tasks failed: ModuleVersion'
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            $result = Invoke-PlumberBuild -Task ModuleVersion -BuildFile $BuildFile -RawOutput
+
+            $result.Tasks.Name | Should -Contain 'ModuleVersion'
+            $result.Tasks.Error | Should -Contain 'Task failed with full context'
+            Should -Invoke Out-Host -Times 1 -Exactly
+        }
+    }
+
+    It 'preserves Invoke-Build setup errors when no result object is available' {
+        InModuleScope Plumber {
+            Mock Get-Command {
+                {
+                    throw "File 'wrapper.build.ps1': Missing task 'NotARealTask'."
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            {Invoke-PlumberBuild -Task NotARealTask -BuildFile $BuildFile} |
+                Should -Throw -ExpectedMessage "*Missing task 'NotARealTask'*"
         }
     }
 
