@@ -119,6 +119,47 @@ Describe 'Module convention integration' {
         } | Should -Throw -ExpectedMessage '*Invoke-Helper is exported from Private/Invoke-Helper.ps1*'
     }
 
+    It 'passes when function files contain one matching function' {
+        $moduleRoot = Initialize-TestModuleFixture -Name 'FunctionFileModule' -FunctionsToExport @('Get-Thing')
+        Set-Content -Path (Join-Path $moduleRoot 'Public/Get-Thing.ps1') -Value @(
+            'function Get-Thing {'
+            '}'
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'Private/Invoke-Helper.ps1') -Value @(
+            'function Invoke-Helper {'
+            '}'
+        )
+
+        & $script:invokeBuild -Task FunctionFiles -File "$moduleRoot/FunctionFileModule.build.ps1"
+    }
+
+    It 'fails when a function file contains multiple functions' {
+        $moduleRoot = Initialize-TestModuleFixture -Name 'MultiFunctionModule' -FunctionsToExport @('Get-Thing')
+        Set-Content -Path (Join-Path $moduleRoot 'Private/Invoke-Helper.ps1') -Value @(
+            'function Invoke-Helper {'
+            '}'
+            ''
+            'function Test-Helper {'
+            '}'
+        )
+
+        {
+            & $script:invokeBuild -Task FunctionFiles -File "$moduleRoot/MultiFunctionModule.build.ps1"
+        } | Should -Throw -ExpectedMessage '*Private/Invoke-Helper.ps1 defines 2 functions; expected 1*'
+    }
+
+    It 'fails when a function file name does not match the function' {
+        $moduleRoot = Initialize-TestModuleFixture -Name 'WrongNameModule' -FunctionsToExport @('Get-Thing')
+        Set-Content -Path (Join-Path $moduleRoot 'Private/Invoke-Helper.ps1') -Value @(
+            'function Test-Helper {'
+            '}'
+        )
+
+        {
+            & $script:invokeBuild -Task FunctionFiles -File "$moduleRoot/WrongNameModule.build.ps1"
+        } | Should -Throw -ExpectedMessage '*Private/Invoke-Helper.ps1 defines function Test-Helper*'
+    }
+
     It 'passes when public functions use the module name as the default prefix' {
         $moduleRoot = Initialize-TestModuleFixture -Name 'ThingDefault' -FunctionsToExport @(
             'Get-ThingDefaultItem'

@@ -141,6 +141,20 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
         $tasks['ModuleConventions'].Jobs | Should -Contain '?Help'
     }
 
+    It 'loads FunctionFiles directly under ModuleConventions' {
+        $buildFile = Join-Path $TestDrive 'function-files-loader.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Contain 'FunctionFiles'
+        $tasks['ModuleConventions'].Jobs | Should -Contain '?FunctionFiles'
+    }
+
     It 'keeps a parent task when at least one child task remains enabled' {
         $buildFile = Join-Path $TestDrive 'partial-code-quality.build.ps1'
         @(
