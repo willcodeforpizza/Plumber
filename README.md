@@ -190,11 +190,13 @@ Invoke-Plumber -OutputMode Table
 Invoke-Plumber -OutputMode Json
 Invoke-Plumber -OutputMode Raw
 Invoke-Plumber -OutputMode CI
+Invoke-Plumber -NoFormat
 ```
 
 `Summary` is the default quiet output. `Table` prints every task result, `Json` emits structured
 output for automation, `Raw` preserves Invoke-Build output for debugging, and `CI`
-preserves Invoke-Build output with a concise final summary.
+preserves Invoke-Build output with a concise final summary. Text output uses ANSI
+formatting by default; add `-NoFormat` for plain text.
 
 Failed validation throws after writing the selected output so CI can fail correctly.
 

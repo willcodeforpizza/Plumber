@@ -64,7 +64,9 @@ Add-BuildTask -Name FunctionFiles -Jobs SetVariables, {
             [ref]$tokens,
             [ref]$parseErrors
         )
-        $relativePath = [System.IO.Path]::GetRelativePath($BuildRoot, $moduleFile.FullName)
+        $relativePath = [System.IO.Path]::GetRelativePath($BuildRoot, $moduleFile.FullName).
+            Replace([System.IO.Path]::DirectorySeparatorChar, '/').
+            Replace([System.IO.Path]::AltDirectorySeparatorChar, '/')
         if ($parseErrors) {
             "$relativePath could not be parsed"
             continue
