@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.31
+- Changed: `Invoke-Plumber` preserves and returns Invoke-Build task context even when tasks fail
+- Changed: Summary output prints full failure details without table truncation
+- Changed: Plumber validation uses `Invoke-Plumber` as the public entry point
+
 ## 0.0.30
 - Fixed: `Validate` exits non-zero after optional validation task failures are collected
 - Fixed: `Invoke-Plumber` parses Invoke-Build result objects for CI pass/fail status
