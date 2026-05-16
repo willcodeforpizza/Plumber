@@ -21,5 +21,5 @@ if ($installMissingDependencies) {
 }
 Import-PlumberDependency @dependencySplat
 
-Get-ChildItem "$PSScriptRoot\Public", "$PSScriptRoot\Private" |
+Get-ChildItem (Join-Path $PSScriptRoot 'Public'), (Join-Path $PSScriptRoot 'Private') |
     ForEach-Object {. $_.FullName}

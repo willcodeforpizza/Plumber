@@ -2,6 +2,7 @@
 
 ## 0.0.35
 - Added: `PathSeparator` task for detecting Windows-style backslash path separators in string literals (AST-aware, regex-context exempt)
+- Fixed: Windows-style path separators in `Plumber.psm1`, `PesterUnit`, `PesterIntegration`, `Naming`, `ChangelogUpdated` — replaced with `Join-Path` / `[IO.Path]::Combine`
 
 ## 0.0.34
 - Removed: defensive helper reload guards in task scriptblocks and `Invoke-Plumber` runtime guards (dead code since inline `Import-Module Plumber` was removed from build files)
