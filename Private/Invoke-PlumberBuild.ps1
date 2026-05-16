@@ -38,7 +38,39 @@ function Invoke-PlumberBuild {
     )
 
     $invokeBuild = Get-Command Invoke-Build
+    $invokeBuildCommand = if ($invokeBuild.CommandType -eq 'Alias') {
+        $invokeBuild.Definition
+    } else {
+        $invokeBuild
+    }
     $resultVariable = "plumberBuildResult_$([guid]::NewGuid().ToString('N'))"
+    $runner = [scriptblock]::Create(@'
+param (
+    $InvokeBuildCommand,
+
+    [string[]]
+    $Task,
+
+    [string]
+    $BuildFile,
+
+    [string]
+    $ResultVariable,
+
+    [bool]
+    $RawOutput
+)
+
+if ($RawOutput) {
+    & $InvokeBuildCommand -Task $Task -File $BuildFile -Result $ResultVariable |
+        Out-Host
+} else {
+    $null = & $InvokeBuildCommand -Task $Task -File $BuildFile -Result $ResultVariable *> $null
+}
+
+Get-Variable -Name $ResultVariable -ValueOnly -ErrorAction SilentlyContinue
+Remove-Variable -Name $ResultVariable -ErrorAction SilentlyContinue
+'@)
     $streamVariableSplat = @{
         Name        = 'PlumberStreamPesterOutput'
         Scope       = 'Global'
@@ -52,12 +84,7 @@ function Invoke-PlumberBuild {
     try {
         Set-Variable -Name PlumberStreamPesterOutput -Scope Global -Value ([bool]$RawOutput)
 
-        if ($RawOutput) {
-            & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable |
-                Out-Host
-        } else {
-            $null = & $invokeBuild -Task $Task -File $BuildFile -Result $resultVariable *> $null
-        }
+        $buildResult = & $runner $invokeBuildCommand $Task $BuildFile $resultVariable ([bool]$RawOutput)
     } finally {
         if (-not $streamVariableExists) {
             Remove-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue
@@ -66,6 +93,9 @@ function Invoke-PlumberBuild {
         }
     }
 
-    Get-Variable -Name $resultVariable -ValueOnly
-    Remove-Variable -Name $resultVariable -ErrorAction SilentlyContinue
+    if (-not $buildResult) {
+        throw 'Invoke-Build did not return a result object.'
+    }
+
+    $buildResult
 }

@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.30
+- Fixed: `Validate` exits non-zero after optional validation task failures are collected
+- Fixed: `Invoke-Plumber` parses Invoke-Build result objects for CI pass/fail status
+
 ## 0.0.29
 - Changed: Plumber config now nests task-owned settings under `Tasks`
 - Changed: Path exclusions now use `Tasks.<Task>.Exclude`
