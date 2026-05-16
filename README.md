@@ -34,8 +34,6 @@ Create a `build.ps1` in the root of the module. This is the basic configuration 
 ./MyModule.build.ps1
 --------------------
 
-Import-Module Plumber
-
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'MyModule.psd1'
 }
@@ -48,8 +46,6 @@ Check the [task index](docs/tasks/index.md) for details on each task configurati
 ```powershell
 ./MyModule.build.ps1
 --------------------
-
-Import-Module Plumber
 
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'MyModule.psd1'
@@ -99,13 +95,17 @@ Use `Tasks.Local` for project-specific validation that should run as part of
 `Validate` without becoming a Plumber core task. See
 [Local tasks](docs/local-tasks.md).
 
-You can also run the same tasks through Invoke-Build:
+`Invoke-Build` is not the recommended way to run Plumber tasks because Plumber
+wraps details such as error handling and module import/discovery. If you want to
+run Invoke-Build directly, ensure Plumber is loaded first:
 
 ```powershell
-Invoke-Build Validate ./MyModule.build.ps1
+Import-Module Plumber
+Invoke-Build -File ./MyModule.build.ps1 Validate
 ```
 
-Warning: When running directly through `Invoke-Build` be aware that Plumber tasks run with `?TaskName`. This means "Continue on error" so the entire pipeline completes. Be careful with your error handling. Use `Invoke-Plumber` for concrete error behavior.
+This should work for simple cases, but direct Invoke-Build execution is not
+officially supported.
 
 ## Running tasks
 

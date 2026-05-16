@@ -38,6 +38,12 @@ jobs:
                   -Force `
                   -SkipPublisherCheck
               }
+          Install-Module `
+            -Name Plumber.Release `
+            -RequiredVersion 0.1.0 `
+            -Scope CurrentUser `
+            -Force `
+            -SkipPublisherCheck
 
       - name: Invoke-Plumber
         shell: pwsh
@@ -96,7 +102,7 @@ jobs:
           Set-PSResourceRepository -Name PSGallery -Trusted
 
           Import-Module ./Plumber.psd1 -Force
-          Invoke-Build -File ./Plumber.build.ps1 Release
+          Invoke-Plumber -Task Release -OutputMode CI
 
   validate:
     name: Validate

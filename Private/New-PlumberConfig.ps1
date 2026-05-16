@@ -103,7 +103,13 @@ function New-PlumberConfig {
     if (-not $plumberConfig.Tasks.PublicFunctionPrefix.Exclusions) {
         $plumberConfig.Tasks.PublicFunctionPrefix.Exclusions = @()
     }
-    if (Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue) {
+    $streamVariableSplat = @{
+        Name        = 'PlumberStreamPesterOutput'
+        Scope       = 'Global'
+        ErrorAction = 'SilentlyContinue'
+    }
+    $streamPesterOutputVariable = Get-Variable @streamVariableSplat
+    if ($null -ne $streamPesterOutputVariable) {
         $streamPesterOutput = [bool](
             Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly
         )

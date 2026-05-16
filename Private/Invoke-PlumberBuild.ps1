@@ -44,33 +44,16 @@ function Invoke-PlumberBuild {
         $invokeBuild
     }
     $resultVariable = "plumberBuildResult_$([guid]::NewGuid().ToString('N'))"
-    $runner = [scriptblock]::Create(@'
-param (
-    $InvokeBuildCommand,
-
-    [string[]]
-    $Task,
-
-    [string]
-    $BuildFile,
-
-    [string]
-    $ResultVariable,
-
-    [bool]
-    $RawOutput
-)
-
-if ($RawOutput) {
-    & $InvokeBuildCommand -Task $Task -File $BuildFile -Result $ResultVariable |
-        Out-Host
-} else {
-    $null = & $InvokeBuildCommand -Task $Task -File $BuildFile -Result $ResultVariable *> $null
-}
-
-Get-Variable -Name $ResultVariable -ValueOnly -ErrorAction SilentlyContinue
-Remove-Variable -Name $ResultVariable -ErrorAction SilentlyContinue
-'@)
+    $moduleRoot = if ($script:moduleRoot) {
+        $script:moduleRoot
+    } else {
+        Split-Path $PSScriptRoot -Parent
+    }
+    $runnerPath = Join-Path $moduleRoot 'Resource/Invoke-PlumberBuildRunner.ps1'
+    # Invoke-Build writes -Result into the caller's scope. Run it inside a
+    # dedicated scriptblock so we can read and remove that variable reliably
+    # without leaking result variables into Invoke-Plumber's module scope.
+    $runner = [scriptblock]::Create((Get-Content -Path $runnerPath -Raw))
     $streamVariableSplat = @{
         Name        = 'PlumberStreamPesterOutput'
         Scope       = 'Global'
