@@ -95,10 +95,17 @@ Use `Tasks.Local` for project-specific validation that should run as part of
 `Validate` without becoming a Plumber core task. See
 [Local tasks](docs/local-tasks.md).
 
-`Invoke-Plumber` is the supported entry point. Plumber uses Invoke-Build internally,
-but direct `Invoke-Build` execution is not the public contract; if you run
-Invoke-Build yourself, you are responsible for loading Plumber first and handling
-Invoke-Build's native error behavior.
+`Invoke-Build` is not the recommended way to run Plumber tasks because Plumber
+wraps details such as error handling and module import/discovery. If you want to
+run Invoke-Build directly, ensure Plumber is loaded first:
+
+```powershell
+Import-Module Plumber
+Invoke-Build -File ./MyModule.build.ps1 Validate
+```
+
+This should work for simple cases, but direct Invoke-Build execution is not
+officially supported.
 
 ## Running tasks
 
