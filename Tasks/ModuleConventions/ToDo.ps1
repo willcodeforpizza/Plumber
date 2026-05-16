@@ -41,11 +41,6 @@
     ```
 #>
 Add-BuildTask -Name ToDo -Jobs {
-    if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
-        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
-        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
-    }
-
     $extensions = '.ps1', '.psm1', '.psd1'
     $toDos = Get-PlumberTaskFile -Task ToDo -Extension $extensions |
         Where-Object {$_.Name -ne 'ToDo.ps1'} |

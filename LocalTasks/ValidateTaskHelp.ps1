@@ -1,9 +1,4 @@
 Add-BuildTask -Name ValidateTaskHelp -Jobs {
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/ConvertFrom-PlumberTaskHelpComment.ps1')
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/ConvertTo-PlumberTaskHelpSection.ps1')
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskHelp.ps1')
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskHelpSection.ps1')
-
     $taskRoot = Join-Path $BuildRoot 'Tasks'
     $taskFiles = Get-ChildItem $taskRoot -File -Recurse -Filter '*.ps1' |
         Where-Object {$_.Name -notmatch '^TaskLoader\.ps1$|^SetVariables\.ps1$'} |

@@ -43,9 +43,6 @@
     ```
 #>
 Add-BuildTask -Name Help -Jobs {
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberFunctionHelp.ps1')
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberFunctionHelp.ps1')
-
     $functionRoots = @(
         @{
             Path            = Join-Path $BuildRoot 'Public'

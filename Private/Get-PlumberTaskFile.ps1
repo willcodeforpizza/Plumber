@@ -51,10 +51,6 @@ function Get-PlumberTaskFile {
         $script:PlumberConfig.FileScope -eq 'Changed' -and
         -not $script:PlumberChangedFilesLoaded
     ) {
-        if (-not (Get-Command Get-PlumberChangedFile -ErrorAction SilentlyContinue)) {
-            . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberChangedFile.ps1')
-        }
-
         $script:PlumberChangedFiles = @(
             Get-PlumberChangedFile -BuildRoot $BuildRoot -DiffBase $script:PlumberConfig.DiffBase
         )

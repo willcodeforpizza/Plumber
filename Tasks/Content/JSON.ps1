@@ -46,12 +46,6 @@
     ```
 #>
 Add-BuildTask -Name JSON -Jobs {
-    # Scope can be lost when running Plumber on Plumber multiple times
-    if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
-        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
-        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
-    }
-
     $jsonFiles = Get-PlumberTaskFile -Task JSON -Extension '.json'
     if (-not $jsonFiles) {
         Write-Build Yellow 'No JSON files found'
