@@ -4,7 +4,7 @@ function Test-PlumberTaskPathExcluded {
         Tests whether a path is excluded for a Plumber task.
 
         .DESCRIPTION
-        Reads task-scoped exclude patterns from PlumberConfig.ExcludePaths and
+        Reads task-scoped exclude patterns from PlumberConfig.Tasks.<Task>.Exclude and
         returns true when the supplied path matches a pattern for the task.
 
         .PARAMETER Task
@@ -31,11 +31,16 @@ function Test-PlumberTaskPathExcluded {
         $Path
     )
 
-    if (-not $script:PlumberConfig.ExcludePaths) {
+    if (-not $script:PlumberConfig.Tasks) {
         return $false
     }
 
-    if (-not $script:PlumberConfig.ExcludePaths.ContainsKey($Task)) {
+    if (-not $script:PlumberConfig.Tasks.ContainsKey($Task)) {
+        return $false
+    }
+
+    $taskConfig = $script:PlumberConfig.Tasks[$Task]
+    if (-not $taskConfig.Exclude) {
         return $false
     }
 
@@ -47,7 +52,7 @@ function Test-PlumberTaskPathExcluded {
     }
     $normalizedPath = $relativePath.Replace('\', '/')
 
-    foreach ($pattern in @($script:PlumberConfig.ExcludePaths[$Task])) {
+    foreach ($pattern in @($taskConfig.Exclude)) {
         $normalizedPattern = $pattern.Replace('\', '/')
         if (
             $normalizedPath -like $normalizedPattern -or

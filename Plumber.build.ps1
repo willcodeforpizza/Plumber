@@ -7,12 +7,14 @@ if (-not $module) {
 
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'Plumber.psd1'
-    ExcludePaths = @{
-        PSScriptAnalyzer = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
+    Tasks          = @{
+        PSScriptAnalyzer = @{
+            Exclude = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
+        }
+        Local            = @(
+            'LocalTasks/ValidateTaskHelp.ps1'
+        )
     }
-    LocalTasks = @(
-        'LocalTasks/ValidateTaskHelp.ps1'
-    )
 }
 
 $releaseTasks = @('Release', 'BuildModule', 'PublishModule', 'PublishGitHubRelease')

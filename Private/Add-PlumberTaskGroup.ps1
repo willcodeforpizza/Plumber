@@ -15,7 +15,7 @@ function Add-PlumberTaskGroup {
     )
 
     if (
-        -not (Test-PlumberTaskEnabled -Name $TaskGroup.Parent -ExcludeTasks $script:PlumberConfig.ExcludeTasks)
+        -not (Test-PlumberTaskEnabled -Name $TaskGroup.Parent -ExcludeTasks $script:PlumberConfig.Tasks.Exclude)
     ) {
         return
     }

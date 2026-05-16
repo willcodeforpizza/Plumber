@@ -16,46 +16,99 @@ function New-PlumberConfig {
     )
 
     $defaults = @{
-        ModuleManifest                 = $null
-        CoverageMinimum                = 75
-        DiffBase                       = $null
-        FileScope                      = 'All'
-        IncludeTestsInPssa             = $true
-        JsonSchemas                    = @()
-        MaxLineLength                  = 115
-        PrivateHelpSynopsisOnly        = $true
-        PublicFunctionPrefix           = $null
-        PublicFunctionPrefixExclusions = @()
-        StreamPesterOutput             = $true
-        VersionIncludePrerelease       = $false
-        VersionRemote                  = 'origin'
-        VersionSource                  = 'PSGallery'
-        ExcludeTasks                   = @()
-        ExcludePaths                   = @{}
-        LocalTasks                     = @()
+        ModuleManifest = $null
+        DiffBase       = $null
+        FileScope      = 'All'
+        Tasks          = @{
+            Exclude              = @()
+            Local                = @()
+            Backticks            = @{
+                Exclude = @()
+            }
+            CodeCoverage         = @{
+                Minimum = 75
+            }
+            Help                 = @{
+                PrivateSynopsisOnly = $true
+            }
+            JSON                 = @{
+                Exclude = @()
+            }
+            JSONSchema           = @{
+                Exclude = @()
+                Schemas = @()
+            }
+            LineLength           = @{
+                Exclude   = @()
+                MaxLength = 115
+            }
+            ModuleVersion        = @{
+                IncludePrerelease = $false
+                Remote            = 'origin'
+                Source            = 'PSGallery'
+            }
+            PesterIntegration    = @{
+                StreamOutput = $true
+            }
+            PesterUnit           = @{
+                StreamOutput = $true
+            }
+            PSScriptAnalyzer     = @{
+                Exclude      = @()
+                IncludeTests = $true
+            }
+            PublicFunctionPrefix = @{
+                Exclusions = @()
+                Prefix     = $null
+            }
+            ToDo                 = @{
+                Exclude = @()
+            }
+            YAML                 = @{
+                Exclude = @()
+            }
+        }
     }
 
     $plumberConfig = $defaults.Clone()
     foreach ($key in $Config.Keys) {
-        $plumberConfig[$key] = $Config[$key]
+        if ($key -eq 'Tasks') {
+            foreach ($taskKey in $Config.Tasks.Keys) {
+                if (
+                    $plumberConfig.Tasks.ContainsKey($taskKey) -and
+                    $plumberConfig.Tasks[$taskKey] -is [hashtable] -and
+                    $Config.Tasks[$taskKey] -is [hashtable]
+                ) {
+                    foreach ($settingKey in $Config.Tasks[$taskKey].Keys) {
+                        $plumberConfig.Tasks[$taskKey][$settingKey] = $Config.Tasks[$taskKey][$settingKey]
+                    }
+                } else {
+                    $plumberConfig.Tasks[$taskKey] = $Config.Tasks[$taskKey]
+                }
+            }
+        } else {
+            $plumberConfig[$key] = $Config[$key]
+        }
     }
 
-    if (-not $plumberConfig.ExcludeTasks) {
-        $plumberConfig.ExcludeTasks = @()
+    if (-not $plumberConfig.Tasks) {
+        $plumberConfig.Tasks = @{}
     }
-    if (-not $plumberConfig.ExcludePaths) {
-        $plumberConfig.ExcludePaths = @{}
+    if (-not $plumberConfig.Tasks.Exclude) {
+        $plumberConfig.Tasks.Exclude = @()
     }
-    if (-not $plumberConfig.LocalTasks) {
-        $plumberConfig.LocalTasks = @()
+    if (-not $plumberConfig.Tasks.Local) {
+        $plumberConfig.Tasks.Local = @()
     }
-    if (-not $plumberConfig.PublicFunctionPrefixExclusions) {
-        $plumberConfig.PublicFunctionPrefixExclusions = @()
+    if (-not $plumberConfig.Tasks.PublicFunctionPrefix.Exclusions) {
+        $plumberConfig.Tasks.PublicFunctionPrefix.Exclusions = @()
     }
     if (Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue) {
-        $plumberConfig.StreamPesterOutput = [bool](
+        $streamPesterOutput = [bool](
             Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly
         )
+        $plumberConfig.Tasks.PesterIntegration.StreamOutput = $streamPesterOutput
+        $plumberConfig.Tasks.PesterUnit.StreamOutput = $streamPesterOutput
     }
     if (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
         $plumberConfig.BuildRoot = $BuildRoot

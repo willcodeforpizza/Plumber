@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.29
+- Changed: Plumber config now nests task-owned settings under `Tasks`
+- Changed: Path exclusions now use `Tasks.<Task>.Exclude`
+- Changed: Task graph exclusions and local tasks now use `Tasks.Exclude` and `Tasks.Local`
+
 ## 0.0.28
 - Changed: ModuleVersion fails when PSGallery source cannot find the module
 - Changed: Release automation now uses Plumber.Release

@@ -11,10 +11,8 @@
     $script:PlumberConfig.
 
     .PARAMETER Config
-    Repository-specific Plumber configuration. Supported keys are
-    ModuleManifest, CoverageMinimum, ExcludePaths, FileScope, DiffBase,
-    IncludeTestsInPssa, LocalTasks, PublicFunctionPrefix,
-    PublicFunctionPrefixExclusions and ExcludeTasks.
+    Repository-specific Plumber configuration. Shared keys are ModuleManifest,
+    FileScope, and DiffBase. Task settings live under Tasks.
 
     .EXAMPLE
     . (Get-PlumberTaskLoader) -Config @{
@@ -25,13 +23,19 @@
 
     .EXAMPLE
     . (Get-PlumberTaskLoader) -Config @{
-        ModuleManifest     = 'MyModule.psd1'
-        CoverageMinimum    = 80
-        ExcludePaths       = @{
-            Backticks = @('Tests/Assets/*')
+        ModuleManifest = 'MyModule.psd1'
+        Tasks          = @{
+            Backticks        = @{
+                Exclude = @('Tests/Assets/*')
+            }
+            CodeCoverage     = @{
+                Minimum = 80
+            }
+            Exclude          = @('YAML', 'ChangelogUpdated')
+            PSScriptAnalyzer = @{
+                IncludeTests = $false
+            }
         }
-        IncludeTestsInPssa = $false
-        ExcludeTasks       = @('YAML', 'ChangelogUpdated')
     }
 
     Loads Plumber tasks with custom coverage, PSScriptAnalyzer and task exclusion

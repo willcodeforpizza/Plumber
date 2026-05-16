@@ -15,18 +15,22 @@ ModuleConventions
 
 ## Configuration
 
-`PublicFunctionPrefix` overrides the expected prefix. The default is the
-configured module name.
+`Tasks.PublicFunctionPrefix.Prefix` overrides the expected prefix. The
+default is the configured module name.
 
-`PublicFunctionPrefixExclusions` excludes exact public function names from
-this check.
+`Tasks.PublicFunctionPrefix.Exclusions` excludes exact public function names
+from this check.
 
 ### Example
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
-    PublicFunctionPrefix           = 'My'
-    PublicFunctionPrefixExclusions = @('New-Thing')
+    Tasks = @{
+        PublicFunctionPrefix = @{
+            Prefix     = 'My'
+            Exclusions = @('New-Thing')
+        }
+    }
 }
 ```
 

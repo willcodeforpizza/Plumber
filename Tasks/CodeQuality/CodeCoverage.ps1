@@ -10,15 +10,19 @@
     CodeQuality
 
     .CONFIGURATION
-    `CoverageMinimum` controls the minimum acceptable coverage percentage. The
-    default is `75`.
+    `Tasks.CodeCoverage.Minimum` controls the minimum acceptable coverage
+    percentage. The default is `75`.
 
     ### Example
 
     ```powershell
     . (Get-PlumberTaskLoader) -Config @{
-        ModuleManifest  = 'MyModule.psd1'
-        CoverageMinimum = 85
+        ModuleManifest = 'MyModule.psd1'
+        Tasks          = @{
+            CodeCoverage = @{
+                Minimum = 85
+            }
+        }
     }
     ```
 
@@ -29,12 +33,12 @@
 
     .PASS
     ```text
-    Covered file reports coverage greater than or equal to CoverageMinimum.
+    Covered file reports coverage greater than or equal to the configured minimum.
     ```
 
     .FAIL
     ```text
-    Covered file reports coverage lower than CoverageMinimum.
+    Covered file reports coverage lower than the configured minimum.
     ```
 #>
 Add-BuildTask -Name CodeCoverage -Jobs ?PesterUnit, {
@@ -46,7 +50,7 @@ Add-BuildTask -Name CodeCoverage -Jobs ?PesterUnit, {
     $script:pesterResult | ForEach-Object {
         $file = $_.Containers[0].Name
         $percent = $_.CodeCoverage.CoveragePercent
-        if ($percent -lt $script:PlumberConfig.CoverageMinimum) {
+        if ($percent -lt $script:PlumberConfig.Tasks.CodeCoverage.Minimum) {
             Write-Error "$percent% coverage for $file"
         }
     }

@@ -24,8 +24,12 @@ Describe 'ModuleVersion task' {
         Mock Find-Module {}
 
         $script:PlumberConfig = @{
-            ModuleRoot    = (Resolve-Path "$PSScriptRoot/../../..").Path
-            VersionSource = 'PSGallery'
+            ModuleRoot = (Resolve-Path "$PSScriptRoot/../../..").Path
+            Tasks      = @{
+                ModuleVersion = @{
+                    Source = 'PSGallery'
+                }
+            }
         }
         $script:moduleName = 'MissingModule'
         $script:psd1 = @{

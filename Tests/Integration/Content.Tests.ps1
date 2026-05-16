@@ -69,7 +69,7 @@ Describe 'Get-PlumberTaskLoader content integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    ExcludeTasks = @('JSON', 'JSONSchema', 'YAML')"
+            "    Tasks = @{ Exclude = @('JSON', 'JSONSchema', 'YAML') }"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -84,7 +84,7 @@ Describe 'Get-PlumberTaskLoader content integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    ExcludeTasks = @('Content')"
+            "    Tasks = @{ Exclude = @('Content') }"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -141,14 +141,16 @@ Describe 'Get-PlumberTaskLoader content integration' {
             '}'
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
-            '    JsonSchemas = @('
-            '        @{'
-            "            Path = 'Resource/**/*.json'"
-            "            Schema = 'Resource/Schema/config.schema.json'"
+            '    Tasks = @{'
+            '        JSONSchema = @{'
+            '            Schemas = @('
+            '                @{'
+            "                    Path = 'Resource/**/*.json'"
+            "                    Schema = 'Resource/Schema/config.schema.json'"
+            '                }'
+            '            )'
+            "            Exclude = @('Resource/Schema/*.json')"
             '        }'
-            '    )'
-            '    ExcludePaths = @{'
-            "        JSONSchema = @('Resource/Schema/*.json')"
             '    }'
             '}'
             "'ok'"

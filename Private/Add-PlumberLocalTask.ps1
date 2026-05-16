@@ -7,19 +7,24 @@ function Add-PlumberLocalTask {
     param ()
 
     if (
-        -not $script:PlumberConfig.LocalTasks -or
-        -not (Test-PlumberTaskEnabled -Name Local -ExcludeTasks $script:PlumberConfig.ExcludeTasks)
+        -not $script:PlumberConfig.Tasks.Local -or
+        -not (Test-PlumberTaskEnabled -Name Local -ExcludeTasks $script:PlumberConfig.Tasks.Exclude)
     ) {
         return
     }
 
-    foreach ($localTaskPath in @($script:PlumberConfig.LocalTasks)) {
+    foreach ($localTaskPath in @($script:PlumberConfig.Tasks.Local)) {
         if (-not $localTaskPath) {
             continue
         }
 
         $localTaskName = [System.IO.Path]::GetFileNameWithoutExtension($localTaskPath)
-        if (-not (Test-PlumberTaskEnabled -Name $localTaskName -ExcludeTasks $script:PlumberConfig.ExcludeTasks)) {
+        $taskEnabledSplat = @{
+            Name         = $localTaskName
+            ExcludeTasks = $script:PlumberConfig.Tasks.Exclude
+        }
+        $isLocalTaskEnabled = Test-PlumberTaskEnabled @taskEnabledSplat
+        if (-not $isLocalTaskEnabled) {
             continue
         }
 

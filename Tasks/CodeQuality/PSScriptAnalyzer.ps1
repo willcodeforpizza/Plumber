@@ -10,10 +10,10 @@
     CodeQuality
 
     .CONFIGURATION
-    `IncludeTestsInPssa` controls whether files under `Tests` are analyzed. The
-    default is `$true`.
+    Set `Tasks.PSScriptAnalyzer.IncludeTests` to control whether files under
+    `Tests` are analyzed. The default is `$true`.
 
-    `ExcludePaths.PSScriptAnalyzer` excludes matching files from this task.
+    `Tasks.PSScriptAnalyzer.Exclude` excludes matching files from this task.
 
     PSScriptAnalyzer settings can be supplied at the build root in
     `PSScriptAnalyzerSettings.psd1`.
@@ -22,10 +22,12 @@
 
     ```powershell
     . (Get-PlumberTaskLoader) -Config @{
-        ModuleManifest     = 'MyModule.psd1'
-        IncludeTestsInPssa = $false
-        ExcludePaths       = @{
-            PSScriptAnalyzer = @('Tests/Assets/*.ps1')
+        ModuleManifest = 'MyModule.psd1'
+        Tasks          = @{
+            PSScriptAnalyzer = @{
+                IncludeTests = $false
+                Exclude      = @('Tests/Assets/*.ps1')
+            }
         }
     }
     ```
@@ -60,7 +62,7 @@ Add-BuildTask -Name PSScriptAnalyzer -Jobs SetVariables, {
         Get-PlumberTaskFile -Task PSScriptAnalyzer -Extension '.ps1', '.psd1', '.psm1'
     )
 
-    if (-not $script:PlumberConfig.IncludeTestsInPssa) {
+    if (-not $script:PlumberConfig.Tasks.PSScriptAnalyzer.IncludeTests) {
         $testRoot = [System.IO.Path]::GetFullPath((Join-Path $BuildRoot 'Tests')).TrimEnd(
             [System.IO.Path]::DirectorySeparatorChar,
             [System.IO.Path]::AltDirectorySeparatorChar

@@ -15,15 +15,17 @@ Content
 
 ## Configuration
 
-`ExcludePaths.JSON` excludes matching files from this task.
+`Tasks.JSON.Exclude` excludes matching files from this task.
 
 ### Example
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'MyModule.psd1'
-    ExcludePaths   = @{
-        JSON = @('Resource/generated.json')
+    Tasks          = @{
+        JSON = @{
+            Exclude = @('Resource/generated.json')
+        }
     }
 }
 ```

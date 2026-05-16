@@ -9,48 +9,57 @@ Describe 'New-PlumberConfig' {
         InModuleScope Plumber {
             $config = New-PlumberConfig
 
-            $config.CoverageMinimum | Should -Be 75
             $config.FileScope | Should -Be 'All'
-            $config.IncludeTestsInPssa | Should -BeTrue
-            $config.ExcludeTasks | Should -Be @()
-            $config.ExcludePaths.Count | Should -Be 0
-            $config.LocalTasks | Should -Be @()
-            $config.PublicFunctionPrefix | Should -BeNullOrEmpty
-            $config.PublicFunctionPrefixExclusions | Should -Be @()
-            $config.StreamPesterOutput | Should -BeTrue
-            $config.VersionIncludePrerelease | Should -BeFalse
-            $config.VersionRemote | Should -Be 'origin'
-            $config.VersionSource | Should -Be 'PSGallery'
+            $config.Tasks.CodeCoverage.Minimum | Should -Be 75
+            $config.Tasks.PSScriptAnalyzer.IncludeTests | Should -BeTrue
+            $config.Tasks.Exclude | Should -Be @()
+            $config.Tasks.Backticks.Exclude | Should -Be @()
+            $config.Tasks.Local | Should -Be @()
+            $config.Tasks.PublicFunctionPrefix.Prefix | Should -BeNullOrEmpty
+            $config.Tasks.PublicFunctionPrefix.Exclusions | Should -Be @()
+            $config.Tasks.PesterUnit.StreamOutput | Should -BeTrue
+            $config.Tasks.PesterIntegration.StreamOutput | Should -BeTrue
+            $config.Tasks.ModuleVersion.IncludePrerelease | Should -BeFalse
+            $config.Tasks.ModuleVersion.Remote | Should -Be 'origin'
+            $config.Tasks.ModuleVersion.Source | Should -Be 'PSGallery'
         }
     }
 
     It 'overrides configured values and normalizes empty collections' {
         InModuleScope Plumber {
             $config = New-PlumberConfig -Config @{
-                CoverageMinimum = 90
-                ExcludeTasks    = $null
-                ExcludePaths    = $null
-                LocalTasks      = $null
-                FileScope       = 'Changed'
-                PublicFunctionPrefix = 'Thing'
-                PublicFunctionPrefixExclusions = $null
-                StreamPesterOutput = $false
-                VersionIncludePrerelease = $true
-                VersionRemote = 'upstream'
-                VersionSource = 'GitTag'
+                FileScope = 'Changed'
+                Tasks     = @{
+                    CodeCoverage = @{
+                        Minimum = 90
+                    }
+                    Exclude = $null
+                    Local = $null
+                    PublicFunctionPrefix = @{
+                        Prefix     = 'Thing'
+                        Exclusions = $null
+                    }
+                    PesterUnit = @{
+                        StreamOutput = $false
+                    }
+                    ModuleVersion = @{
+                        IncludePrerelease = $true
+                        Remote            = 'upstream'
+                        Source            = 'GitTag'
+                    }
+                }
             }
 
-            $config.CoverageMinimum | Should -Be 90
             $config.FileScope | Should -Be 'Changed'
-            $config.ExcludeTasks | Should -Be @()
-            $config.ExcludePaths.Count | Should -Be 0
-            $config.LocalTasks | Should -Be @()
-            $config.PublicFunctionPrefix | Should -Be 'Thing'
-            $config.PublicFunctionPrefixExclusions | Should -Be @()
-            $config.StreamPesterOutput | Should -BeFalse
-            $config.VersionIncludePrerelease | Should -BeTrue
-            $config.VersionRemote | Should -Be 'upstream'
-            $config.VersionSource | Should -Be 'GitTag'
+            $config.Tasks.CodeCoverage.Minimum | Should -Be 90
+            $config.Tasks.Exclude | Should -Be @()
+            $config.Tasks.Local | Should -Be @()
+            $config.Tasks.PublicFunctionPrefix.Prefix | Should -Be 'Thing'
+            $config.Tasks.PublicFunctionPrefix.Exclusions | Should -Be @()
+            $config.Tasks.PesterUnit.StreamOutput | Should -BeFalse
+            $config.Tasks.ModuleVersion.IncludePrerelease | Should -BeTrue
+            $config.Tasks.ModuleVersion.Remote | Should -Be 'upstream'
+            $config.Tasks.ModuleVersion.Source | Should -Be 'GitTag'
         }
     }
 
@@ -60,10 +69,18 @@ Describe 'New-PlumberConfig' {
 
             try {
                 $config = New-PlumberConfig -Config @{
-                    StreamPesterOutput = $true
+                    Tasks = @{
+                        PesterIntegration = @{
+                            StreamOutput = $true
+                        }
+                        PesterUnit = @{
+                            StreamOutput = $true
+                        }
+                    }
                 }
 
-                $config.StreamPesterOutput | Should -BeFalse
+                $config.Tasks.PesterIntegration.StreamOutput | Should -BeFalse
+                $config.Tasks.PesterUnit.StreamOutput | Should -BeFalse
             } finally {
                 Remove-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue
             }

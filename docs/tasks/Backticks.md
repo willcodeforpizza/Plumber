@@ -15,15 +15,17 @@ CodeQuality
 
 ## Configuration
 
-`ExcludePaths.Backticks` excludes matching files from this task.
+`Tasks.Backticks.Exclude` excludes matching files from this task.
 
 ### Example
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
     ModuleManifest = 'MyModule.psd1'
-    ExcludePaths   = @{
-        Backticks = @('Tests/Assets/TaskHelp/*.ps1')
+    Tasks          = @{
+        Backticks = @{
+            Exclude = @('Tests/Assets/TaskHelp/*.ps1')
+        }
     }
 }
 ```
