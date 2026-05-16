@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.34
+- Removed: defensive helper reload guards in task scriptblocks and `Invoke-Plumber` runtime guards (dead code since inline `Import-Module Plumber` was removed from build files)
+- Added: `Tests/Integration/HelperScope.Tests.ps1` pinning the contract that Private helpers stay reachable from task scriptblocks via TaskLoader
+
 ## 0.0.33
 - Added: `FunctionFiles` task for one function per PowerShell function file
 

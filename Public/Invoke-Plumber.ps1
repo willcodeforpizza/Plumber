@@ -56,25 +56,6 @@ function Invoke-Plumber {
         $NoFormat
     )
     process {
-        $moduleRoot = if ($script:moduleRoot) {
-            $script:moduleRoot
-        } else {
-            Split-Path $PSScriptRoot -Parent
-        }
-
-        # Self-validation can reload Plumber while Invoke-Plumber is running.
-        $runtimeFunctions = @(
-            'Invoke-PlumberBuild',
-            'ConvertTo-PlumberResult',
-            'Write-PlumberResult',
-            'Resolve-PlumberBuildFile'
-        )
-        foreach ($runtimeFunction in $runtimeFunctions) {
-            if (-not (Get-Command $runtimeFunction -ErrorAction SilentlyContinue)) {
-                . (Join-Path $moduleRoot "Private/$runtimeFunction.ps1")
-            }
-        }
-
         $resolvedBuildFile = Resolve-PlumberBuildFile -BuildFile $BuildFile
 
         Write-Verbose "Build file: $resolvedBuildFile"
@@ -84,11 +65,6 @@ function Invoke-Plumber {
             RawOutput = $OutputMode -in 'CI', 'Raw'
         }
         $buildResult = Invoke-PlumberBuild @buildSplat
-        foreach ($runtimeFunction in $runtimeFunctions) {
-            if (-not (Get-Command $runtimeFunction -ErrorAction SilentlyContinue)) {
-                . (Join-Path $moduleRoot "Private/$runtimeFunction.ps1")
-            }
-        }
 
         $plumberResult = ConvertTo-PlumberResult -BuildResult $buildResult
         Write-PlumberResult -Result $plumberResult -OutputMode $OutputMode -NoFormat:$NoFormat

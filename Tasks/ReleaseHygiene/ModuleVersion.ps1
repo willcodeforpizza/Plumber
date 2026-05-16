@@ -53,10 +53,6 @@
     ```
 #>
 Add-BuildTask -Name ModuleVersion -Jobs SetVariables, {
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/ConvertTo-PlumberSemVer.ps1')
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Invoke-PlumberGit.ps1')
-    . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberGitTagVersion.ps1')
-
     $versionSource = $script:PlumberConfig.Tasks.ModuleVersion.Source
     switch ($versionSource) {
         'PSGallery' {

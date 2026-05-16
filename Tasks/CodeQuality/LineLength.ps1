@@ -46,12 +46,6 @@
     ```
 #>
 Add-BuildTask -Name LineLength -Jobs {
-    # Scope can be lost when running Plumber on Plumber multiple times
-    if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
-        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
-        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
-    }
-
     $extensions = '.ps1', '.psm1', '.psd1'
     $files = Get-PlumberTaskFile -Task LineLength -Extension $extensions
 

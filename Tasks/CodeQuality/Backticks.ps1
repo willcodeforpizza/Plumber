@@ -41,12 +41,6 @@
     ```
 #>
 Add-BuildTask -Name Backticks -Jobs {
-    # Scope can be lost when running Plumber on Plumber multiple times
-    if (-not (Get-Command Get-PlumberTaskFile -ErrorAction SilentlyContinue)) {
-        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Test-PlumberTaskPathExcluded.ps1')
-        . (Join-Path $script:PlumberConfig.ModuleRoot 'Private/Get-PlumberTaskFile.ps1')
-    }
-
     $powershellFiles = Get-PlumberTaskFile -Task Backticks -Extension '.ps1', '.psd1', '.psm1'
 
     $failures = foreach ($file in $powershellFiles) {
