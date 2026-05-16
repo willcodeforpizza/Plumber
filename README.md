@@ -107,6 +107,55 @@ Invoke-Build -File ./MyModule.build.ps1 Validate
 This should work for simple cases, but direct Invoke-Build execution is not
 officially supported.
 
+## Dependencies
+
+Plumber has two dependency paths:
+
+- Plumber's own task dependencies are internal to Plumber. When CI needs a
+  clean agent to install missing Plumber dependencies during module import, use:
+
+  ```powershell
+  Import-Module Plumber -ArgumentList @{ InstallMissingDependencies = $true }
+  ```
+
+- Repository build or release dependencies belong in `Plumber.dependencies.psd1`
+  at the repository root. These are dependencies needed to run that repository's
+  Plumber tasks, not runtime dependencies for normal users of the module.
+
+Example `Plumber.dependencies.psd1`:
+
+```powershell
+@{
+    Modules = @(
+        @{
+            ModuleName    = 'Plumber.Release'
+            ModuleVersion = '0.1.4'
+        }
+    )
+}
+```
+
+Install the repository dependencies explicitly before running tasks:
+
+```powershell
+Install-PlumberDependency
+Invoke-Plumber
+```
+
+CI commonly does both steps: import Plumber with dependency installation enabled
+for Plumber itself, then install the repository's task dependencies:
+
+```powershell
+Import-Module Plumber -ArgumentList @{ InstallMissingDependencies = $true }
+Install-PlumberDependency
+Invoke-Plumber -OutputMode CI
+```
+
+`Install-PlumberDependency` installs modules from `Plumber.dependencies.psd1`.
+Loading a consumer module should not install build tooling or force normal users
+to install Plumber. Keep Plumber and release tooling out of the module manifest
+unless they are real runtime dependencies.
+
 ## Running tasks
 
 `Validate` runs all validation tasks:
