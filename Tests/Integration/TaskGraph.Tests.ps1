@@ -204,4 +204,29 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
         $tasks.Keys | Should -Contain 'LineLength'
         $tasks['CodeQuality'].Jobs | Should -Contain '?LineLength'
     }
+
+    It 'fails Validate after optional child task errors are collected' {
+        $localTaskRoot = Join-Path $TestDrive 'Tasks'
+        New-Item -Path $localTaskRoot -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $localTaskRoot 'FailingTask.ps1') -Value @(
+            'Add-BuildTask -Name FailingTask -Jobs {'
+            "    throw 'expected failure'"
+            '}'
+        )
+
+        $buildFile = Join-Path $TestDrive 'failing-validate.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = '$PSScriptRoot/../../Plumber.psd1'"
+            '    Tasks = @{'
+            "        Local = @('Tasks/FailingTask.ps1')"
+            '    }'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        {
+            & $script:invokeBuild -Task Validate -File $buildFile
+        } | Should -Throw -ExpectedMessage '*One or more Plumber validation tasks failed*'
+    }
 }

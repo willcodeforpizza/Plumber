@@ -196,6 +196,62 @@ Describe 'Invoke-PlumberBuild' {
         }
     }
 
+    It 'runs Invoke-Build through an alias definition path' {
+        InModuleScope Plumber {
+            $invokeBuildPath = Join-Path $TestDrive 'Invoke-Build.ps1'
+            Set-Content -Path $invokeBuildPath -Value @(
+                'param ('
+                '    [string[]]'
+                '    $Task,'
+                ''
+                '    [string]'
+                '    $File,'
+                ''
+                '    [string]'
+                '    $Result'
+                ')'
+                'Set-Variable -Name $Result -Scope 1 -Value ([pscustomobject]@{'
+                '    Tasks = @('
+                '        [pscustomobject]@{'
+                '            Name = $Task[0]'
+                '            Error = $null'
+                '        }'
+                '    )'
+                '})'
+            )
+            Mock Get-Command {
+                [pscustomobject]@{
+                    CommandType = 'Alias'
+                    Definition  = $invokeBuildPath
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            $result = Invoke-PlumberBuild -Task AliasSmoke -BuildFile $BuildFile
+
+            $result.Tasks.Name | Should -Contain 'AliasSmoke'
+            $result.Tasks.Error | Should -BeNullOrEmpty
+        }
+    }
+
+    It 'throws when Invoke-Build does not return a result object' {
+        InModuleScope Plumber {
+            Mock Get-Command {
+                {
+                    'no result'
+                }
+            } -ParameterFilter {
+                $Name -eq 'Invoke-Build'
+            }
+
+            $buildFile = Join-Path $TestDrive 'wrapper.build.ps1'
+            {Invoke-PlumberBuild -Task MissingResult -BuildFile $BuildFile} |
+                Should -Throw -ExpectedMessage 'Invoke-Build did not return a result object.'
+        }
+    }
+
     It 'suppresses Invoke-Build output unless raw output is requested' {
         InModuleScope Plumber {
             Mock Out-Host {}
