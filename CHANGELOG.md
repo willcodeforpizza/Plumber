@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.33
+- Added: `FunctionFiles` task for one function per PowerShell function file
+
 ## 0.0.32
 - Changed: Plumber installs missing internal task dependencies when the module loads
 - Added: `Install-PlumberDependency` for opt-in repository build dependencies

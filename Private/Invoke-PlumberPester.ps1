@@ -76,11 +76,7 @@ function Invoke-PlumberPester {
             $configuration.CodeCoverage.Path = $CoveragePath
         }
 
-        $result = if ($StreamOutput) {
-            Invoke-Pester -Configuration $configuration
-        } else {
-            Invoke-Pester -Configuration $configuration | Out-Null
-        }
+        $result = Invoke-Pester -Configuration $configuration
         $result | Export-Clixml -Path $PesterResultPath
     } -ArgumentList $Path, $ModuleManifest, $CodeCoveragePath, $resultPath, $StreamOutput.IsPresent
 

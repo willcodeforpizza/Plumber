@@ -35,6 +35,25 @@ Describe 'Invoke-Plumber' {
         }
     }
 
+    It 'writes ANSI formatting by default' {
+        InModuleScope Plumber {
+            $escape = [regex]::Escape("$([char]27)[32mPlumber validation passed.")
+
+            Invoke-Plumber |
+                Out-String |
+                    Should -Match $escape
+        }
+    }
+
+    It 'writes plain text when formatting is disabled' {
+        InModuleScope Plumber {
+            $output = Invoke-Plumber -NoFormat
+
+            $output | Should -Contain 'Plumber validation passed. Passed: 1. Failed: 0.'
+            $output | Out-String | Should -Not -Match ([regex]::Escape("$([char]27)["))
+        }
+    }
+
     It 'uses an explicit build file when provided' {
         $moduleRoot = Join-Path $TestDrive 'ExplicitModule'
         New-Item -Path $moduleRoot -ItemType Directory | Out-Null
@@ -69,7 +88,9 @@ Describe 'Invoke-Plumber' {
 
     It 'passes local task names to the build runner' {
         InModuleScope Plumber {
-            Invoke-Plumber -Task local -OutputMode Raw | Should -Match 'Validate'
+            Invoke-Plumber -Task local -OutputMode Raw |
+                Out-String |
+                    Should -Match 'Validate'
 
             Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
                 $Task.Count -eq 1 -and
@@ -116,7 +137,7 @@ Describe 'Invoke-Plumber' {
             }
 
             $output = try {
-                Invoke-Plumber -Task Validate
+                Invoke-Plumber -Task Validate -NoFormat
             } catch {
                 $PSItem.Exception.Message | Should -Be 'Build failed!'
             }
@@ -125,6 +146,39 @@ Describe 'Invoke-Plumber' {
             $output | Should -Contain 'ModuleVersion:'
             $output | Should -Contain $longError
             $output | Should -Contain 'Passed: 1. Failed: 1.'
+        }
+    }
+
+    It 'formats failure summaries with spacing and neutral task headings by default' {
+        InModuleScope Plumber {
+            $errorText = 'PSD1 version might be out of date.'
+            $script:mockBuildResult = [pscustomobject]@{
+                Tasks = @(
+                    [pscustomobject]@{
+                        Name  = 'ModuleVersion'
+                        Error = $errorText
+                    }
+                )
+            }
+
+            $output = try {
+                Invoke-Plumber -Task Validate
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+            $outputText = $output | Out-String
+
+            $output[0] | Should -Be ''
+            $outputText |
+                Should -Match ([regex]::Escape("$([char]27)[1;90mPlumber validation failed."))
+            $outputText |
+                Should -Match ([regex]::Escape("$([char]27)[90mModuleVersion:$([char]27)[0m"))
+            $outputText |
+                Should -Match ([regex]::Escape("$([char]27)[31m$errorText$([char]27)[0m"))
+            $outputText |
+                Should -Match ([regex]::Escape("$([char]27)[32mPassed: 0.$([char]27)[0m"))
+            $outputText |
+                Should -Match ([regex]::Escape("$([char]27)[31mFailed: 1.$([char]27)[0m"))
         }
     }
 
@@ -138,15 +192,158 @@ Describe 'Invoke-Plumber' {
         }
     }
 
-    It 'writes all task rows in table mode' {
+    It 'writes visible task rows in table mode' {
         InModuleScope Plumber {
-            Invoke-Plumber -OutputMode Table | Should -Match 'Validate'
+            Invoke-Plumber -OutputMode Table |
+                Out-String |
+                    Should -Match 'Validate'
+        }
+    }
+
+    It 'hides group failures when child task failures explain them' {
+        InModuleScope Plumber {
+            $analyzerError = @(
+                'Get-Bad.ps1:3 - PSAvoidUsingWriteHost - File contains Write-Host.'
+                'Detailed analyzer text: 1234567890abcdefghijklmnopqrstuvwxyz'
+            ) -join [Environment]::NewLine
+            $script:mockBuildResult = [pscustomobject]@{
+                Tasks = @(
+                    [pscustomobject]@{
+                        Name  = 'SetVariables'
+                        Error = $null
+                    }
+                    [pscustomobject]@{
+                        Name  = 'PSScriptAnalyzer'
+                        Error = $analyzerError
+                    }
+                    [pscustomobject]@{
+                        Name  = 'CodeQuality'
+                        Error = 'One or more CodeQuality tasks failed: PSScriptAnalyzer'
+                        Jobs  = @('?PSScriptAnalyzer')
+                    }
+                    [pscustomobject]@{
+                        Name  = 'Validate'
+                        Error = 'One or more Plumber validation tasks failed: CodeQuality'
+                        Jobs  = @('?CodeQuality')
+                    }
+                )
+            }
+
+            $summary = try {
+                Invoke-Plumber -Task Validate -NoFormat
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+
+            $summary | Should -Contain 'PSScriptAnalyzer:'
+            $summary | Should -Contain $analyzerError
+            $summary | Should -Not -Contain 'CodeQuality:'
+            $summary | Should -Not -Contain 'Validate:'
+
+            $table = try {
+                Invoke-Plumber -Task Validate -OutputMode Table -NoFormat
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+            $tableText = $table | Out-String
+
+            $tableText | Should -Match 'PSScriptAnalyzer\s+Failed'
+            $table | Should -Contain $analyzerError
+            $tableText | Should -Not -Match 'CodeQuality\s+Failed'
+            $tableText | Should -Not -Match 'Validate\s+Failed'
+
+            $jsonText = try {
+                Invoke-Plumber -Task Validate -OutputMode Json
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+            $json = $jsonText | ConvertFrom-Json
+
+            $json.Tasks.Name | Should -Contain 'PSScriptAnalyzer'
+            $json.Tasks.Name | Should -Not -Contain 'CodeQuality'
+            $json.Tasks.Name | Should -Not -Contain 'Validate'
+            $json.Tasks |
+                Where-Object Name -eq 'PSScriptAnalyzer' |
+                    Select-Object -ExpandProperty Error |
+                        Should -Be $analyzerError
+            $json.Failures[0].Error | Should -Be $analyzerError
+        }
+    }
+
+    It 'preserves a group failure when no child task failure explains it' {
+        InModuleScope Plumber {
+            $groupError = 'Setup failed before any child validation task could run.'
+            $script:mockBuildResult = [pscustomobject]@{
+                Tasks = @(
+                    [pscustomobject]@{
+                        Name  = 'Validate'
+                        Error = $groupError
+                    }
+                )
+            }
+
+            $summary = try {
+                Invoke-Plumber -Task Validate -NoFormat
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+
+            $summary | Should -Contain 'Validate:'
+            $summary | Should -Contain $groupError
+
+            $table = try {
+                Invoke-Plumber -Task Validate -OutputMode Table -NoFormat
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+            $tableText = $table | Out-String
+
+            $tableText | Should -Match 'Validate\s+Failed'
+            $table | Should -Contain $groupError
+
+            $jsonText = try {
+                Invoke-Plumber -Task Validate -OutputMode Json
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+            $json = $jsonText | ConvertFrom-Json
+
+            $json.Tasks[0].Name | Should -Be 'Validate'
+            $json.Tasks[0].Error | Should -Be $groupError
+            $json.Failures[0].Error | Should -Be $groupError
+        }
+    }
+
+    It 'colors table failure status and details by default' {
+        InModuleScope Plumber {
+            $errorText = 'Found TODO'
+            $script:mockBuildResult = [pscustomobject]@{
+                Tasks = @(
+                    [pscustomobject]@{
+                        Name  = 'ToDo'
+                        Error = $errorText
+                    }
+                )
+            }
+
+            $output = try {
+                Invoke-Plumber -Task ToDo -OutputMode Table
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+            $outputText = $output | Out-String
+
+            $outputText | Should -Match ([regex]::Escape("$([char]27)[31mFailed$([char]27)[0m"))
+            $outputText | Should -Match ([regex]::Escape("$([char]27)[90mToDo:$([char]27)[0m"))
+            $outputText | Should -Match ([regex]::Escape("$([char]27)[31m$errorText$([char]27)[0m"))
         }
     }
 
     It 'requests raw build output in raw mode' {
         InModuleScope Plumber {
-            Invoke-Plumber -OutputMode Raw | Should -Match 'Validate'
+            Invoke-Plumber -OutputMode Raw |
+                Out-String |
+                    Should -Match 'Validate'
 
             Should -Invoke Invoke-PlumberBuild -Times 1 -Exactly -ParameterFilter {
                 $RawOutput
@@ -591,8 +788,12 @@ Describe 'Invoke-Plumber private wrapper recovery' {
                 $Name -eq 'Invoke-Build'
             }
 
-            Invoke-Plumber -Task Content -OutputMode Table | Should -Match 'Content'
-            Invoke-Plumber -Task JSON -OutputMode Table | Should -Match 'JSON'
+            Invoke-Plumber -Task Content -OutputMode Table |
+                Out-String |
+                    Should -Match 'Content'
+            Invoke-Plumber -Task JSON -OutputMode Table |
+                Out-String |
+                    Should -Match 'JSON'
         }
     }
 }

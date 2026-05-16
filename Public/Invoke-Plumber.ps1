@@ -21,6 +21,9 @@ function Invoke-Plumber {
         task results, Json emits structured output, Raw preserves Invoke-Build
         output, and CI preserves Invoke-Build output with a concise summary.
 
+        .PARAMETER NoFormat
+        Writes plain text output without ANSI color or emphasis formatting.
+
         .EXAMPLE
         Invoke-Plumber
 
@@ -47,7 +50,10 @@ function Invoke-Plumber {
 
         [ValidateSet('CI', 'Json', 'Raw', 'Summary', 'Table')]
         [string]
-        $OutputMode = 'Summary'
+        $OutputMode = 'Summary',
+
+        [switch]
+        $NoFormat
     )
     process {
         $moduleRoot = if ($script:moduleRoot) {
@@ -85,7 +91,7 @@ function Invoke-Plumber {
         }
 
         $plumberResult = ConvertTo-PlumberResult -BuildResult $buildResult
-        Write-PlumberResult -Result $plumberResult -OutputMode $OutputMode
+        Write-PlumberResult -Result $plumberResult -OutputMode $OutputMode -NoFormat:$NoFormat
 
         if (-not $plumberResult.Success) {
             throw 'Build failed!'

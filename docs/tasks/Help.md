@@ -54,4 +54,5 @@ Public/Get-Thing.ps1 contains a function with no comment-based help.
 
 - [Task index](index.md)
 - [Group: ModuleConventions](ModuleConventions.md)
+- Previous: [FunctionFiles](FunctionFiles.md)
 - Next: [Manifest](Manifest.md)

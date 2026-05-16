@@ -8,7 +8,7 @@
 | --- | --- |
 | [CodeQuality](CodeQuality.md) | `PSScriptAnalyzer`, `Backticks`, `LineLength`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
 | [Content](Content.md) | `JSON`, `JSONSchema`, `YAML` |
-| [ModuleConventions](ModuleConventions.md) | `Manifest`, `PublicFunctions`, `Naming`, `ToDo`, `Help` |
+| [ModuleConventions](ModuleConventions.md) | `Manifest`, `PublicFunctions`, `PublicFunctionPrefix`, `FunctionFiles`, `Naming`, `ToDo`, `Help` |
 | [ReleaseHygiene](ReleaseHygiene.md) | `ModuleVersion`, `ChangelogUpdated` |
 | [Validate](Validate.md) | `CodeQuality`, `ReleaseHygiene`, `Content`, `ModuleConventions` |
 
@@ -25,6 +25,7 @@
 | [JSON](JSON.md) | `Content` |
 | [JSONSchema](JSONSchema.md) | `Content` |
 | [YAML](YAML.md) | `Content` |
+| [FunctionFiles](FunctionFiles.md) | `ModuleConventions` |
 | [Help](Help.md) | `ModuleConventions` |
 | [Manifest](Manifest.md) | `ModuleConventions` |
 | [Naming](Naming.md) | `ModuleConventions` |
