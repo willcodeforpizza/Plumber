@@ -10,6 +10,18 @@
                 'Tests/Unit/Private/Get-PlumberPathSeparator.Tests.ps1'
             )
         }
+        Backticks        = @{
+            Exclude = @(
+                'Tests/Assets/TaskHelp/InvalidPowerShell.ps1'
+                'Tests/Unit/Private/Get-PlumberLineContinuation.Tests.ps1'
+            )
+        }
+        ToDo             = @{
+            Exclude = @(
+                'Tests/Assets/TaskHelp/InvalidPowerShell.ps1'
+                'Tests/Unit/Private/Get-PlumberToDoComment.Tests.ps1'
+            )
+        }
         Local            = @(
             'LocalTasks/ValidateTaskHelp.ps1'
         )
