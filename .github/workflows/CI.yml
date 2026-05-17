@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  PLUMBER_RELEASE_VERSION: 0.1.0
+
 jobs:
   test:
     name: ${{ matrix.os }}
@@ -30,20 +33,12 @@ jobs:
         shell: pwsh
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-          (Import-PowerShellDataFile ./Plumber.psd1).ModuleList |
-              ForEach-Object {
-                $installSplat = @{
-                  Name               = $_.ModuleName
-                  RequiredVersion    = $_.ModuleVersion
-                  Scope              = 'CurrentUser'
-                  Force              = $true
-                  SkipPublisherCheck = $true
-                }
-                Install-Module @installSplat
-              }
+          Import-Module ./Plumber.psd1 -Force -ArgumentList @{
+            InstallMissingDependencies = $true
+          }
           $releaseSplat = @{
             Name               = 'Plumber.Release'
-            RequiredVersion    = '0.1.0'
+            RequiredVersion    = $env:PLUMBER_RELEASE_VERSION
             Scope              = 'CurrentUser'
             Force              = $true
             SkipPublisherCheck = $true
@@ -75,20 +70,12 @@ jobs:
         shell: pwsh
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-          (Import-PowerShellDataFile ./Plumber.psd1).ModuleList |
-              ForEach-Object {
-                $installSplat = @{
-                  Name               = $_.ModuleName
-                  RequiredVersion    = $_.ModuleVersion
-                  Scope              = 'CurrentUser'
-                  Force              = $true
-                  SkipPublisherCheck = $true
-                }
-                Install-Module @installSplat
-              }
+          Import-Module ./Plumber.psd1 -Force -ArgumentList @{
+            InstallMissingDependencies = $true
+          }
           $releaseSplat = @{
             Name               = 'Plumber.Release'
-            RequiredVersion    = '0.1.0'
+            RequiredVersion    = $env:PLUMBER_RELEASE_VERSION
             Scope              = 'CurrentUser'
             Force              = $true
             SkipPublisherCheck = $true

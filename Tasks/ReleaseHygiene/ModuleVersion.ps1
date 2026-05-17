@@ -1,11 +1,12 @@
 <#
     .SYNOPSIS
-    Validates current PSD1 version is higher than the published version.
+    Validates current PSD1 version is merge-ready.
 
     .DESCRIPTION
-    Looks up the latest published module version from PSGallery or git tags
-    and fails when the configured manifest version is not greater than the
-    published version.
+    Looks up the latest published module version from PSGallery or git tags.
+    Fails when the configured manifest version is not greater than the
+    published version because a mergeable change must advance the next
+    publishable module version.
 
     .GROUP
     ReleaseHygiene
@@ -110,9 +111,9 @@ Add-BuildTask -Name ModuleVersion -Jobs SetVariables, {
 
     if ($psd1Version -le $publishedVersion) {
         Write-Error (
-            'PSD1 version might be out of date. ' +
-            "PSD1 version $psd1Version " +
-            "$versionSource version $publishedVersion"
+            "ModuleVersion is not merge-ready. PSD1 version $psd1Version " +
+            "must be greater than $versionSource version $publishedVersion " +
+            'before this change is merged.'
         )
     }
 }

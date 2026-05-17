@@ -84,4 +84,42 @@ Describe 'ModuleVersion task' {
             & $job
         } | Should -Not -Throw
     }
+
+    It 'uses merge-readiness wording when the manifest version is already published' {
+        function Add-BuildTask {
+            param ([string] $Name, [object[]] $Jobs)
+            $script:taskName = $Name
+            $script:taskJobs = $Jobs
+        }
+        function Write-Build {
+            param ($Color, $Message)
+            $null = $Color
+            $null = $Message
+        }
+
+        . "$PSScriptRoot/../../../Private/ConvertTo-PlumberSemVer.ps1"
+        . "$PSScriptRoot/../../../Tasks/ReleaseHygiene/ModuleVersion.ps1"
+        Mock Find-Module {
+            [pscustomobject]@{
+                Name    = 'PublishedVersionModule'
+                Version = [version]'1.2.3'
+            }
+        }
+
+        $script:PlumberConfig = @{
+            ModuleRoot = (Resolve-Path "$PSScriptRoot/../../..").Path
+            Tasks      = @{ ModuleVersion = @{ Source = 'PSGallery' } }
+        }
+        $script:moduleName = 'PublishedVersionModule'
+        $script:psd1 = @{ ModuleVersion = '1.2.3' }
+
+        $job = $script:taskJobs[-1]
+        {
+            $ErrorActionPreference = 'Stop'
+            & $job
+        } | Should -Throw -ExpectedMessage (
+            '*ModuleVersion is not merge-ready. PSD1 version 1.2.3 ' +
+            'must be greater than PSGallery version 1.2.3 before this change is merged.*'
+        )
+    }
 }
