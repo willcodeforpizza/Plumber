@@ -125,10 +125,26 @@ scriptblock without any further wiring. No change to TaskLoader or
 
 Migration is per-task and incremental. Each task migrates independently
 without coordination; the framework treats migrated and unmigrated tasks
-identically because both end up calling code from the same scope. ADR 007
-adds a unit test that fails if any task scriptblock grows beyond four
-lines, which makes the migration finished-state both verifiable and
-durable.
+identically because both end up calling code from the same scope. The
+four-line task-scriptblock cap described below makes the migration
+finished-state both verifiable and durable.
+
+### Enforcement — four-line task scriptblock cap
+
+A unit test at `Tests/Unit/TaskBodyLength.Tests.ps1` parses every
+`Tasks/<Group>/<Name>.ps1` via AST, locates each `Add-BuildTask` call,
+extracts its `-Jobs` scriptblock argument(s), and fails if any
+scriptblock body contains more than four lines of code (excluding
+comments and blank lines). Four is deliberately generous: it allows a
+quick guard clause plus a call to the private function (`if (-not $x)
+{ return }` plus `Invoke-Plumber<Name>` plus closing brace plus
+whitespace), but is too small to host meaningful business logic.
+
+The cap lives in this ADR (not in ADR 007) because it enforces task
+*shape*, not configuration. It is a Plumber self-check; it does not
+run as part of the consumer-facing `Validate` pipeline. New tasks
+added in the wrong shape fail Plumber's own `PesterUnit` task before
+merge.
 
 ## Alternatives Considered
 
@@ -160,7 +176,7 @@ need editing.** This avoids upfront work but leaves Plumber in a permanent
 mixed state where some tasks follow the new pattern and some do not.
 Readers would have to learn both shapes and remember which tasks are on
 which side. Rejected in favour of a consistent migration across all
-built-in tasks, paired with the test rule from ADR 007 to keep new tasks
+built-in tasks, paired with the four-line cap test to keep new tasks
 honest.
 
 ## Consequences
@@ -170,12 +186,28 @@ existing `Tasks/<Group>/<Name>.ps1` shrinks to a help block plus a
 one-line `Add-BuildTask` call. Net line count is roughly flat; the
 distribution changes from "few large files" to "more small files."
 
-Plumber's own unit tests can target task bodies directly. A new spec at
-`Tests/Unit/Private/Invoke-PlumberLineLength.Tests.ps1` calls the function
-with a fixture `$script:PlumberConfig` value and asserts the output,
-without going through Invoke-Build at all. This is faster, more focused,
-and produces cleaner test failures than the existing integration approach.
-Per-task coverage growth follows naturally.
+Plumber's own tests can target task bodies more directly. A new spec at
+`Tests/Unit/Private/Invoke-PlumberLineLength.Tests.ps1` sets up a fixture
+`$script:PlumberConfig` value (and `$BuildRoot`, and any file-discovery
+caches the task reads through) and calls the function without going
+through the full Invoke-Build harness. This is faster and produces
+cleaner test failures than today's integration-shaped tests, but it is
+not "pure" isolated unit testing in the dependency-injection sense — the
+functions still read script-scope state. A future cleanup may move
+tasks that benefit from real isolation onto parameters that take config
+and paths explicitly, where doing so does not make the call site uglier.
+
+Adding ~20 new `Invoke-Plumber<TaskName>` functions under `Private/`
+expands the set of symbols dot-sourced into the consumer's build-file
+scope by TaskLoader. These are not exported via the module's
+`FunctionsToExport`, but they are reachable by name from inside any
+consumer's `*.build.ps1`. The trade-off versus the exported-function
+alternative is: fewer public commands shown by `Get-Command -Module
+Plumber`, but more dot-sourced implementation symbols visible in
+build-file scope. This is an accepted trade-off — neither shape is
+"free" — chosen because it does not pollute the consumer's global
+command table and does not create stability expectations against
+function signatures.
 
 Consumers see no change. Task names, group names, exclusions, the loader
 configuration shape, and `Invoke-Plumber -Task <Name>` all behave
@@ -183,8 +215,8 @@ identically. The migration is internal to Plumber.
 
 Future task authoring becomes simpler: write a private function with the
 real logic, register a one-line `Add-BuildTask` that calls it, add the
-help block. The four-line test rule from ADR 007 makes the discipline
-self-enforcing.
+help block. The four-line cap described in the Decision section makes
+the discipline self-enforcing.
 
 Local tasks (consumer-supplied `Tasks.Local`) are out of scope for this
 decision. Local task authors choose their own shape; Plumber does not

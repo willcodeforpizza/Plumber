@@ -61,11 +61,11 @@ PowerShell-class scope quirks, no new dispatch convention.
 validation task uses it. Reusing the same machinery for config
 validation does not add a runtime dependency.
 
-ADR 006 establishes that task logic moves into named private functions
-with a thin orchestration scriptblock. This decision is independent but
-synergistic: a static four-line cap on task scriptblock bodies (enforced
-as a unit test, see below) keeps ADR 006's "tasks are thin orchestrators"
-principle from drifting back to scriptblock-fat over time.
+ADR 006 (task logic moves into named private functions with thin
+orchestration scriptblocks) is independent of this decision and is
+recorded separately. The four-line task-scriptblock cap that enforces
+ADR 006 also lives in ADR 006, not here — it enforces task *shape*,
+which is not the same concern as validating consumer *configuration*.
 
 ## Decision
 
@@ -125,6 +125,30 @@ Schema example (abbreviated):
 }
 ```
 
+**Null values and defaults.** The current default-merge in
+`New-PlumberConfig` produces hashtable values with explicit `$null`
+entries for `ModuleManifest`, `DiffBase`, and
+`Tasks.PublicFunctionPrefix.Prefix`. `ConvertTo-Json` serialises these
+as JSON `null` literals. A schema property declared as `"type":
+"string"` rejects `null`, which would cause every default Plumber
+config (before the consumer supplies values) to fail validation.
+
+The schema models nullable values as `"type": ["string", "null"]` (or
+`"oneOf": [{"type": "string"}, {"type": "null"}]` for richer shapes).
+Required-on-use values that nullable-defaults occupy at config-load
+time — `ModuleManifest` is the obvious example: every consumer must
+supply one for any task to run — are enforced by the consuming code
+when it reads the value, not by the schema's `required` keyword. The
+schema describes what consumers *may pass*, not what runtime code
+*needs*.
+
+The JSON Schema `"default"` keyword is informational, not enforced by
+`Test-Json`. Plumber's runtime defaults remain in `New-PlumberConfig`'s
+imperative defaults map. Schema `"default"` entries, when present,
+exist as documentation hints and potential IDE-tooling input only.
+A test should pin that schema `"default"` entries match the imperative
+defaults to catch drift between the two sources.
+
 **Local task handling.** Plumber.Tasks.Local entries are dynamically
 folded into the schema at validation time. `Test-PlumberConfig` reads
 `Tasks.Local` (the consumer's list of local task files), derives the
@@ -141,23 +165,6 @@ own schema and runs its own `Test-Json` pass. Plumber's shipped schema
 covers built-in task config only. This matches the existing pattern
 where `Plumber.Release.Tasks.<Name>` is validated by `Plumber.Release`,
 not by Plumber.
-
-**Task-body four-line cap (enforces ADR 006).** A new unit test at
-`Tests/Unit/TaskBodyLength.Tests.ps1` parses every
-`Tasks/<Group>/<Name>.ps1` via AST, locates each `Add-BuildTask` call,
-extracts its `-Jobs` scriptblock argument(s), and fails if any
-scriptblock body contains more than four lines of code (excluding
-comments and blank lines). Four is a deliberate generosity: it allows a
-quick guard clause plus a call to the private function (`if (-not
-$x) { return }` plus `Invoke-Plumber<Name>` plus closing brace plus
-whitespace), but is too small to host meaningful business logic.
-
-This test lives in ADR 007 rather than ADR 006 because ADR 006 describes
-the *principle* (thin task scriptblocks delegating to named functions),
-and ADR 007 introduces the *validation infrastructure* that keeps the
-codebase honest about that principle over time. The four-line cap is a
-Plumber self-check; it does not run as part of the consumer-facing
-`Validate` pipeline.
 
 ## Alternatives Considered
 
@@ -224,9 +231,19 @@ gains a single call to `Test-PlumberConfig` after the defaults merge.
 
 Adding a new task config becomes: declare the per-task properties block
 in the schema, write the task per ADR 006 (private function + thin
-orchestration scriptblock), done. The schema is the single canonical
-description of the configuration surface. There is no second place to
-remember to update when a task gains a new setting.
+orchestration scriptblock), done. The schema is the canonical
+*validation contract* for the configuration surface.
+
+It is not the single canonical description of configuration. Task
+implementations still read values from `$script:PlumberConfig`,
+runtime defaults still live imperatively in `New-PlumberConfig`'s
+defaults map, and consumer-facing documentation still lives in
+per-task `.CONFIGURATION` help blocks (see ADR 004). Adding a setting
+touches the schema, the defaults map, the task read sites, and the
+help block — four places, not one. The schema makes validation cheap
+to author and reliable to enforce; the other three remain authoring
+work and benefit from drift-protection tests (see below) rather than
+elimination.
 
 Configuration errors surface at config-load time with friendly path-based
 messages. Multiple errors compose into a single failure report rather
@@ -247,12 +264,21 @@ Plumber.Release and any future plugin loaders own their own validation;
 Plumber's schema does not need to know about them. This matches the
 existing per-loader ownership pattern.
 
-The task-body four-line cap unit test prevents drift from ADR 006's
-"thin orchestration scriptblocks" principle. New tasks added in the
-wrong shape fail Plumber's own `PesterUnit` task before merge. The cap
-is deliberately generous (four lines accommodates a guard clause plus
-the function call) but small enough to make business logic obvious by
-its absence.
+Friendly error message parsing from `Test-Json` is the implementation
+risk in this design. `Test-Json -ErrorVariable` produces error records
+whose format and content vary across PowerShell versions and across
+schema-rule kinds — `additionalProperties` failures look different from
+`enum` failures look different from `minimum`/`maximum` failures. The
+"Tasks.LineLength.MaxLenght: unknown property" friendly form requires
+parsing the JSON path attribution out of each error record and
+synthesising the user-facing message. The parser needs golden tests
+against representative failures (typo at top level, typo nested under
+Tasks, type mismatch, range violation, enum violation, deeply nested
+invalid value, null on non-nullable, multiple errors in one config)
+and must fall back to raw `Test-Json` output when path attribution is
+missing or unclear. This is more work than a one-line `Test-Json` call
+suggests and is the most likely source of "the validator works but the
+error message is ugly" follow-up work after the initial implementation.
 
 The shipped schema doubles as documentation. Doc generation can render
 it as a config reference page in addition to (or alongside) the
