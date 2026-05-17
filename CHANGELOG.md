@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.38
+- Fixed: CI test matrix now runs on push to main and the release job depends on it, closing a release-safety hole where admin-merge could publish unvalidated to PSGallery
+- Changed: `New-PlumberConfig` now accepts `BuildRoot` as an explicit parameter; `TaskLoader` passes it instead of the function reaching up the scope chain via `Get-Variable`
+- Changed: `Get-PlumberChangedFile` now routes all git invocations through `Invoke-PlumberGit` for consistent error handling
+
 ## 0.0.37
 - Changed: `Backticks` rule rewritten as AST-aware via new `Get-PlumberLineContinuation` helper — no longer flags backticks inside strings, here-strings, or comments
 - Changed: `ToDo` rule rewritten as AST-aware via new `Get-PlumberToDoComment` helper — now catches inline TODOs (`$x = 1 # TODO: fix`) as well as leading-line TODOs; block-comment TODOs and TODOs in string literals are not flagged

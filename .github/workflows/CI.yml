@@ -12,12 +12,13 @@ permissions:
 jobs:
   test:
     name: ${{ matrix.os }}
-    if: github.event_name == 'pull_request'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # Both platforms on PR; ubuntu only on push to main (windows
+        # already validated by the PR run, and saves the 2x runner cost).
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["ubuntu-latest", "windows-latest"]' || '["ubuntu-latest"]') }}
 
     steps:
       - name: Checkout
@@ -54,6 +55,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
