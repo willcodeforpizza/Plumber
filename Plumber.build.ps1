@@ -8,6 +8,7 @@
             Exclude = @(
                 'Tests/Assets/TaskHelp/InvalidPowerShell.ps1'
                 'Tests/Unit/Private/Get-PlumberPathSeparator.Tests.ps1'
+                'Tests/Unit/Private/ConvertTo-PlumberPathRegex.Tests.ps1'
             )
         }
         Backticks        = @{
