@@ -73,7 +73,7 @@ function New-PlumberConfig {
         }
     }
 
-    $plumberConfig = $defaults.Clone()
+    $plumberConfig = Copy-PlumberHashtable -InputObject $defaults
     foreach ($key in $Config.Keys) {
         if ($key -eq 'Tasks') {
             foreach ($taskKey in $Config.Tasks.Keys) {
