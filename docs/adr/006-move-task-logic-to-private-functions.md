@@ -56,8 +56,9 @@ type errors — is a separate concern addressed in ADR 007.
 
 ## Decision
 
-Plumber will store each built-in task's logic in a named private function at
-`Private/Invoke-Plumber<TaskName>.ps1`. The task file at
+Plumber will store each built-in task's logic in a named function at
+`TaskFunctions/Invoke-Plumber<TaskName>.ps1`, a new folder dedicated to
+holding task bodies. The task file at
 `Tasks/<Group>/<TaskName>.ps1` retains only:
 
 - The existing comment-based help block (`.SYNOPSIS`, `.GROUP`,
@@ -80,7 +81,7 @@ For example, after the change `Tasks/CodeQuality/LineLength.ps1` becomes:
 Add-BuildTask -Name LineLength -Jobs SetVariables, { Invoke-PlumberLineLength }
 ```
 
-And `Private/Invoke-PlumberLineLength.ps1` holds the body:
+And `TaskFunctions/Invoke-PlumberLineLength.ps1` holds the body:
 
 ```powershell
 function Invoke-PlumberLineLength {
@@ -108,7 +109,7 @@ The private function takes no parameters and reads configuration directly
 from `$script:PlumberConfig.Tasks.<Name>`, matching today's pattern. (How
 that configuration is validated is the subject of ADR 007.)
 
-Private functions are used in preference to public exports. Plumber's own
+Functions are kept module-internal rather than exported. Plumber's own
 `PublicFunctions` rule treats exported functions as a curated API surface;
 adding ~20 new `Invoke-Plumber<X>` exports to expose internal task bodies
 would inflate the public surface without any consumer-facing benefit, and
@@ -117,11 +118,15 @@ matching `Public/<Name>.ps1` file path. None of that buys consumers
 anything they could not get by invoking the task via
 `Invoke-Plumber -Task <Name>`.
 
-The existing TaskLoader behaviour dot-sources every file under `Private/`
-into build-file scope (see v0.0.34's `Tests/Integration/HelperScope.Tests.ps1`),
-which means `Invoke-Plumber<TaskName>` is reachable from the task
-scriptblock without any further wiring. No change to TaskLoader or
-`Add-PlumberTask` is required.
+`TaskFunctions/` is a new folder. TaskLoader.ps1 and Plumber.psm1 each
+gain one additional `foreach` loop that dot-sources `TaskFunctions/*.ps1`
+alongside the existing `Private/*.ps1` discovery (~6 lines of framework
+change total). Both folders end up in build-file scope (see v0.0.34's
+`Tests/Integration/HelperScope.Tests.ps1`), so `Invoke-Plumber<TaskName>`
+is reachable from the task scriptblock without any further wiring.
+Plumber's own `PublicFunctions` rule needs to recognise `TaskFunctions/`
+as a known non-public folder so it does not flag the functions as
+"exported but not in `Public/`."
 
 Migration is per-task and incremental. Each task migrates independently
 without coordination; the framework treats migrated and unmigrated tasks
@@ -129,22 +134,32 @@ identically because both end up calling code from the same scope. The
 four-line task-scriptblock cap described below makes the migration
 finished-state both verifiable and durable.
 
-### Enforcement — four-line task scriptblock cap
+### Enforcement — four-line cap and task/body pairing
 
-A unit test at `Tests/Unit/TaskBodyLength.Tests.ps1` parses every
+Two related unit tests enforce the shape this ADR establishes:
+
+`Tests/Unit/TaskBodyLength.Tests.ps1` parses every
 `Tasks/<Group>/<Name>.ps1` via AST, locates each `Add-BuildTask` call,
 extracts its `-Jobs` scriptblock argument(s), and fails if any
 scriptblock body contains more than four lines of code (excluding
 comments and blank lines). Four is deliberately generous: it allows a
-quick guard clause plus a call to the private function (`if (-not $x)
+quick guard clause plus a call to the task-body function (`if (-not $x)
 { return }` plus `Invoke-Plumber<Name>` plus closing brace plus
 whitespace), but is too small to host meaningful business logic.
 
-The cap lives in this ADR (not in ADR 007) because it enforces task
-*shape*, not configuration. It is a Plumber self-check; it does not
-run as part of the consumer-facing `Validate` pipeline. New tasks
-added in the wrong shape fail Plumber's own `PesterUnit` task before
-merge.
+`Tests/Unit/TaskFunctionPairing.Tests.ps1` parses every
+`Add-BuildTask -Name X` registration and asserts that
+`TaskFunctions/Invoke-PlumberX.ps1` exists and defines
+`Invoke-PlumberX`. Catches the case where a task scriptblock is added
+without its task-body function (or vice versa) — the four-line cap
+does not catch this on its own because a one-line scriptblock that
+calls a nonexistent function passes the cap.
+
+Both checks live in this ADR (not in ADR 007) because they enforce
+task *shape*, not configuration. They are Plumber self-checks; they
+do not run as part of the consumer-facing `Validate` pipeline. New
+tasks added in the wrong shape fail Plumber's own `PesterUnit` task
+before merge.
 
 ## Alternatives Considered
 
@@ -161,8 +176,26 @@ public API surface by ~20 commands with no consumer benefit, requires
 `Public/<Name>.ps1` files per Plumber's own `PublicFunctions` rule, and
 exposes implementation details that consumers should not depend on (a task
 body's signature is not a stability contract). Rejected in favour of
-keeping the functions private — the symbol-table and testability wins are
-the same either way.
+keeping the functions module-internal — the symbol-table and testability
+wins are the same either way.
+
+**Place task-body functions in `Private/` rather than a new
+`TaskFunctions/` folder.** The simpler option: reuse the existing
+`Private/` folder that TaskLoader already dot-sources, zero framework
+change. But `Private/` today contains a cohesive set of ~20 framework
+helpers (`Get-PlumberTaskFile`, `Copy-PlumberHashtable`,
+`Test-PlumberTaskEnabled`, etc.) that are reused across the codebase.
+Adding ~20 task-body functions doubles the folder size and mixes two
+distinct categories of code: "reusable framework utility" and "the body
+of one specific task." Browsing `Private/` stops being informative;
+readers cannot quickly tell which files are utilities vs which contain
+task logic. A dedicated `TaskFunctions/` folder costs ~6 lines of
+framework change (TaskLoader + Plumber.psm1 dot-source) plus a
+small awareness in Plumber's own `PublicFunctions` rule, in exchange
+for a cleaner four-way split: `Public/` (exported API), `Private/`
+(framework helpers), `TaskFunctions/` (task bodies), `Tasks/` (task
+registration). Rejected the shared-`Private/` placement in favour of
+the dedicated folder.
 
 **Use PowerShell classes with task methods.** A `[PlumberTask]` base class
 with a virtual `Invoke()` method, subclassed per task. Cleaner type
@@ -181,13 +214,18 @@ honest.
 
 ## Consequences
 
-Plumber gains ~20 new files under `Private/`, one per built-in task. Each
-existing `Tasks/<Group>/<Name>.ps1` shrinks to a help block plus a
-one-line `Add-BuildTask` call. Net line count is roughly flat; the
-distribution changes from "few large files" to "more small files."
+Plumber gains a new `TaskFunctions/` folder containing ~20 files, one
+per built-in task. Each existing `Tasks/<Group>/<Name>.ps1` shrinks to
+a help block plus a one-line `Add-BuildTask` call. Net line count is
+roughly flat; the distribution changes from "few large files" to
+"more small files" and gains explicit separation between task
+orchestration (in `Tasks/`) and task execution (in `TaskFunctions/`).
+TaskLoader.ps1 and Plumber.psm1 each gain a small `foreach` loop to
+dot-source the new folder. Plumber's own `PublicFunctions` rule gains
+awareness of `TaskFunctions/` as a recognised non-public folder.
 
 Plumber's own tests can target task bodies more directly. A new spec at
-`Tests/Unit/Private/Invoke-PlumberLineLength.Tests.ps1` sets up a fixture
+`Tests/Unit/TaskFunctions/Invoke-PlumberLineLength.Tests.ps1` sets up a fixture
 `$script:PlumberConfig` value (and `$BuildRoot`, and any file-discovery
 caches the task reads through) and calls the function without going
 through the full Invoke-Build harness. This is faster and produces
@@ -197,7 +235,7 @@ functions still read script-scope state. A future cleanup may move
 tasks that benefit from real isolation onto parameters that take config
 and paths explicitly, where doing so does not make the call site uglier.
 
-Adding ~20 new `Invoke-Plumber<TaskName>` functions under `Private/`
+Adding ~20 new `Invoke-Plumber<TaskName>` functions under `TaskFunctions/`
 expands the set of symbols dot-sourced into the consumer's build-file
 scope by TaskLoader. These are not exported via the module's
 `FunctionsToExport`, but they are reachable by name from inside any
