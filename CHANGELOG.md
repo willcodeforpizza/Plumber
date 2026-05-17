@@ -1,5 +1,12 @@
 # Plumber
 
+## 0.0.41
+- Changed: `PathSeparator` rule tightened to reduce false positives discovered in real-world rollout:
+  - `\$` now requires a following `[A-Za-z_]` to count as a path (catches `\$variable` paths, no longer flags regex `\${`, `\$\d`, `\$(`)
+  - Walks up to 4 AST ancestor levels for regex-operator context (handles array literals and parens between the string and the operator)
+  - Skips strings starting with `(?` (regex prefix shape)
+  - Skips strings assigned to variables matching `*pattern*`, `*regex*`, `*matcher*`, `^re`
+
 ## 0.0.40
 - Documented: `Validate` task's `Get-BuildError` fan-in pattern (why it's needed given optional `?Task` dependencies)
 - Documented: `Test-PlumberFunctionHelp` treats `Synopsis -eq Name` as missing because PowerShell's `GetHelpContent()` falls back to the function name
