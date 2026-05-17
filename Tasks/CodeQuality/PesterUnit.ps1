@@ -33,13 +33,14 @@
     ```
 #>
 Add-BuildTask -Name PesterUnit -Jobs SetVariables, {
-    if (-not (Test-Path "$BuildRoot\Tests\Unit")) {
+    $unitTestPath = [System.IO.Path]::Combine($BuildRoot, 'Tests', 'Unit')
+    if (-not (Test-Path $unitTestPath)) {
         Write-Build Yellow 'No unit tests found'
         return
     }
 
     $pesterSplat = @{
-        Path             = "$BuildRoot\Tests\Unit"
+        Path             = $unitTestPath
         ModuleManifest   = Join-Path $BuildRoot "$script:moduleName.psd1"
         CodeCoveragePath = $script:moduleFolders
         StreamOutput     = $script:PlumberConfig.Tasks.PesterUnit.StreamOutput

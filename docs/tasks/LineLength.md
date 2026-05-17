@@ -58,4 +58,4 @@ $line = '<more than configured maximum characters on one physical line>'
 - [Task index](index.md)
 - [Group: CodeQuality](CodeQuality.md)
 - Previous: [CodeCoverage](CodeCoverage.md)
-- Next: [PesterIntegration](PesterIntegration.md)
+- Next: [PathSeparator](PathSeparator.md)

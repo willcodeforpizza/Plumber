@@ -19,6 +19,7 @@
 | [Backticks](Backticks.md) | `CodeQuality` |
 | [CodeCoverage](CodeCoverage.md) | `CodeQuality` |
 | [LineLength](LineLength.md) | `CodeQuality` |
+| [PathSeparator](PathSeparator.md) | `CodeQuality` |
 | [PesterIntegration](PesterIntegration.md) | `CodeQuality` |
 | [PesterUnit](PesterUnit.md) | `CodeQuality` |
 | [PSScriptAnalyzer](PSScriptAnalyzer.md) | `CodeQuality` |

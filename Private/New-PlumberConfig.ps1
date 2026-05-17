@@ -42,6 +42,9 @@ function New-PlumberConfig {
                 Exclude   = @()
                 MaxLength = 115
             }
+            PathSeparator        = @{
+                Exclude = @()
+            }
             ModuleVersion        = @{
                 IncludePrerelease = $false
                 Remote            = 'origin'

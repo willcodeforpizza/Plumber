@@ -32,13 +32,14 @@
     ```
 #>
 Add-BuildTask -Name PesterIntegration -Jobs SetVariables, {
-    if (-not (Test-Path "$BuildRoot\Tests\Integration")) {
+    $integrationTestPath = [System.IO.Path]::Combine($BuildRoot, 'Tests', 'Integration')
+    if (-not (Test-Path $integrationTestPath)) {
         Write-Build Yellow 'No integration tests found'
         return
     }
 
     $pesterSplat = @{
-        Path           = "$BuildRoot\Tests\Integration"
+        Path           = $integrationTestPath
         ModuleManifest = Join-Path $BuildRoot "$script:moduleName.psd1"
         StreamOutput   = $script:PlumberConfig.Tasks.PesterIntegration.StreamOutput
     }
