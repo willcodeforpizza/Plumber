@@ -6,9 +6,20 @@ function Get-PlumberPathSeparator {
         .DESCRIPTION
         Parses a PowerShell file, walks the AST for every string constant and
         expandable string, and returns each literal that contains a backslash
-        used as a path separator. Strings used as operands of regex operators
-        (-match, -replace, -split family) are skipped, as are backslash
-        sequences that look like regex escapes (\d, \s, \\, \., etc.).
+        used as a path separator.
+
+        The detection has three layers of false-positive suppression:
+
+        - Backslash sequences that look like regex escapes (\d, \s, \\, \.,
+          etc.) are not flagged by the path-like regex itself.
+        - Strings whose ancestor in the AST is a binary regex operator
+          (-match, -replace, -split family) are skipped, including strings
+          that sit inside array literals or parenthesised expressions
+          between the string and the operator.
+        - Strings assigned to a variable whose name contains pattern, regex,
+          re, or match (case-insensitive) are skipped.
+        - Strings whose content starts with (? are skipped (regex prefix
+          shape).
 
         .PARAMETER Path
         The PowerShell file to inspect.
@@ -50,20 +61,26 @@ function Get-PlumberPathSeparator {
     )
 
     # Backslash followed by either:
-    #   (a) a character that is not a regex/escape special, or
-    #   (b) a regex-letter that is followed by another word character - meaning
-    #       it's part of a longer identifier, not a one-character regex escape.
-    # The first branch catches \T, \Public, \$variable, etc. The second branch
-    # catches \Tests, \two, \sources where the leading letter happens to be a
-    # regex-escape letter but the rest of the word makes it clearly a path
-    # component. The regex-context check below handles strings actually used
-    # as regex (where \two might legitimately be tab + 'wo').
+    #   (a) a character that is neither a regex/escape special nor `$` - catches
+    #       \T, \Public, etc.
+    #   (b) a regex-letter (d s w b n r t f v 0 and uppercase variants) followed
+    #       by another word character - catches \Tests, \two where the leading
+    #       letter happens to be a regex-escape letter but the rest of the word
+    #       makes it clearly a path component.
+    #   (c) `\$` followed by `[A-Za-z_]` - catches `\$variable` paths like
+    #       "$BuildRoot\$script:moduleName.psm1" without matching regex `\${`,
+    #       `\$\d`, `\$(`, etc.
     #
     # Skip set covers commonly-used regex escapes: character classes (\d \s
     # \w \b and uppercase variants), control characters (\n \r \t \f \v \0),
-    # and metachar escapes (\. \\ \| \+ \* \? \( \) \[ \] \{ \} \/). Rare
-    # regex escapes (\A \Z \z \G \p \P \k \K \^ \$) are deliberately omitted.
-    $pathLikeBackslash = '\\(?:[^dDsSwWbBnrtfv0.\\|+*?()\[\]{}/]|[dDsSwWbBnrtfv0]\w)'
+    # metachar escapes (\. \\ \| \+ \* \? \( \) \[ \] \{ \} \/), and the
+    # end-of-string anchor (\$). Rare regex escapes (\A \Z \z \G \p \P \k \K
+    # \^) are deliberately omitted.
+    $pathLikeBackslash =
+        '\\(?:[^dDsSwWbBnrtfv0.\\|+*?()\[\]{}/$]|[dDsSwWbBnrtfv0]\w|\$[A-Za-z_])'
+
+    # Variable-name conventions that indicate the string is a regex pattern.
+    $regexVariableNames = 'pattern|regex|matcher|matchpattern|^re$|^re\d'
 
     $stringPredicate = {
         param ($node)
@@ -78,13 +95,54 @@ function Get-PlumberPathSeparator {
             continue
         }
 
-        $parent = $stringNode.Parent
-        $inRegexContext = (
-            $parent -is [System.Management.Automation.Language.BinaryExpressionAst] -and
-            $parent.Operator -in $regexOperators
-        )
+        # Strings that start with (? are regex (case-insensitive flags, named
+        # groups, non-capturing groups, etc.).
+        if ($stringValue.StartsWith('(?')) {
+            continue
+        }
+
+        # Walk up the parent chain looking for a regex operator. Strings inside
+        # array literals, paren expressions, or unary expressions between the
+        # string and the operator are still in regex context. Cap the walk at
+        # a few levels so we don't accidentally treat a deeply-nested literal
+        # as regex.
+        $inRegexContext = $false
+        $ancestor = $stringNode.Parent
+        for ($depth = 0; $depth -lt 4 -and $null -ne $ancestor; $depth++) {
+            if (
+                $ancestor -is [System.Management.Automation.Language.BinaryExpressionAst] -and
+                $ancestor.Operator -in $regexOperators
+            ) {
+                $inRegexContext = $true
+                break
+            }
+            # Stop walking up once we hit a statement or command boundary - the
+            # string isn't going to feed a regex operator from inside one of
+            # those.
+            if (
+                $ancestor -is [System.Management.Automation.Language.StatementAst] -or
+                $ancestor -is [System.Management.Automation.Language.CommandAst]
+            ) {
+                break
+            }
+            $ancestor = $ancestor.Parent
+        }
         if ($inRegexContext) {
             continue
+        }
+
+        # Strings assigned to a variable whose name suggests it holds a regex
+        # are skipped. The variable might be used as a -match operand later
+        # without us being able to trace it via AST walking.
+        $parent = $stringNode.Parent
+        if (
+            $parent -is [System.Management.Automation.Language.AssignmentStatementAst] -and
+            $parent.Left -is [System.Management.Automation.Language.VariableExpressionAst]
+        ) {
+            $variableName = $parent.Left.VariablePath.UserPath
+            if ($variableName -match $regexVariableNames) {
+                continue
+            }
         }
 
         [pscustomobject]@{
