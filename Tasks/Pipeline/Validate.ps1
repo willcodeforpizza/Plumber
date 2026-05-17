@@ -16,6 +16,12 @@
     Invoke-Plumber -Task Validate
     ```
 #>
+# Validate's children are wired up as optional dependencies (?Task) so an
+# excluded child doesn't error its parent. The trade-off: Invoke-Build treats
+# the build as successful when only optional dependencies fail. To make
+# Invoke-Plumber surface failures correctly, this final job iterates every
+# task in the registered graph and asks Get-BuildError per task. Any task
+# that recorded an error gets re-raised so the build exits non-zero.
 $validateJobs = @($script:PlumberTaskJobs.Validate) + {
     $taskNames = [ordered]@{}
     foreach ($taskName in $script:PlumberTaskJobs.Keys) {
