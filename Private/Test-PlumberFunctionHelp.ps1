@@ -29,6 +29,9 @@ function Test-PlumberFunctionHelp {
         $RequireFullHelp
     )
 
+    # PowerShell's GetHelpContent() falls back to the function name when no
+    # .SYNOPSIS is present, so a synopsis equal to the name means the author
+    # never wrote one. Treat that as missing.
     if (
         -not $Help.Synopsis -or
         $Help.Synopsis -eq $Help.Name
