@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.40
+- Documented: `Validate` task's `Get-BuildError` fan-in pattern (why it's needed given optional `?Task` dependencies)
+- Documented: `Test-PlumberFunctionHelp` treats `Synopsis -eq Name` as missing because PowerShell's `GetHelpContent()` falls back to the function name
+- Documented: ADR-005 now explains the deliberate re-purpose of `ModuleList` as Plumber's internal dependency declaration
+
 ## 0.0.39
 - Changed: `Get-PlumberTaskGroup` streams hashtables individually instead of wrapping in `@(...)`; OutputType now correctly declares `[hashtable]`
 - Changed: `Invoke-PlumberBuild` caches the parsed runner scriptblock across calls instead of reading and parsing the file every time
