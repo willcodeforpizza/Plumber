@@ -3,8 +3,11 @@
     Validates no TODO comments are left in files.
 
     .DESCRIPTION
-    Checks files under the build root and fails when a code comment begins with
-    `TODO`.
+    Checks `.ps1`, `.psm1`, and `.psd1` files and fails when a line comment
+    contains a TODO marker. Detection is AST-aware so TODO text inside string
+    literals or block comments is not flagged. Both leading-line TODOs
+    (`# TODO: fix this`) and inline TODOs after code on the same line
+    (`$x = 1 # TODO: fix this`) are reported.
 
     .GROUP
     ModuleConventions
@@ -37,19 +40,26 @@
 
     .FAIL
     ```text
-    A code comment begins with the TODO marker.
+    A line comment contains the TODO marker.
     ```
 #>
 Add-BuildTask -Name ToDo -Jobs {
     $extensions = '.ps1', '.psm1', '.psd1'
-    $toDos = Get-PlumberTaskFile -Task ToDo -Extension $extensions |
-        Where-Object {$_.Name -ne 'ToDo.ps1'} |
-        ForEach-Object {
-        $file = $_
-        Get-Content $_.FullName | Where-Object {$_ -match '^\s*#\s*TODO\b'} | ForEach-Object {
-            "$($file.Name): $(($_ -replace '^\s*#\s*TODO:?\s*', '').Trim())"
+    $taskFiles = Get-PlumberTaskFile -Task ToDo -Extension $extensions |
+        Where-Object {$_.Name -ne 'ToDo.ps1'}
+
+    $toDos = foreach ($file in $taskFiles) {
+        try {
+            $hits = Get-PlumberToDoComment -Path $file.FullName
+        } catch {
+            "$($file.Name): could not parse file: $($_.Exception.Message)"
+            continue
+        }
+        foreach ($hit in $hits) {
+            "$($file.Name):$($hit.Line) - $($hit.Message)".TrimEnd(' -')
         }
     }
+
     if ($toDos) {
         Write-Error ($toDos -join (', ' + [Environment]::NewLine))
     }

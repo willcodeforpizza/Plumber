@@ -327,7 +327,7 @@ Describe 'Get-PlumberTaskLoader code-quality integration' {
             Out-String
 
         $LASTEXITCODE | Should -Not -Be 0
-        $result | Should -Match 'Invoke-Thing.ps1: fix this'
+        $result | Should -Match 'Invoke-Thing\.ps1:\d+ - fix this'
     }
 
     It 'ignores TODO markers inside strings' {
