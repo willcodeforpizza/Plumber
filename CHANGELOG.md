@@ -1,5 +1,11 @@
 # Plumber
 
+## 0.0.39
+- Changed: `Get-PlumberTaskGroup` streams hashtables individually instead of wrapping in `@(...)`; OutputType now correctly declares `[hashtable]`
+- Changed: `Invoke-PlumberBuild` caches the parsed runner scriptblock across calls instead of reading and parsing the file every time
+- Added: `ConvertTo-PlumberPathRegex` helper extracts the JSONSchema glob-to-regex logic with 20 pinned test cases
+- Changed: `.github/workflows/CI.yml` replaces backtick line continuation with splatted hashtables
+
 ## 0.0.38
 - Fixed: CI test matrix now runs on push to main and the release job depends on it, closing a release-safety hole where admin-merge could publish unvalidated to PSGallery
 - Changed: `New-PlumberConfig` now accepts `BuildRoot` as an explicit parameter; `TaskLoader` passes it instead of the function reaching up the scope chain via `Get-Variable`
