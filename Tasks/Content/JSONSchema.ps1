@@ -76,13 +76,7 @@ Add-BuildTask -Name JSONSchema -Jobs {
             continue
         }
 
-        $normalizedPattern = $mapping.Path.Replace('\', '/')
-        $pathRegex = [regex]::Escape($normalizedPattern).
-            Replace('\*\*/', '(?:.*/)?').
-            Replace('\*\*', '.*').
-            Replace('\*', '[^/]*').
-            Replace('\?', '[^/]')
-        $pathRegex = "^$pathRegex$"
+        $pathRegex = ConvertTo-PlumberPathRegex -Pattern $mapping.Path
 
         $jsonFiles = @(
             Get-PlumberTaskFile -Task JSONSchema -Extension '.json' |
