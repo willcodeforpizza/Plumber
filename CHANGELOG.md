@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.37
+- Changed: `Backticks` rule rewritten as AST-aware via new `Get-PlumberLineContinuation` helper — no longer flags backticks inside strings, here-strings, or comments
+- Changed: `ToDo` rule rewritten as AST-aware via new `Get-PlumberToDoComment` helper — now catches inline TODOs (`$x = 1 # TODO: fix`) as well as leading-line TODOs; block-comment TODOs and TODOs in string literals are not flagged
+
 ## 0.0.36
 - Fixed: `ModuleVersion` PSGallery path now normalises both versions through `ConvertTo-PlumberSemVer` so 3-segment and 4-segment representations of the same semantic version compare equal
 - Changed: `New-PlumberConfig` deep-clones default config via new `Copy-PlumberHashtable` helper so nested hashtables and arrays are not shared by reference

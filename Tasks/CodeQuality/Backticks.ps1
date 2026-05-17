@@ -4,7 +4,10 @@
 
     .DESCRIPTION
     Checks `.ps1`, `.psm1`, and `.psd1` files and fails when a backtick is used
-    as the final non-whitespace character on a line.
+    as a line continuation. Detection is AST-aware: backticks inside strings,
+    here-strings, and comments are not flagged, and a trailing pair of backticks
+    (a literal escaped backtick) is treated as intentional source rather than a
+    continuation.
 
     .GROUP
     CodeQuality
@@ -37,19 +40,22 @@
 
     .FAIL
     ```text
-    A PowerShell line whose final non-whitespace character is a backtick.
+    A PowerShell line whose final non-whitespace character is a backtick
+    used as a line continuation.
     ```
 #>
 Add-BuildTask -Name Backticks -Jobs {
     $powershellFiles = Get-PlumberTaskFile -Task Backticks -Extension '.ps1', '.psd1', '.psm1'
 
     $failures = foreach ($file in $powershellFiles) {
-        $lineNumber = 0
-        foreach ($line in Get-Content $file.FullName) {
-            $lineNumber++
-            if ($line -match '(?<!`)`\s*$') {
-                "$($file.Name):$lineNumber - Line-continuation backtick found"
-            }
+        try {
+            $hits = Get-PlumberLineContinuation -Path $file.FullName
+        } catch {
+            "$($file.Name):0 - Could not parse file: $($_.Exception.Message)"
+            continue
+        }
+        foreach ($hit in $hits) {
+            "$($file.Name):$($hit.Line) - Line-continuation backtick found"
         }
     }
 

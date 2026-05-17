@@ -6,8 +6,11 @@ Validates no TODO comments are left in files.
 
 ## Description
 
-Checks files under the build root and fails when a code comment begins with
-`TODO`.
+Checks `.ps1`, `.psm1`, and `.psd1` files and fails when a line comment
+contains a TODO marker. Detection is AST-aware so TODO text inside string
+literals or block comments is not flagged. Both leading-line TODOs
+(`# TODO: fix this`) and inline TODOs after code on the same line
+(`$x = 1 # TODO: fix this`) are reported.
 
 ## Group
 
@@ -45,7 +48,7 @@ Invoke-Plumber -Task ToDo
 ## Fail
 
 ```text
-A code comment begins with the TODO marker.
+A line comment contains the TODO marker.
 ```
 
 ## Navigation

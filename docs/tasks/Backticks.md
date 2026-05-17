@@ -7,7 +7,10 @@ Validates PowerShell files do not use line-continuation backticks.
 ## Description
 
 Checks `.ps1`, `.psm1`, and `.psd1` files and fails when a backtick is used
-as the final non-whitespace character on a line.
+as a line continuation. Detection is AST-aware: backticks inside strings,
+here-strings, and comments are not flagged, and a trailing pair of backticks
+(a literal escaped backtick) is treated as intentional source rather than a
+continuation.
 
 ## Group
 
@@ -45,7 +48,8 @@ Get-Foo -DoBar -AddFizz
 ## Fail
 
 ```text
-A PowerShell line whose final non-whitespace character is a backtick.
+A PowerShell line whose final non-whitespace character is a backtick
+used as a line continuation.
 ```
 
 ## Navigation
