@@ -73,7 +73,7 @@ function New-PlumberConfig {
         }
     }
 
-    $plumberConfig = $defaults.Clone()
+    $plumberConfig = Copy-PlumberHashtable -InputObject $defaults
     foreach ($key in $Config.Keys) {
         if ($key -eq 'Tasks') {
             foreach ($taskKey in $Config.Tasks.Keys) {
@@ -106,16 +106,8 @@ function New-PlumberConfig {
     if (-not $plumberConfig.Tasks.PublicFunctionPrefix.Exclusions) {
         $plumberConfig.Tasks.PublicFunctionPrefix.Exclusions = @()
     }
-    $streamVariableSplat = @{
-        Name        = 'PlumberStreamPesterOutput'
-        Scope       = 'Global'
-        ErrorAction = 'SilentlyContinue'
-    }
-    $streamPesterOutputVariable = Get-Variable @streamVariableSplat
-    if ($null -ne $streamPesterOutputVariable) {
-        $streamPesterOutput = [bool](
-            Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly
-        )
+    $streamPesterOutput = Get-PlumberStreamPesterOutput
+    if ($null -ne $streamPesterOutput) {
         $plumberConfig.Tasks.PesterIntegration.StreamOutput = $streamPesterOutput
         $plumberConfig.Tasks.PesterUnit.StreamOutput = $streamPesterOutput
     }

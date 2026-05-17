@@ -1,5 +1,10 @@
 # Plumber
 
+## 0.0.36
+- Fixed: `ModuleVersion` PSGallery path now normalises both versions through `ConvertTo-PlumberSemVer` so 3-segment and 4-segment representations of the same semantic version compare equal
+- Changed: `New-PlumberConfig` deep-clones default config via new `Copy-PlumberHashtable` helper so nested hashtables and arrays are not shared by reference
+- Changed: encapsulated the `PlumberStreamPesterOutput` global side-channel behind `Set`/`Get`/`Restore-PlumberStreamPesterOutput` helpers
+
 ## 0.0.35
 - Added: `PathSeparator` task for detecting Windows-style backslash path separators in string literals (AST-aware, regex-context exempt)
 - Fixed: Windows-style path separators in `Plumber.psm1`, `PesterUnit`, `PesterIntegration`, `Naming`, `ChangelogUpdated` — replaced with `Join-Path` / `[IO.Path]::Combine`

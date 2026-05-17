@@ -54,26 +54,11 @@ function Invoke-PlumberBuild {
     # dedicated scriptblock so we can read and remove that variable reliably
     # without leaking result variables into Invoke-Plumber's module scope.
     $runner = [scriptblock]::Create((Get-Content -Path $runnerPath -Raw))
-    $streamVariableSplat = @{
-        Name        = 'PlumberStreamPesterOutput'
-        Scope       = 'Global'
-        ErrorAction = 'SilentlyContinue'
-    }
-    $streamVariableExists = Get-Variable @streamVariableSplat
-    $previousStreamPesterOutput = if ($streamVariableExists) {
-        Get-Variable -Name PlumberStreamPesterOutput -Scope Global -ValueOnly
-    }
-
+    $streamToken = Set-PlumberStreamPesterOutput -Value ([bool]$RawOutput)
     try {
-        Set-Variable -Name PlumberStreamPesterOutput -Scope Global -Value ([bool]$RawOutput)
-
         $buildResult = & $runner $invokeBuildCommand $Task $BuildFile $resultVariable ([bool]$RawOutput)
     } finally {
-        if (-not $streamVariableExists) {
-            Remove-Variable -Name PlumberStreamPesterOutput -Scope Global -ErrorAction SilentlyContinue
-        } else {
-            Set-Variable -Name PlumberStreamPesterOutput -Scope Global -Value $previousStreamPesterOutput
-        }
+        Restore-PlumberStreamPesterOutput -Token $streamToken
     }
 
     if (-not $buildResult) {
