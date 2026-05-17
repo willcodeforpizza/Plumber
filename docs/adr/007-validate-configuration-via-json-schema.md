@@ -2,7 +2,13 @@
 
 ## Status
 
-Accepted
+Proposed — needs more consideration before adoption. The trade-offs
+versus a PowerShell-class-based approach were re-examined after empirical
+testing of class reload behaviour in PowerShell 7.6.1 (see the
+"PowerShell classes" entry in Alternatives Considered). The JSON Schema
+direction still looks right for this project, but the error-handling
+concession to classes is real and the team is not ready to commit
+without more thinky time.
 
 ## Context
 
@@ -168,14 +174,61 @@ not by Plumber.
 
 ## Alternatives Considered
 
-**PowerShell classes for a typed `[PlumberConfig]`.** Provides
-type-checked property access and `using module` IntelliSense in build
-files, but PowerShell classes do not survive `Import-Module -Force`
-cleanly — old instances become `PSObject` shells. This interacts badly
-with Plumber's self-validation story. Consumers would also need
-`using module Plumber` at the top of every build file, creating a
-parse-time dependency on Plumber being installed before the file is
-read. Rejected.
+**PowerShell classes for a typed `[PlumberConfig]`.** Honestly the
+strongest alternative on error-handling ergonomics. Classes give
+free, friendly per-error messages out of PowerShell's property
+binder (`"Cannot validate argument on property 'MaxLength'. The 99999
+argument is greater than the maximum allowed range of 10000"`), no
+custom error-translation code required. They also support richer
+validation primitives via `[ValidateScript({...})]`, including
+cross-property checks ("if `FileScope='Changed'` then `DiffBase`
+required") that are expressible in JSON Schema only through
+`dependentRequired` / `if-then-else` constructs.
+
+Classes lose on error aggregation (the property binder stops on the
+first invalid value, so consumers fix one error per retry cycle
+rather than seeing a composite report) and on direct path attribution
+to hashtable keys (PS errors name the type, not the
+`Tasks.LineLength.<key>` path consumers typed). These gaps are real
+but smaller than the error-handling wins.
+
+The bigger reason to reject is that classes bring permanent concerns
+the JSON Schema approach avoids. Tested empirically in PowerShell
+7.6.1:
+
+- **Type identity is fragile across module reloads when the class
+  definition changes.** If a script holds an instance of
+  `[PlumberConfig]` from one Plumber version and then `Import-Module
+  Plumber -Force` loads a different definition, the old and new
+  `[PlumberConfig]` types coexist in the session. Old-instance method
+  calls still dispatch correctly (`$old.GetType()` still reports
+  `PlumberConfig`, no "PSObject shells"), but `$old -is
+  [PlumberConfig]` and `$old.GetType() -eq $new.GetType()` return
+  `False`. Day-to-day this is fine; in self-validation harnesses that
+  load Plumber multiple times, this is a footgun that needs care.
+- **`using module Plumber` is required for the type literal to be
+  visible at all.** `Import-Module Plumber` does not expose module
+  class types to the caller's scope (confirmed by test — the literal
+  `[PlumberConfig]` throws "Unable to find type" without `using
+  module`). `using module` is parsed before the script executes, so
+  it creates a parse-time dependency on Plumber being already
+  installed and locatable. Not catastrophic; it does add a setup
+  step consumers do not need today.
+- **Class shapes become part of Plumber's stability contract.**
+  Adding, renaming, or removing a property is a breaking change for
+  any consumer that constructs the class explicitly via `[Type]@{...}`
+  cast. Hashtable keys do not carry the same constraint — adding a
+  key is forward-compatible, removing one fails gracefully through
+  the validator.
+
+JSON Schema trades some error-message authoring work — bounded
+(~100 lines plus golden tests across PS versions and schema-rule
+kinds, see Consequences) and addressable — for avoiding all three of
+those forever-features. Rejected as the wrong trade for *this*
+project, not as the wrong solution in general; with a different
+audience or feature set (e.g., a typed runtime config object passed
+between subsystems, or rich computed validation), classes might be
+the right shape.
 
 **Two-way JSON configuration (`plumber.config.json` as the authoring
 format).** Same machinery as the chosen design but extended to let
