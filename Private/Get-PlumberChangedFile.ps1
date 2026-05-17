@@ -33,14 +33,16 @@ function Get-PlumberChangedFile {
         $DiffBase
     )
 
-    $git = Get-Command git -ErrorAction SilentlyContinue
-    if (-not $git) {
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         throw 'FileScope Changed requires git.'
     }
 
     $resolvedBuildRoot = [System.IO.Path]::GetFullPath($BuildRoot)
-    $gitRoot = & $git -C $resolvedBuildRoot rev-parse --show-toplevel 2>$null
-    if ($LASTEXITCODE -ne 0 -or -not $gitRoot) {
+    try {
+        $gitRoot = Invoke-PlumberGit -ArgumentList @(
+            '-C', $resolvedBuildRoot, 'rev-parse', '--show-toplevel'
+        )
+    } catch {
         throw 'FileScope Changed requires BuildRoot to be inside a git repository.'
     }
     $gitRoot = [System.IO.Path]::GetFullPath($gitRoot)
@@ -59,10 +61,7 @@ function Get-PlumberChangedFile {
     }
 
     foreach ($diffArg in $diffArgs) {
-        $paths = & $git -C $resolvedBuildRoot @diffArg
-        if ($LASTEXITCODE -ne 0) {
-            throw "Failed to get changed files from git using: git $($diffArg -join ' ')"
-        }
+        $paths = Invoke-PlumberGit -ArgumentList (@('-C', $resolvedBuildRoot) + $diffArg)
 
         foreach ($path in $paths) {
             if (-not $path) {
