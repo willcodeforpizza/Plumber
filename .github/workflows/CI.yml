@@ -32,19 +32,23 @@ jobs:
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           (Import-PowerShellDataFile ./Plumber.psd1).ModuleList |
               ForEach-Object {
-                Install-Module `
-                  -Name $_.ModuleName `
-                  -RequiredVersion $_.ModuleVersion `
-                  -Scope CurrentUser `
-                  -Force `
-                  -SkipPublisherCheck
+                $installSplat = @{
+                  Name               = $_.ModuleName
+                  RequiredVersion    = $_.ModuleVersion
+                  Scope              = 'CurrentUser'
+                  Force              = $true
+                  SkipPublisherCheck = $true
+                }
+                Install-Module @installSplat
               }
-          Install-Module `
-            -Name Plumber.Release `
-            -RequiredVersion 0.1.0 `
-            -Scope CurrentUser `
-            -Force `
-            -SkipPublisherCheck
+          $releaseSplat = @{
+            Name               = 'Plumber.Release'
+            RequiredVersion    = '0.1.0'
+            Scope              = 'CurrentUser'
+            Force              = $true
+            SkipPublisherCheck = $true
+          }
+          Install-Module @releaseSplat
 
       - name: Invoke-Plumber
         shell: pwsh
@@ -73,19 +77,23 @@ jobs:
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           (Import-PowerShellDataFile ./Plumber.psd1).ModuleList |
               ForEach-Object {
-                Install-Module `
-                  -Name $_.ModuleName `
-                  -RequiredVersion $_.ModuleVersion `
-                  -Scope CurrentUser `
-                  -Force `
-                  -SkipPublisherCheck
+                $installSplat = @{
+                  Name               = $_.ModuleName
+                  RequiredVersion    = $_.ModuleVersion
+                  Scope              = 'CurrentUser'
+                  Force              = $true
+                  SkipPublisherCheck = $true
+                }
+                Install-Module @installSplat
               }
-          Install-Module `
-            -Name Plumber.Release `
-            -RequiredVersion 0.1.0 `
-            -Scope CurrentUser `
-            -Force `
-            -SkipPublisherCheck
+          $releaseSplat = @{
+            Name               = 'Plumber.Release'
+            RequiredVersion    = '0.1.0'
+            Scope              = 'CurrentUser'
+            Force              = $true
+            SkipPublisherCheck = $true
+          }
+          Install-Module @releaseSplat
 
       - name: Run Release
         shell: pwsh
