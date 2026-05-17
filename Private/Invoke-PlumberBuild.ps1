@@ -49,11 +49,16 @@ function Invoke-PlumberBuild {
     } else {
         Split-Path $PSScriptRoot -Parent
     }
-    $runnerPath = Join-Path $moduleRoot 'Resource/Invoke-PlumberBuildRunner.ps1'
     # Invoke-Build writes -Result into the caller's scope. Run it inside a
     # dedicated scriptblock so we can read and remove that variable reliably
     # without leaking result variables into Invoke-Plumber's module scope.
-    $runner = [scriptblock]::Create((Get-Content -Path $runnerPath -Raw))
+    # Cache the parsed scriptblock across calls so we only read+parse the
+    # runner file once per session.
+    if (-not $script:PlumberBuildRunner) {
+        $runnerPath = Join-Path $moduleRoot 'Resource/Invoke-PlumberBuildRunner.ps1'
+        $script:PlumberBuildRunner = [scriptblock]::Create((Get-Content -Path $runnerPath -Raw))
+    }
+    $runner = $script:PlumberBuildRunner
     $streamToken = Set-PlumberStreamPesterOutput -Value ([bool]$RawOutput)
     try {
         $buildResult = & $runner $invokeBuildCommand $Task $BuildFile $resultVariable ([bool]$RawOutput)
