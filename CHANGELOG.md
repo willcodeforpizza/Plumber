@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.43
+- Changed: `ModuleVersion` failure wording now describes merge readiness more directly.
+- Changed: CI dependency setup imports Plumber with missing internal dependency installation enabled and centralizes the `Plumber.Release` version.
+
 ## 0.0.42
 - Fixed: validation file discovery now includes hidden directories, so files such as `.github/workflows/CI.yml` are checked.
 - Fixed: `ChangelogUpdated` now declares its `SetVariables` dependency and works when invoked directly.

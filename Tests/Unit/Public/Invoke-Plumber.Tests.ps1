@@ -119,7 +119,7 @@ Describe 'Invoke-Plumber' {
     It 'writes full failure details in summary mode before throwing' {
         InModuleScope Plumber {
             $longError = @(
-                'PSD1 version might be out of date.'
+                'ModuleVersion is not merge-ready.'
                 'Expected version marker: 1234567890abcdefghijklmnopqrstuvwxyz'
                 'Actual version marker: zyxwvutsrqponmlkjihgfedcba0987654321'
             ) -join [Environment]::NewLine
@@ -151,7 +151,7 @@ Describe 'Invoke-Plumber' {
 
     It 'formats failure summaries with spacing and neutral task headings by default' {
         InModuleScope Plumber {
-            $errorText = 'PSD1 version might be out of date.'
+            $errorText = 'ModuleVersion is not merge-ready.'
             $script:mockBuildResult = [pscustomobject]@{
                 Tasks = @(
                     [pscustomobject]@{
@@ -740,4 +740,3 @@ Describe 'Invoke-PlumberBuild' {
         }
     }
 }
-

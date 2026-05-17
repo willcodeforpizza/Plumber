@@ -2,13 +2,14 @@
 
 ## Synopsis
 
-Validates current PSD1 version is higher than the published version.
+Validates current PSD1 version is merge-ready.
 
 ## Description
 
-Looks up the latest published module version from PSGallery or git tags
-and fails when the configured manifest version is not greater than the
-published version.
+Looks up the latest published module version from PSGallery or git tags.
+Fails when the configured manifest version is not greater than the
+published version because a mergeable change must advance the next
+publishable module version.
 
 ## Group
 
