@@ -55,7 +55,13 @@ foreach ($privateScript in Get-ChildItem (Join-Path $moduleRoot 'Private') -Filt
     . $privateScript.FullName
 }
 
-$script:PlumberConfig = New-PlumberConfig -Config $Config
+$newConfigSplat = @{
+    Config = $Config
+}
+if (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
+    $newConfigSplat.BuildRoot = $BuildRoot
+}
+$script:PlumberConfig = New-PlumberConfig @newConfigSplat
 $script:PlumberConfig.ModuleRoot = $moduleRoot
 $script:PlumberTaskJobs = Initialize-PlumberTaskGraph
 

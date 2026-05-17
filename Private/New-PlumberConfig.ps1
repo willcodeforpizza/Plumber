@@ -12,7 +12,10 @@ function New-PlumberConfig {
     [OutputType([hashtable])]
     param (
         [hashtable]
-        $Config = @{}
+        $Config = @{},
+
+        [string]
+        $BuildRoot
     )
 
     $defaults = @{
@@ -111,7 +114,7 @@ function New-PlumberConfig {
         $plumberConfig.Tasks.PesterIntegration.StreamOutput = $streamPesterOutput
         $plumberConfig.Tasks.PesterUnit.StreamOutput = $streamPesterOutput
     }
-    if (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
+    if ($BuildRoot) {
         $plumberConfig.BuildRoot = $BuildRoot
     }
 
