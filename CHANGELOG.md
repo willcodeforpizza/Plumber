@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.42
+- Fixed: validation file discovery now includes hidden directories, so files such as `.github/workflows/CI.yml` are checked.
+- Fixed: `ChangelogUpdated` now declares its `SetVariables` dependency and works when invoked directly.
+
 ## 0.0.41
 - Changed: `PathSeparator` rule tightened to reduce false positives discovered in real-world rollout:
   - `\$` now requires a following `[A-Za-z_]` to count as a path (catches `\$variable` paths, no longer flags regex `\${`, `\$\d`, `\$(`)
