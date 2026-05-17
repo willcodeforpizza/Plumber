@@ -205,6 +205,21 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
         $tasks['CodeQuality'].Jobs | Should -Contain '?Backticks'
     }
 
+    It 'runs SetVariables before ChangelogUpdated when invoked directly' {
+        $buildFile = Join-Path $TestDrive 'changelog-updated.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = '$PSScriptRoot/../../Plumber.psd1'"
+            "    Tasks = @{ Exclude = @('ModuleVersion') }"
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+
+        $tasks['ChangelogUpdated'].Jobs | Should -Contain 'SetVariables'
+    }
+
     It 'loads LineLength directly under CodeQuality' {
         $buildFile = Join-Path $TestDrive 'line-length-loader.build.ps1'
         @(
