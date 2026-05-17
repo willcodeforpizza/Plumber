@@ -11,12 +11,14 @@ Describe 'Get-PlumberTaskFile' {
         New-Item -Path (Join-Path $script:buildRoot 'Public') -ItemType Directory -Force | Out-Null
         New-Item -Path (Join-Path $script:buildRoot 'Resource') -ItemType Directory -Force | Out-Null
         New-Item -Path (Join-Path $script:buildRoot 'Resource/Schema') -ItemType Directory -Force | Out-Null
+        New-Item -Path (Join-Path $script:buildRoot '.github/workflows') -ItemType Directory -Force | Out-Null
         New-Item -Path (Join-Path $script:buildRoot 'Tests/Assets') -ItemType Directory -Force | Out-Null
 
         Set-Content -Path (Join-Path $script:buildRoot 'Public/Invoke-Thing.ps1') -Value '$true'
         Set-Content -Path (Join-Path $script:buildRoot 'Public/Invoke-Other.psm1') -Value '$true'
         Set-Content -Path (Join-Path $script:buildRoot 'Resource/config.json') -Value '{}'
         Set-Content -Path (Join-Path $script:buildRoot 'Resource/Schema/config.schema.json') -Value '{}'
+        Set-Content -Path (Join-Path $script:buildRoot '.github/workflows/CI.yml') -Value 'name: CI'
         Set-Content -Path (Join-Path $script:buildRoot 'Tests/Assets/Fixture.ps1') -Value '$true'
     }
 
@@ -36,6 +38,23 @@ Describe 'Get-PlumberTaskFile' {
             $files.Name | Should -Contain 'Invoke-Thing.ps1'
             $files.Name | Should -Contain 'Fixture.ps1'
             $files.Name | Should -Not -Contain 'Invoke-Other.psm1'
+        }
+    }
+
+    It 'includes files under hidden directories' {
+        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+            $script:PlumberFiles = $null
+            $script:PlumberChangedFiles = $null
+            $script:PlumberChangedFilesLoaded = $false
+            $script:PlumberConfig = @{
+                BuildRoot = $BuildRoot
+                FileScope = 'All'
+                Tasks     = @{}
+            }
+
+            $files = Get-PlumberTaskFile -Task YAML -Extension '.yml'
+
+            $files.FullName | Should -Contain (Join-Path $BuildRoot '.github/workflows/CI.yml')
         }
     }
 

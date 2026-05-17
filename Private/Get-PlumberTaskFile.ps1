@@ -37,7 +37,7 @@ function Get-PlumberTaskFile {
     )
 
     if (-not $script:PlumberFiles) {
-        $script:PlumberFiles = @(Get-ChildItem $BuildRoot -File -Recurse)
+        $script:PlumberFiles = @(Get-ChildItem $BuildRoot -File -Recurse -Force)
     }
 
     if (

@@ -35,7 +35,7 @@
     ## 1.2.2
     ```
 #>
-Add-BuildTask -Name ChangelogUpdated -Jobs {
+Add-BuildTask -Name ChangelogUpdated -Jobs SetVariables, {
     $changelog = Get-Content (Join-Path $BuildRoot 'CHANGELOG.md') -ErrorAction SilentlyContinue
     if (-not $changelog) {
         Write-Build Yellow 'No changelog found'
