@@ -28,11 +28,37 @@ but that dependency is not needed to import the module at runtime.
 Plumber will separate dependency concerns:
 
 - Runtime module manifests should declare only real runtime dependencies.
-- Plumber's own task dependencies remain internal to Plumber.
+- Plumber's own task dependencies remain internal to Plumber, declared in
+  Plumber's own manifest under `ModuleList` (see "On `ModuleList` use"
+  below).
 - Repository build and release dependencies are declared in
   `Plumber.dependencies.psd1` at the repository root.
 - Repository dependencies are installed explicitly with
   `Install-PlumberDependency`.
+
+### On `ModuleList` use
+
+PowerShell has no canonical manifest slot for "modules my module needs to
+function at runtime but are not consumer-facing." `RequiredModules` loads
+globally; `NestedModules` implies nested module semantics. `ModuleList` is
+documented as "an inventory of the modules included in the module" — a
+documentation hint with no install-time behavior.
+
+Plumber re-purposes `ModuleList` as its internal dependency declaration:
+`Plumber.psm1` reads `ModuleList` from the manifest at import time and calls
+`Import-PlumberDependency` against the entries. This is a deliberate misuse
+of the field, accepted because:
+
+- It keeps Plumber's dependencies declarative and version-pinned in the
+  manifest where readers expect manifests to live.
+- It does not affect consumers — `ModuleList` does not trigger any
+  PowerShell install behavior, so end users importing a Plumber-validated
+  module are not exposed to Plumber's internal needs.
+- The alternative (a dedicated `Plumber.internal-dependencies.psd1` file)
+  splits manifest data across two files for no gain in consumer behavior.
+
+If PowerShell adds a proper "tooling dependency" slot in a future manifest
+schema, Plumber should move to it.
 
 Loading a consumer module must not install build tooling as a side effect.
 
