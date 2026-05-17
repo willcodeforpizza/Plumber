@@ -65,8 +65,24 @@ Add-BuildTask -Name ModuleVersion -Jobs SetVariables, {
                 return
             }
 
-            $publishedVersion = [version]$publishedModule.Version
-            $psd1Version = [version]$script:psd1.ModuleVersion
+            $publishedSemVerSplat = @{
+                VersionName        = [string]$publishedModule.Version
+                AllowSystemVersion = $true
+            }
+            $publishedVersionInfo = ConvertTo-PlumberSemVer @publishedSemVerSplat
+            if (-not $publishedVersionInfo) {
+                throw "PSGallery version '$($publishedModule.Version)' is not a valid version."
+            }
+            $psd1SemVerSplat = @{
+                VersionName        = $script:psd1.ModuleVersion
+                AllowSystemVersion = $true
+            }
+            $psd1VersionInfo = ConvertTo-PlumberSemVer @psd1SemVerSplat
+            if (-not $psd1VersionInfo) {
+                throw "ModuleVersion '$($script:psd1.ModuleVersion)' is not a valid version."
+            }
+            $publishedVersion = $publishedVersionInfo.Version
+            $psd1Version = $psd1VersionInfo.Version
         }
         'GitTag' {
             $gitTagVersionSplat = @{
