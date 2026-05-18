@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.58
+- Changed: `PesterUnit` and `CodeCoverage` task logic moved into dedicated task functions with unit coverage.
+
 ## 0.0.57
 - Changed: `Manifest` and `Help` task logic moved into dedicated task functions with unit coverage.
 
