@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.56
+- Changed: `PublicFunctionPrefix` and `Naming` task logic moved into dedicated task functions with unit coverage.
+
 ## 0.0.55
 - Changed: `FunctionFiles` task logic moved into a dedicated task function with unit coverage.
 
