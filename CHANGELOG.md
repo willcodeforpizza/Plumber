@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.48
+- Changed: `PSScriptAnalyzer` task logic moved into a dedicated task function with unit coverage.
+
 ## 0.0.47
 - Changed: `ToDo` task logic moved into a dedicated task function with unit coverage.
 
