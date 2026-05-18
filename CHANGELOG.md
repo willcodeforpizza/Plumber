@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.46
+- Changed: `Backticks` task logic moved into a dedicated task function with unit coverage.
+
 ## 0.0.45
 - Changed: `LineLength` task logic moved into a dedicated task function with unit coverage.
 
