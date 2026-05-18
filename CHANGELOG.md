@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.57
+- Changed: `Manifest` and `Help` task logic moved into dedicated task functions with unit coverage.
+
 ## 0.0.56
 - Changed: `PublicFunctionPrefix` and `Naming` task logic moved into dedicated task functions with unit coverage.
 
