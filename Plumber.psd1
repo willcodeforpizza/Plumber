@@ -1,6 +1,6 @@
 @{
     RootModule    = 'Plumber.psm1'
-    ModuleVersion = '0.0.53'
+    ModuleVersion = '0.0.54'
     GUID          = '03d665a4-c447-470b-acfc-ee7195c019e0'
     Author        = 'WillCodeForPizza'
     CompanyName   = 'WillCodeForPizza'
