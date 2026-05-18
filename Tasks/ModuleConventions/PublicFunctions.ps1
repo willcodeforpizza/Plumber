@@ -41,16 +41,17 @@
 Add-BuildTask -Name PublicFunctions -Jobs SetVariables, {
     $exportedFunctions = @($script:psd1.FunctionsToExport)
     $publicRoot = Join-Path $BuildRoot 'Public'
-    $privateRoot = Join-Path $BuildRoot 'Private'
+    $nonPublicRoots = $script:moduleFolders |
+        Where-Object {-not $_.Equals($publicRoot, [System.StringComparison]::OrdinalIgnoreCase)}
     $publicFiles = if (Test-Path $publicRoot) {
         @(Get-ChildItem $publicRoot -File -Filter '*.ps1')
     } else {
         @()
     }
-    $privateFiles = if (Test-Path $privateRoot) {
-        @(Get-ChildItem $privateRoot -File -Filter '*.ps1')
-    } else {
-        @()
+    $nonPublicFiles = foreach ($nonPublicRoot in $nonPublicRoots) {
+        if (Test-Path $nonPublicRoot) {
+            Get-ChildItem $nonPublicRoot -File -Filter '*.ps1'
+        }
     }
 
     $publicFunctionNames = @($publicFiles | Select-Object -ExpandProperty BaseName)
@@ -89,29 +90,35 @@ Add-BuildTask -Name PublicFunctions -Jobs SetVariables, {
         }
     }
 
-    $failures += foreach ($privateFile in $privateFiles) {
+    $failures += foreach ($nonPublicFile in $nonPublicFiles) {
         $tokens = $null
         $parseErrors = $null
         $ast = [System.Management.Automation.Language.Parser]::ParseFile(
-            $privateFile.FullName,
+            $nonPublicFile.FullName,
             [ref]$tokens,
             [ref]$parseErrors
         )
         if ($parseErrors) {
-            "$($privateFile.Name) could not be parsed"
+            "$($nonPublicFile.Name) could not be parsed"
             continue
         }
 
-        $privateFunctionNames = @($ast.FindAll(
+        $nonPublicFunctionNames = @($ast.FindAll(
                 {
                     param ($node)
                     $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
                 },
                 $true
             ) | Select-Object -ExpandProperty Name)
-        foreach ($privateFunctionName in $privateFunctionNames) {
-            if ($privateFunctionName -in $exportedFunctions) {
-                "$privateFunctionName is exported from Private/$($privateFile.Name)"
+        foreach ($nonPublicFunctionName in $nonPublicFunctionNames) {
+            if ($nonPublicFunctionName -in $exportedFunctions) {
+                $relativePath = [System.IO.Path]::GetRelativePath(
+                    $BuildRoot,
+                    $nonPublicFile.FullName
+                ).
+                    Replace([System.IO.Path]::DirectorySeparatorChar, '/').
+                    Replace([System.IO.Path]::AltDirectorySeparatorChar, '/')
+                "$nonPublicFunctionName is exported from $relativePath"
             }
         }
     }

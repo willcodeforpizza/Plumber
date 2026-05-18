@@ -1,6 +1,7 @@
 . (Get-PlumberTaskLoader) -Config @{
-    ModuleManifest = 'Plumber.psd1'
-    Tasks          = @{
+    ModuleManifest       = 'Plumber.psd1'
+    IncludeModuleFolders = @('TaskFunctions')
+    Tasks                = @{
         PSScriptAnalyzer = @{
             Exclude = @('Tests/Assets/TaskHelp/InvalidPowerShell.ps1')
         }

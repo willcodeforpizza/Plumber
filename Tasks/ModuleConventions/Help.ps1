@@ -3,9 +3,10 @@
     Validates public and private function help.
 
     .DESCRIPTION
-    Validates comment-based help on functions in `Public` and `Private`.
-    Public functions require a synopsis, description, example and parameter help. Private functions
-    require synopsis-only help unless configured otherwise.
+    Validates comment-based help on functions in module source folders. Public
+    functions require a synopsis, description, example and parameter help.
+    Non-public module functions require synopsis-only help unless configured
+    otherwise.
 
     .GROUP
     ModuleConventions
@@ -42,17 +43,24 @@
     Public/Get-Thing.ps1 contains a function with no comment-based help.
     ```
 #>
-Add-BuildTask -Name Help -Jobs {
+Add-BuildTask -Name Help -Jobs SetVariables, {
+    $publicRoot = Join-Path $BuildRoot 'Public'
     $functionRoots = @(
         @{
-            Path            = Join-Path $BuildRoot 'Public'
+            Path            = $publicRoot
             RequireFullHelp = $true
         }
+    )
+    $functionRoots += foreach ($moduleFolder in $script:moduleFolders) {
+        if ($moduleFolder.Equals($publicRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+            continue
+        }
+
         @{
-            Path            = Join-Path $BuildRoot 'Private'
+            Path            = $moduleFolder
             RequireFullHelp = -not $script:PlumberConfig.Tasks.Help.PrivateSynopsisOnly
         }
-    )
+    }
 
     $failures = foreach ($functionRoot in $functionRoots) {
         if (-not (Test-Path $functionRoot.Path)) {

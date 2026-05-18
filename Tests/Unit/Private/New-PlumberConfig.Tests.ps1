@@ -10,6 +10,7 @@ Describe 'New-PlumberConfig' {
             $config = New-PlumberConfig
 
             $config.FileScope | Should -Be 'All'
+            $config.IncludeModuleFolders | Should -Be @()
             $config.Tasks.CodeCoverage.Minimum | Should -Be 75
             $config.Tasks.PSScriptAnalyzer.IncludeTests | Should -BeTrue
             $config.Tasks.Exclude | Should -Be @()
@@ -29,6 +30,7 @@ Describe 'New-PlumberConfig' {
         InModuleScope Plumber {
             $config = New-PlumberConfig -Config @{
                 FileScope = 'Changed'
+                IncludeModuleFolders = @('TaskFunctions')
                 Tasks     = @{
                     CodeCoverage = @{
                         Minimum = 90
@@ -51,6 +53,7 @@ Describe 'New-PlumberConfig' {
             }
 
             $config.FileScope | Should -Be 'Changed'
+            $config.IncludeModuleFolders | Should -Be @('TaskFunctions')
             $config.Tasks.CodeCoverage.Minimum | Should -Be 90
             $config.Tasks.Exclude | Should -Be @()
             $config.Tasks.Local | Should -Be @()
