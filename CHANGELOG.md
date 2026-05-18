@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.59
+- Changed: `PesterIntegration` task logic moved into a dedicated task function with unit coverage.
+
 ## 0.0.58
 - Changed: `PesterUnit` and `CodeCoverage` task logic moved into dedicated task functions with unit coverage.
 
