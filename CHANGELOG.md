@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.51
+- Changed: `PathSeparator` task logic moved into a dedicated task function with unit coverage.
+
 ## 0.0.50
 - Changed: `YAML` task logic moved into a dedicated task function with unit coverage.
 
