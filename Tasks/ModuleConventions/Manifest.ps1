@@ -34,6 +34,4 @@
     Test-ModuleManifest -Path ./Missing.psd1
     ```
 #>
-Add-BuildTask -Name Manifest -Jobs SetVariables, {
-    Test-ModuleManifest -Path $script:moduleManifest.FullName | Out-Null
-}
+Add-BuildTask -Name Manifest -Jobs SetVariables, { Invoke-PlumberManifest }
