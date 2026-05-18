@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.45
+- Changed: `LineLength` task logic moved into a dedicated task function with unit coverage.
+
 ## 0.0.44
 - Documented: ADR-006 records the decision to move task logic into private functions.
 - Documented: ADR-007 records the proposed JSON Schema approach for Plumber configuration validation.

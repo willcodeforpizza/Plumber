@@ -19,10 +19,11 @@ function New-PlumberConfig {
     )
 
     $defaults = @{
-        ModuleManifest = $null
-        DiffBase       = $null
-        FileScope      = 'All'
-        Tasks          = @{
+        ModuleManifest       = $null
+        DiffBase             = $null
+        FileScope            = 'All'
+        IncludeModuleFolders = @()
+        Tasks                = @{
             Exclude              = @()
             Local                = @()
             Backticks            = @{
@@ -105,6 +106,9 @@ function New-PlumberConfig {
     }
     if (-not $plumberConfig.Tasks.Local) {
         $plumberConfig.Tasks.Local = @()
+    }
+    if (-not $plumberConfig.IncludeModuleFolders) {
+        $plumberConfig.IncludeModuleFolders = @()
     }
     if (-not $plumberConfig.Tasks.PublicFunctionPrefix.Exclusions) {
         $plumberConfig.Tasks.PublicFunctionPrefix.Exclusions = @()

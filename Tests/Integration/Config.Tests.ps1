@@ -110,4 +110,48 @@ Describe 'Get-PlumberTaskLoader config integration' {
         $result.MaxLineLength | Should -Be 100
         $result.PrivateHelpSynopsisOnly | Should -BeFalse
     }
+
+    It 'adds configured module folders to source-root tasks' {
+        $moduleRoot = Join-Path $TestDrive 'SourceRootModule'
+        New-Item -Path (Join-Path $moduleRoot 'Public') -ItemType Directory | Out-Null
+        New-Item -Path (Join-Path $moduleRoot 'Private') -ItemType Directory | Out-Null
+        New-Item -Path (Join-Path $moduleRoot 'TaskFunctions') -ItemType Directory | Out-Null
+        '@{ ModuleVersion = "0.0.1" }' | Set-Content -Path (
+            Join-Path $moduleRoot 'SourceRootModule.psd1'
+        )
+
+        $buildFile = Join-Path $moduleRoot 'source-roots.build.ps1'
+        @(
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "SetVariables") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            'function Write-Build {'
+            '    param ($Color, $Message)'
+            '    $null = $Color'
+            '    $null = $Message'
+            '}'
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'SourceRootModule.psd1'"
+            "    IncludeModuleFolders = @('TaskFunctions')"
+            '}'
+            '$script:moduleFolders | ForEach-Object { Split-Path $_ -Leaf }'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile
+
+        $result | Should -Contain 'Public'
+        $result | Should -Contain 'Private'
+        $result | Should -Contain 'TaskFunctions'
+    }
 }

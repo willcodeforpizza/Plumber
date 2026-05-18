@@ -45,25 +45,4 @@
     $line = '<more than configured maximum characters on one physical line>'
     ```
 #>
-Add-BuildTask -Name LineLength -Jobs {
-    $extensions = '.ps1', '.psm1', '.psd1'
-    $files = Get-PlumberTaskFile -Task LineLength -Extension $extensions
-
-    $failures = foreach ($file in $files) {
-        $lineNumber = 0
-        foreach ($line in Get-Content $file.FullName) {
-            $lineNumber++
-            if ($line.Length -gt $script:PlumberConfig.Tasks.LineLength.MaxLength) {
-                (
-                    "$($file.Name):$lineNumber - " +
-                    "Line is $($line.Length) characters " +
-                    ">$($script:PlumberConfig.Tasks.LineLength.MaxLength)"
-                )
-            }
-        }
-    }
-
-    if ($failures) {
-        Write-Error ($failures -join (', ' + [Environment]::NewLine))
-    }
-}
+Add-BuildTask -Name LineLength -Jobs { Invoke-PlumberLineLength }

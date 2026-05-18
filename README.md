@@ -48,10 +48,11 @@ Check the [task index](docs/tasks/index.md) for details on each task configurati
 --------------------
 
 . (Get-PlumberTaskLoader) -Config @{
-    ModuleManifest = 'MyModule.psd1'
-    FileScope      = 'All'
-    DiffBase       = $null
-    Tasks          = @{
+    ModuleManifest       = 'MyModule.psd1'
+    FileScope            = 'All'
+    DiffBase             = $null
+    IncludeModuleFolders = @()
+    Tasks                = @{
         Exclude              = @(
             'Backticks',
             'ToDo'
@@ -251,6 +252,21 @@ Configuration is defined in the build file, in the hashtable passed to `Get-Plum
 Review the details per task help in the [task index](docs/tasks/index.md).
 
 ### Global
+
+#### IncludeModuleFolders
+
+`IncludeModuleFolders` adds extra module source folders to the default `Public`
+and `Private` folders. Source-root tasks such as `PesterUnit` code coverage and
+`FunctionFiles` use these folders.
+
+Use this for module-owned source folders that should be treated like module
+code:
+
+```powershell
+. (Get-PlumberTaskLoader) -Config @{
+    IncludeModuleFolders = @('TaskFunctions')
+}
+```
 
 #### Tasks.Exclude
 

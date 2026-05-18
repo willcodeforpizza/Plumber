@@ -5,8 +5,18 @@
 Add-BuildTask -Name SetVariables -Jobs {
     $script:PlumberConfig.BuildRoot = $BuildRoot
     $script:moduleFolders = @()
-    (Join-Path $BuildRoot 'Public'), (Join-Path $BuildRoot 'Private') | ForEach-Object {
-        if (Test-Path $_) { $script:moduleFolders += $_ }
+    $moduleFolderPaths = @(
+        'Public'
+        'Private'
+        $script:PlumberConfig.IncludeModuleFolders
+    )
+    foreach ($moduleFolderPath in $moduleFolderPaths) {
+        $moduleFolder = if ([System.IO.Path]::IsPathRooted($moduleFolderPath)) {
+            $moduleFolderPath
+        } else {
+            Join-Path $BuildRoot $moduleFolderPath
+        }
+        if (Test-Path $moduleFolder) { $script:moduleFolders += $moduleFolder }
     }
 
     $manifestPath = if ($script:PlumberConfig.ModuleManifest) {

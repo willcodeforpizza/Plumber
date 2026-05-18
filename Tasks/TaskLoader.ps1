@@ -12,7 +12,8 @@
 
     .PARAMETER Config
     Repository-specific Plumber configuration. Shared keys are ModuleManifest,
-    FileScope, and DiffBase. Task settings live under Tasks.
+    FileScope, DiffBase and IncludeModuleFolders. Task settings live under
+    Tasks.
 
     .EXAMPLE
     . (Get-PlumberTaskLoader) -Config @{
@@ -53,6 +54,9 @@ $moduleRoot = Split-Path $PSScriptRoot -Parent
 # module functions to that build-file scope.
 foreach ($privateScript in Get-ChildItem (Join-Path $moduleRoot 'Private') -Filter '*.ps1') {
     . $privateScript.FullName
+}
+foreach ($taskFunctionScript in Get-ChildItem (Join-Path $moduleRoot 'TaskFunctions') -Filter '*.ps1') {
+    . $taskFunctionScript.FullName
 }
 
 $newConfigSplat = @{

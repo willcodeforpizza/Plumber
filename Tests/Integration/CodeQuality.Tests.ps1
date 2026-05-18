@@ -247,51 +247,6 @@ Describe 'Get-PlumberTaskLoader code-quality integration' {
         $result | Should -Not -Match 'Line-continuation backtick found'
     }
 
-    It 'reports lines over the configured maximum length' {
-        $moduleRoot = Join-Path $TestDrive 'LineLengthModule'
-        $publicRoot = Join-Path $moduleRoot 'Public'
-        New-Item -Path $publicRoot -ItemType Directory | Out-Null
-        $longLine = 'x' * 11
-
-        Set-Content -Path (Join-Path $publicRoot 'Invoke-Thing.ps1') -Value @(
-            'function Invoke-Thing {'
-            "    '$longLine'"
-            '}'
-        )
-
-        $buildFile = Join-Path $moduleRoot 'LineLengthModule.build.ps1'
-        @(
-            '$ErrorActionPreference = ''Stop'''
-            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
-            'function Add-BuildTask {'
-            '    param ('
-            '        [string]'
-            '        $Name,'
-            ''
-            '        $Jobs'
-            '    )'
-            ''
-            '    if ($Name -eq "LineLength") {'
-            '        & $Jobs'
-            '    }'
-            '}'
-            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
-            '. (Get-PlumberTaskLoader) -Config @{'
-            '    Tasks = @{'
-            '        LineLength = @{'
-            '            MaxLength = 10'
-            '        }'
-            '    }'
-            '}'
-        ) | Set-Content -Path $buildFile
-
-        $result = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1 |
-            Out-String
-
-        $LASTEXITCODE | Should -Not -Be 0
-        $result | Should -Match 'Line is'
-    }
-
     It 'reports TODO comments' {
         $moduleRoot = Join-Path $TestDrive 'ToDoModule'
         $publicRoot = Join-Path $moduleRoot 'Public'
