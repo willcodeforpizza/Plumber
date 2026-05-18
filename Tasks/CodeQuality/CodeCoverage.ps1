@@ -41,17 +41,4 @@
     Covered file reports coverage lower than the configured minimum.
     ```
 #>
-Add-BuildTask -Name CodeCoverage -Jobs ?PesterUnit, {
-    if (-not $script:pesterResult) {
-        Write-Build Yellow 'No Pester unit test results found'
-        return
-    }
-
-    $script:pesterResult | ForEach-Object {
-        $file = $_.Containers[0].Name
-        $percent = $_.CodeCoverage.CoveragePercent
-        if ($percent -lt $script:PlumberConfig.Tasks.CodeCoverage.Minimum) {
-            Write-Error "$percent% coverage for $file"
-        }
-    }
-}
+Add-BuildTask -Name CodeCoverage -Jobs ?PesterUnit, { Invoke-PlumberCodeCoverage }
