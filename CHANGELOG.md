@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.44
+- Documented: ADR-006 records the decision to move task logic into private functions.
+- Documented: ADR-007 records the proposed JSON Schema approach for Plumber configuration validation.
+
 ## 0.0.43
 - Changed: `ModuleVersion` failure wording now describes merge readiness more directly.
 - Changed: CI dependency setup imports Plumber with missing internal dependency installation enabled and centralizes the `Plumber.Release` version.
