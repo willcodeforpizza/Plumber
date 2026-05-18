@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.49
+- Changed: `JSON` and `JSONSchema` task logic moved into dedicated task functions with unit coverage.
+
 ## 0.0.48
 - Changed: `PSScriptAnalyzer` task logic moved into a dedicated task function with unit coverage.
 
