@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.53
+- Changed: `ModuleVersion` task logic moved into a dedicated task function with unit coverage.
+
 ## 0.0.52
 - Changed: `ChangelogUpdated` task logic moved into a dedicated task function with unit coverage.
 
