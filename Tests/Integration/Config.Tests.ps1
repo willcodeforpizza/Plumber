@@ -154,4 +154,39 @@ Describe 'Get-PlumberTaskLoader config integration' {
         $result | Should -Contain 'Private'
         $result | Should -Contain 'TaskFunctions'
     }
+
+    It 'fails at task-loader time for invalid config with a friendly message' {
+        $buildFile = Join-Path $TestDrive 'invalid-config.build.ps1'
+        @(
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            '}'
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            'try {'
+            '    . (Get-PlumberTaskLoader) -Config @{'
+            '    Tasks = @{'
+            '        PSScriptAnalyzer = @{'
+            "            Excdddlude = @('Tests/*')"
+            '        }'
+            '    }'
+            '    }'
+            '    exit 0'
+            '} catch {'
+            '    $_.Exception.Message'
+            '    exit 1'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $output = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1
+
+        $LASTEXITCODE | Should -Not -Be 0
+        $output -join "`n" |
+            Should -Match 'Tasks\.PSScriptAnalyzer\.Excdddlude is[\s|]+not a known setting'
+        $output -join "`n" | Should -Match 'Did you mean Exclude'
+    }
 }

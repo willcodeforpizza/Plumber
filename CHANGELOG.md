@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.60
+- Added: Plumber config validation now reports unknown keys, invalid values
+  and friendly suggestions at task-loader time.
+
 ## 0.0.59
 - Changed: `PesterIntegration` task logic moved into a dedicated task function with unit coverage.
 
