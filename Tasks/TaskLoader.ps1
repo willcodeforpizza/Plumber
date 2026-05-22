@@ -65,7 +65,10 @@ $newConfigSplat = @{
 if (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
     $newConfigSplat.BuildRoot = $BuildRoot
 }
+
 $script:PlumberConfig = New-PlumberConfig @newConfigSplat
+Test-PlumberConfig -Config $script:PlumberConfig
+
 $script:PlumberConfig.ModuleRoot = $moduleRoot
 $script:PlumberTaskJobs = Initialize-PlumberTaskGraph
 

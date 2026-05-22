@@ -39,9 +39,12 @@ Create a `build.ps1` in the root of the module. This is the basic configuration 
 }
 ```
 
-To customize the tasks you run, or edit settings, set configuration in the build file.
+To customize the tasks you run, or edit settings, set configuration in the build
+file.
 
-Check the [task index](docs/tasks/index.md) for details on each task configuration. Here is an example of all available options:
+See [configuration](docs/configuration.md) for global settings and validation
+behavior. Check the [task index](docs/tasks/index.md) for details on each task
+configuration. Here is an example of all available options:
 
 ```powershell
 ./MyModule.build.ps1
@@ -247,9 +250,20 @@ Tasks are documented in detail in the [task index](docs/tasks/index.md).
 
 ## Configuration
 
-Configuration is defined in the build file, in the hashtable passed to `Get-PlumberTaskLoader`.
+Configuration is defined in the build file, in the hashtable passed to
+`Get-PlumberTaskLoader`.
 
-Review the details per task help in the [task index](docs/tasks/index.md).
+Plumber validates built-in configuration when the task loader runs. Unknown
+keys, invalid value types and out-of-range values fail before the task graph is
+loaded. Typos close to a known key include a suggestion.
+
+```text
+Plumber config failed validation:
+- Tasks.LineLenght is not a known task. Did you mean LineLength?
+```
+
+See [configuration](docs/configuration.md) for the full configuration guide.
+Review per-task settings in the [task index](docs/tasks/index.md).
 
 ### Global
 
@@ -293,7 +307,8 @@ For example, to exclude a test asset from PSScriptAnalyzer, you would do:
 }
 ```
 
-Review the details per task help in the [task index](docs/tasks/index.md) for details on what tasks support path exclusions.
+Review per-task help in the [task index](docs/tasks/index.md) for details on
+what tasks support path exclusions.
 
 Patterns use PowerShell wildcard matching against repository-relative paths
 normalized with `/`.

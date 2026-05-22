@@ -6,6 +6,7 @@ Shared Invoke-Build tasks for PowerShell validation pipelines.
 
 ## Documentation
 
+- [Configuration](configuration.md)
 - [Task index](tasks/index.md)
 - [Writing tasks](writing-tasks.md)
 - [Local tasks](local-tasks.md)
