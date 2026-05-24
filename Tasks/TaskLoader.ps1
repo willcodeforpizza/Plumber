@@ -30,17 +30,20 @@
                 Exclude = @('Tests/Assets/*')
             }
             CodeCoverage     = @{
-                Minimum = 80
+                EnforceWhen = 'OnRelease'
+                Minimum     = 80
             }
-            Exclude          = @('YAML', 'ChangelogUpdated')
             PSScriptAnalyzer = @{
                 IncludeTests = $false
+            }
+            YAML             = @{
+                EnforceWhen = 'Never'
             }
         }
     }
 
-    Loads Plumber tasks with custom coverage, PSScriptAnalyzer and task exclusion
-    settings.
+    Loads Plumber tasks with custom coverage, PSScriptAnalyzer, and task
+    enforcement settings.
 #>
 param (
     [hashtable]

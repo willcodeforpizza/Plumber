@@ -36,4 +36,8 @@
     }
 }
 
+. (Get-PlumberReleaseTaskLoader) -Config @{
+    ModuleManifest = 'Plumber.psd1'
+}
+
 . (Join-Path $PSScriptRoot 'LocalTasks/GenerateDocs.ps1')

@@ -260,4 +260,15 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             & $script:invokeBuild -Task Validate -File $buildFile
         } | Should -Throw -ExpectedMessage '*One or more Plumber validation tasks failed*'
     }
+
+    It 'loads Plumber.Release tasks from the repository build file' {
+        Import-Module Plumber.Release -RequiredVersion 0.1.4 -ErrorAction Stop
+
+        $tasks = & $script:invokeBuild -Task '??' -File './Plumber.build.ps1'
+
+        $tasks.Keys | Should -Contain 'Release'
+        $tasks.Keys | Should -Contain 'BuildModule'
+        $tasks.Keys | Should -Contain 'PublishModule'
+        $tasks.Keys | Should -Contain 'PublishGitHubRelease'
+    }
 }
