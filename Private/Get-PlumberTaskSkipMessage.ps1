@@ -23,8 +23,5 @@ function Get-PlumberTaskSkipMessage {
         'Never' {
             "Skipping $Name`: EnforceWhen=Never."
         }
-        default {
-            "Skipping $Name`: EnforceWhen=$EnforceWhen."
-        }
     }
 }
