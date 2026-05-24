@@ -1,9 +1,9 @@
 # Plumber
 
 ## 0.0.61
-- Added: task-level `EnforceWhen` policy with `Always`, `OnRelease`, and
+- Added: task-level `RunWhen` policy with `Always`, `OnRelease`, and
   `Never` modes for built-in and local tasks.
-- Removed: global `Tasks.Exclude`; use `Tasks.<Task>.EnforceWhen = 'Never'`
+- Removed: global `Tasks.Exclude`; use `Tasks.<Task>.RunWhen = 'Never'`
   instead.
 
 ## 0.0.60

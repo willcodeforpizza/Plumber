@@ -230,17 +230,17 @@ Describe 'Test-PlumberConfig' {
         }
     }
 
-    It 'reports invalid EnforceWhen values' {
+    It 'reports invalid RunWhen values' {
         InModuleScope Plumber {
             $config = New-PlumberConfig -Config @{
                 Tasks = @{
                     ModuleVersion = @{
-                        EnforceWhen = 'Sometimes'
+                        RunWhen = 'Sometimes'
                     }
                 }
             }
 
-            $expectedMessage = '*Tasks.ModuleVersion.EnforceWhen: Expected one of*Always*OnRelease*Never*'
+            $expectedMessage = '*Tasks.ModuleVersion.RunWhen: Expected one of*Always*OnRelease*Never*'
 
             { Test-PlumberConfig -Config $config } |
                 Should -Throw -ExpectedMessage $expectedMessage

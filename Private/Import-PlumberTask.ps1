@@ -4,7 +4,7 @@ function Import-PlumberTask {
         Creates metadata for a Plumber task import.
 
         .DESCRIPTION
-        Returns task import metadata including the task's EnforceWhen policy and
+        Returns task import metadata including the task's RunWhen policy and
         whether it should run in the current context. TaskLoader.ps1 uses this
         metadata to dot-source task files or register explicit skip tasks in the
         active Invoke-Build scope.
@@ -29,14 +29,14 @@ function Import-PlumberTask {
 
         [ValidateSet('Always', 'OnRelease', 'Never')]
         [string]
-        $EnforceWhen = 'Always'
+        $RunWhen = 'Always'
     )
 
     [pscustomobject]@{
         Name        = $Name
         FullName    = Join-Path $TaskRoot $Path
         Parent      = $Parent
-        EnforceWhen = $EnforceWhen
-        ShouldRun   = Test-PlumberTaskEnabled -Name $Name -EnforceWhen $EnforceWhen
+        RunWhen     = $RunWhen
+        ShouldRun   = Test-PlumberTaskShouldRun -Name $Name -RunWhen $RunWhen
     }
 }

@@ -4,7 +4,7 @@ BeforeAll {
     }
 }
 
-Describe 'Test-PlumberTaskEnabled' {
+Describe 'Test-PlumberTaskShouldRun' {
     BeforeEach {
         $script:previousReleaseIntent = $env:PLUMBER_RELEASE_INTENT
         Remove-Item Env:/PLUMBER_RELEASE_INTENT -ErrorAction SilentlyContinue
@@ -18,32 +18,32 @@ Describe 'Test-PlumberTaskEnabled' {
         }
     }
 
-    It 'returns true when EnforceWhen is Always' {
+    It 'returns true when RunWhen is Always' {
         InModuleScope Plumber {
-            Test-PlumberTaskEnabled -Name JSON -EnforceWhen Always |
+            Test-PlumberTaskShouldRun -Name JSON -RunWhen Always |
                 Should -BeTrue
         }
     }
 
-    It 'returns false when EnforceWhen is Never' {
+    It 'returns false when RunWhen is Never' {
         InModuleScope Plumber {
-            Test-PlumberTaskEnabled -Name YAML -EnforceWhen Never |
+            Test-PlumberTaskShouldRun -Name YAML -RunWhen Never |
                 Should -BeFalse
         }
     }
 
-    It 'returns false when EnforceWhen is OnRelease without release intent' {
+    It 'returns false when RunWhen is OnRelease without release intent' {
         InModuleScope Plumber {
-            Test-PlumberTaskEnabled -Name ModuleVersion -EnforceWhen OnRelease |
+            Test-PlumberTaskShouldRun -Name ModuleVersion -RunWhen OnRelease |
                 Should -BeFalse
         }
     }
 
-    It 'returns true when EnforceWhen is OnRelease with release intent' {
+    It 'returns true when RunWhen is OnRelease with release intent' {
         $env:PLUMBER_RELEASE_INTENT = 'true'
 
         InModuleScope Plumber {
-            Test-PlumberTaskEnabled -Name ModuleVersion -EnforceWhen OnRelease |
+            Test-PlumberTaskShouldRun -Name ModuleVersion -RunWhen OnRelease |
                 Should -BeTrue
         }
     }
@@ -53,16 +53,16 @@ Describe 'Test-PlumberTaskEnabled' {
             $env:PLUMBER_RELEASE_INTENT = $releaseIntent
 
             InModuleScope Plumber {
-                Test-PlumberTaskEnabled -Name ModuleVersion -EnforceWhen OnRelease |
+                Test-PlumberTaskShouldRun -Name ModuleVersion -RunWhen OnRelease |
                     Should -BeTrue
             }
         }
     }
 
-    It 'throws for unknown EnforceWhen values' {
+    It 'throws for unknown RunWhen values' {
         InModuleScope Plumber {
-            { Test-PlumberTaskEnabled -Name JSON -EnforceWhen Sometimes } |
-                Should -Throw '*EnforceWhen*Sometimes*'
+            { Test-PlumberTaskShouldRun -Name JSON -RunWhen Sometimes } |
+                Should -Throw '*RunWhen*Sometimes*'
         }
     }
 }

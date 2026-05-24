@@ -7,7 +7,7 @@ function Get-PlumberConfigRule {
     [OutputType([hashtable])]
     param ()
 
-    $enforceWhenRule = @{Validate = 'enum'; Values = @('Always', 'OnRelease', 'Never')}
+    $runWhenRule = @{Validate = 'enum'; Values = @('Always', 'OnRelease', 'Never')}
 
     @{
         ModuleManifest                          = @{Validate = 'string'; Nullable = $true}
@@ -16,15 +16,15 @@ function Get-PlumberConfigRule {
         IncludeModuleFolders                    = @{Validate = 'string-array'}
         BuildRoot                               = @{Validate = 'string'}
         'Tasks.Local'                           = @{Validate = 'string-array'}
-        'Tasks.Backticks.EnforceWhen'           = $enforceWhenRule
+        'Tasks.Backticks.RunWhen'           = $runWhenRule
         'Tasks.Backticks.Exclude'               = @{Validate = 'string-array'}
-        'Tasks.CodeCoverage.EnforceWhen'        = $enforceWhenRule
+        'Tasks.CodeCoverage.RunWhen'        = $runWhenRule
         'Tasks.CodeCoverage.Minimum'            = @{Validate = 'integer'; Min = 0; Max = 100}
-        'Tasks.Help.EnforceWhen'                = $enforceWhenRule
+        'Tasks.Help.RunWhen'                = $runWhenRule
         'Tasks.Help.PrivateSynopsisOnly'        = @{Validate = 'boolean'}
-        'Tasks.JSON.EnforceWhen'                = $enforceWhenRule
+        'Tasks.JSON.RunWhen'                = $runWhenRule
         'Tasks.JSON.Exclude'                    = @{Validate = 'string-array'}
-        'Tasks.JSONSchema.EnforceWhen'          = $enforceWhenRule
+        'Tasks.JSONSchema.RunWhen'          = $runWhenRule
         'Tasks.JSONSchema.Exclude'              = @{Validate = 'string-array'}
         'Tasks.JSONSchema.Schemas'              = @{
             Validate = 'object-array'
@@ -33,41 +33,41 @@ function Get-PlumberConfigRule {
                 Schema = @{Validate = 'string'}
             }
         }
-        'Tasks.LineLength.EnforceWhen'          = $enforceWhenRule
+        'Tasks.LineLength.RunWhen'          = $runWhenRule
         'Tasks.LineLength.Exclude'              = @{Validate = 'string-array'}
         'Tasks.LineLength.MaxLength'            = @{
             Validate = 'integer'
             Min      = 1
             Max      = 10000
         }
-        'Tasks.PathSeparator.EnforceWhen'       = $enforceWhenRule
+        'Tasks.PathSeparator.RunWhen'       = $runWhenRule
         'Tasks.PathSeparator.Exclude'           = @{Validate = 'string-array'}
-        'Tasks.ModuleVersion.EnforceWhen'       = $enforceWhenRule
+        'Tasks.ModuleVersion.RunWhen'       = $runWhenRule
         'Tasks.ModuleVersion.IncludePrerelease' = @{Validate = 'boolean'}
         'Tasks.ModuleVersion.Remote'            = @{Validate = 'string'}
         'Tasks.ModuleVersion.Source'            = @{
             Validate = 'enum'
             Values   = @('PSGallery', 'GitTag')
         }
-        'Tasks.ChangelogUpdated.EnforceWhen'    = $enforceWhenRule
-        'Tasks.PesterIntegration.EnforceWhen'   = $enforceWhenRule
+        'Tasks.ChangelogUpdated.RunWhen'    = $runWhenRule
+        'Tasks.PesterIntegration.RunWhen'   = $runWhenRule
         'Tasks.PesterIntegration.StreamOutput'  = @{Validate = 'boolean'}
-        'Tasks.PesterUnit.EnforceWhen'          = $enforceWhenRule
+        'Tasks.PesterUnit.RunWhen'          = $runWhenRule
         'Tasks.PesterUnit.StreamOutput'         = @{Validate = 'boolean'}
-        'Tasks.PSScriptAnalyzer.EnforceWhen'    = $enforceWhenRule
+        'Tasks.PSScriptAnalyzer.RunWhen'    = $runWhenRule
         'Tasks.PSScriptAnalyzer.Exclude'        = @{Validate = 'string-array'}
         'Tasks.PSScriptAnalyzer.IncludeTests'   = @{Validate = 'boolean'}
-        'Tasks.Manifest.EnforceWhen'            = $enforceWhenRule
-        'Tasks.PublicFunctions.EnforceWhen'     = $enforceWhenRule
-        'Tasks.PublicFunctionPrefix.EnforceWhen' = $enforceWhenRule
+        'Tasks.Manifest.RunWhen'            = $runWhenRule
+        'Tasks.PublicFunctions.RunWhen'     = $runWhenRule
+        'Tasks.PublicFunctionPrefix.RunWhen' = $runWhenRule
         'Tasks.PublicFunctionPrefix.Exclusions' = @{Validate = 'string-array'}
         'Tasks.PublicFunctionPrefix.Prefix'     = @{Validate = 'string'; Nullable = $true}
-        'Tasks.FunctionFiles.EnforceWhen'       = $enforceWhenRule
+        'Tasks.FunctionFiles.RunWhen'       = $runWhenRule
         'Tasks.FunctionFiles.Exclude'           = @{Validate = 'string-array'}
-        'Tasks.Naming.EnforceWhen'              = $enforceWhenRule
-        'Tasks.ToDo.EnforceWhen'                = $enforceWhenRule
+        'Tasks.Naming.RunWhen'              = $runWhenRule
+        'Tasks.ToDo.RunWhen'                = $runWhenRule
         'Tasks.ToDo.Exclude'                    = @{Validate = 'string-array'}
-        'Tasks.YAML.EnforceWhen'                = $enforceWhenRule
+        'Tasks.YAML.RunWhen'                = $runWhenRule
         'Tasks.YAML.Exclude'                    = @{Validate = 'string-array'}
     }
 }

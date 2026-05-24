@@ -1,7 +1,7 @@
 function Get-PlumberTaskSkipMessage {
     <#
         .SYNOPSIS
-        Gets the skip message for a task disabled by EnforceWhen.
+        Gets the skip message for a task disabled by RunWhen.
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -13,15 +13,15 @@ function Get-PlumberTaskSkipMessage {
         [Parameter(Mandatory)]
         [ValidateSet('Always', 'OnRelease', 'Never')]
         [string]
-        $EnforceWhen
+        $RunWhen
     )
 
-    switch ($EnforceWhen) {
+    switch ($RunWhen) {
         'OnRelease' {
-            "Skipping $Name`: EnforceWhen=OnRelease and PLUMBER_RELEASE_INTENT is not true."
+            "Skipping $Name`: RunWhen=OnRelease and PLUMBER_RELEASE_INTENT is not true."
         }
         'Never' {
-            "Skipping $Name`: EnforceWhen=Never."
+            "Skipping $Name`: RunWhen=Never."
         }
     }
 }

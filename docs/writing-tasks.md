@@ -137,7 +137,7 @@ default is `115`.
 ```
 ````
 
-Document global task policy such as `Tasks.<Task>.EnforceWhen` once in global
+Document global task policy such as `Tasks.<Task>.RunWhen` once in global
 user documentation, not in every task page.
 
 ## Help Examples

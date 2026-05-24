@@ -113,9 +113,9 @@ untracked files.
 
 ## Task Settings
 
-### Tasks.<Task>.EnforceWhen
+### Tasks.<Task>.RunWhen
 
-`Tasks.<Task>.EnforceWhen` controls when a task runs. Supported values are:
+`Tasks.<Task>.RunWhen` controls when a task runs. Supported values are:
 
 - `Always` - run whenever the task is selected. This is the default.
 - `OnRelease` - run only when `PLUMBER_RELEASE_INTENT=true`.
@@ -128,16 +128,16 @@ explains why validation did not run.
 . (Get-PlumberTaskLoader) -Config @{
     Tasks = @{
         ModuleVersion = @{
-            EnforceWhen = 'OnRelease'
+            RunWhen = 'OnRelease'
         }
         ToDo = @{
-            EnforceWhen = 'Never'
+            RunWhen = 'Never'
         }
     }
 }
 ```
 
-`Tasks.Exclude` has been removed. Use `Tasks.<Task>.EnforceWhen = 'Never'`
+`Tasks.Exclude` has been removed. Use `Tasks.<Task>.RunWhen = 'Never'`
 instead.
 
 ### Tasks.Local

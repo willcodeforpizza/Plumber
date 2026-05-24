@@ -23,16 +23,16 @@ Describe 'Get-PlumberTaskLoader content integration' {
         $tasks['Content'].Jobs | Should -Contain '?JSONSchema'
     }
 
-    It 'loads Content with skipped children when all Content child tasks use EnforceWhen Never' {
+    It 'loads Content with skipped children when all Content child tasks use RunWhen Never' {
         $buildFile = Join-Path $TestDrive 'skip-all-content.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
             '    Tasks = @{'
-            "        JSON = @{ EnforceWhen = 'Never' }"
-            "        JSONSchema = @{ EnforceWhen = 'Never' }"
-            "        YAML = @{ EnforceWhen = 'Never' }"
+            "        JSON = @{ RunWhen = 'Never' }"
+            "        JSONSchema = @{ RunWhen = 'Never' }"
+            "        YAML = @{ RunWhen = 'Never' }"
             '    }'
             '}'
         ) | Set-Content -Path $buildFile

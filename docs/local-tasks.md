@@ -42,7 +42,7 @@ Add-BuildTask -Name ValidateTaskDocs -Jobs {
 
 ## Controlling Local Task Enforcement
 
-Local tasks support the same `EnforceWhen` task policy as built-in tasks. Add a
+Local tasks support the same `RunWhen` task policy as built-in tasks. Add a
 config block named after the local task file stem:
 
 ```powershell
@@ -54,11 +54,11 @@ config block named after the local task file stem:
             'Tasks/CheckGeneratedFiles.ps1'
         )
         ValidateTaskDocs = @{
-            EnforceWhen = 'Never'
+            RunWhen = 'Never'
         }
     }
 }
 ```
 
-Use `EnforceWhen = 'OnRelease'` to run a local task only when
+Use `RunWhen = 'OnRelease'` to run a local task only when
 `PLUMBER_RELEASE_INTENT=true`.

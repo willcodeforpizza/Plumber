@@ -1,7 +1,7 @@
-function Get-PlumberTaskEnforceWhen {
+function Get-PlumberTaskRunWhen {
     <#
         .SYNOPSIS
-        Gets the EnforceWhen policy for a Plumber task.
+        Gets the RunWhen policy for a Plumber task.
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -16,8 +16,8 @@ function Get-PlumberTaskEnforceWhen {
     }
 
     $taskConfig = $script:PlumberConfig.Tasks[$Name]
-    if ($taskConfig -is [hashtable] -and $taskConfig.ContainsKey('EnforceWhen')) {
-        return $taskConfig.EnforceWhen
+    if ($taskConfig -is [hashtable] -and $taskConfig.ContainsKey('RunWhen')) {
+        return $taskConfig.RunWhen
     }
 
     'Always'

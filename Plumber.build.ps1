@@ -25,10 +25,10 @@
             )
         }
         ModuleVersion    = @{
-            EnforceWhen = 'OnRelease'
+            RunWhen = 'OnRelease'
         }
         ChangelogUpdated = @{
-            EnforceWhen = 'OnRelease'
+            RunWhen = 'OnRelease'
         }
         Local            = @(
             'LocalTasks/ValidateTaskHelp.ps1'

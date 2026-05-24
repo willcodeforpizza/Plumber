@@ -16,8 +16,8 @@ function Add-PlumberLocalTask {
         }
 
         $localTaskName = [System.IO.Path]::GetFileNameWithoutExtension($localTaskPath)
-        $enforceWhen = Get-PlumberTaskEnforceWhen -Name $localTaskName
-        $isLocalTaskEnabled = Test-PlumberTaskEnabled -Name $localTaskName -EnforceWhen $enforceWhen
+        $runWhen = Get-PlumberTaskRunWhen -Name $localTaskName
+        $isLocalTaskEnabled = Test-PlumberTaskShouldRun -Name $localTaskName -RunWhen $runWhen
 
         if ($isLocalTaskEnabled) {
             $resolvedLocalTaskPath = if ([System.IO.Path]::IsPathRooted($localTaskPath)) {
@@ -34,7 +34,7 @@ function Add-PlumberLocalTask {
 
             . $resolvedLocalTaskPath
         } else {
-            $skipMessage = Get-PlumberTaskSkipMessage -Name $localTaskName -EnforceWhen $enforceWhen
+            $skipMessage = Get-PlumberTaskSkipMessage -Name $localTaskName -RunWhen $runWhen
             Add-BuildTask -Name $localTaskName -Jobs ({
                 Write-Host $skipMessage
             }.GetNewClosure())

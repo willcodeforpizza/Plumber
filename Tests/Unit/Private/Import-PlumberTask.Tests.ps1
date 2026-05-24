@@ -12,24 +12,24 @@ Describe 'Import-PlumberTask' {
                 Path        = 'Content/JSON.ps1'
                 TaskRoot    = $TestDrive
                 Parent      = 'Content'
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
             }
             $task = Import-PlumberTask @taskSplat
 
             $task.Name | Should -Be 'JSON'
             $task.FullName | Should -Be (Join-Path $TestDrive 'Content/JSON.ps1')
             $task.Parent | Should -Be 'Content'
-            $task.EnforceWhen | Should -Be 'Always'
+            $task.RunWhen | Should -Be 'Always'
             $task.ShouldRun | Should -BeTrue
         }
     }
 
-    It 'marks task imports as skipped when EnforceWhen disables the task' {
+    It 'marks task imports as skipped when RunWhen disables the task' {
         InModuleScope Plumber {
-            $task = Import-PlumberTask -Name YAML -Path 'Content/YAML.ps1' -TaskRoot $TestDrive -EnforceWhen Never
+            $task = Import-PlumberTask -Name YAML -Path 'Content/YAML.ps1' -TaskRoot $TestDrive -RunWhen Never
 
             $task.Name | Should -Be 'YAML'
-            $task.EnforceWhen | Should -Be 'Never'
+            $task.RunWhen | Should -Be 'Never'
             $task.ShouldRun | Should -BeFalse
         }
     }

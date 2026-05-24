@@ -184,7 +184,7 @@ wins are the same either way.
 `Private/` folder that TaskLoader already dot-sources, zero framework
 change. But `Private/` today contains a cohesive set of ~20 framework
 helpers (`Get-PlumberTaskFile`, `Copy-PlumberHashtable`,
-`Test-PlumberTaskEnabled`, etc.) that are reused across the codebase.
+`Test-PlumberTaskShouldRun`, etc.) that are reused across the codebase.
 Adding ~20 task-body functions doubles the folder size and mixes two
 distinct categories of code: "reusable framework utility" and "the body
 of one specific task." Browsing `Private/` stops being informative;

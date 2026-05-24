@@ -93,7 +93,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "        'Tasks/ValidateTaskDocs.ps1'"
             "        'Tasks/CheckGeneratedFiles.ps1'"
             '        )'
-            "        ValidateTaskDocs = @{ EnforceWhen = 'Never' }"
+            "        ValidateTaskDocs = @{ RunWhen = 'Never' }"
             '    }'
             '}'
         ) | Set-Content -Path $buildFile
@@ -113,7 +113,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    Tasks = @{ JSON = @{ EnforceWhen = 'Never' }; YAML = @{ EnforceWhen = 'Never' } }"
+            "    Tasks = @{ JSON = @{ RunWhen = 'Never' }; YAML = @{ RunWhen = 'Never' } }"
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -160,9 +160,9 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
             '    Tasks = @{'
-            "        PesterUnit = @{ EnforceWhen = 'Never' }"
-            "        PesterIntegration = @{ EnforceWhen = 'Never' }"
-            "        CodeCoverage = @{ EnforceWhen = 'Never' }"
+            "        PesterUnit = @{ RunWhen = 'Never' }"
+            "        PesterIntegration = @{ RunWhen = 'Never' }"
+            "        CodeCoverage = @{ RunWhen = 'Never' }"
             '    }'
             '}'
         ) | Set-Content -Path $buildFile
@@ -213,7 +213,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = '$PSScriptRoot/../../Plumber.psd1'"
-            "    Tasks = @{ ModuleVersion = @{ EnforceWhen = 'Never' } }"
+            "    Tasks = @{ ModuleVersion = @{ RunWhen = 'Never' } }"
             '}'
         ) | Set-Content -Path $buildFile
 

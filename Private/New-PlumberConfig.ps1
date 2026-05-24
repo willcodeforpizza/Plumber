@@ -26,81 +26,81 @@ function New-PlumberConfig {
         Tasks                = @{
             Local                = @()
             Backticks            = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclude     = @()
             }
             CodeCoverage         = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Minimum     = 75
             }
             Help                 = @{
-                EnforceWhen         = 'Always'
+                RunWhen         = 'Always'
                 PrivateSynopsisOnly = $true
             }
             JSON                 = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclude     = @()
             }
             JSONSchema           = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclude     = @()
                 Schemas     = @()
             }
             LineLength           = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclude     = @()
                 MaxLength   = 115
             }
             PathSeparator        = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclude     = @()
             }
             ModuleVersion        = @{
-                EnforceWhen       = 'Always'
+                RunWhen       = 'Always'
                 IncludePrerelease = $false
                 Remote            = 'origin'
                 Source            = 'PSGallery'
             }
             ChangelogUpdated      = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
             }
             PesterIntegration    = @{
-                EnforceWhen  = 'Always'
+                RunWhen  = 'Always'
                 StreamOutput = $true
             }
             PesterUnit           = @{
-                EnforceWhen  = 'Always'
+                RunWhen  = 'Always'
                 StreamOutput = $true
             }
             PSScriptAnalyzer     = @{
-                EnforceWhen  = 'Always'
+                RunWhen  = 'Always'
                 Exclude      = @()
                 IncludeTests = $true
             }
             Manifest             = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
             }
             PublicFunctions       = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
             }
             PublicFunctionPrefix = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclusions  = @()
                 Prefix      = $null
             }
             FunctionFiles         = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclude     = @()
             }
             Naming                = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
             }
             ToDo                 = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclude     = @()
             }
             YAML                 = @{
-                EnforceWhen = 'Always'
+                RunWhen = 'Always'
                 Exclude     = @()
             }
         }

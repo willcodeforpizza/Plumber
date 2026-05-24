@@ -4,33 +4,33 @@ BeforeAll {
     }
 }
 
-Describe 'Get-PlumberTaskEnforceWhen' {
-    It 'returns configured EnforceWhen for built-in tasks' {
+Describe 'Get-PlumberTaskRunWhen' {
+    It 'returns configured RunWhen for built-in tasks' {
         InModuleScope Plumber {
             $script:PlumberConfig = New-PlumberConfig -Config @{
                 Tasks = @{
                     ModuleVersion = @{
-                        EnforceWhen = 'OnRelease'
+                        RunWhen = 'OnRelease'
                     }
                 }
             }
 
-            Get-PlumberTaskEnforceWhen -Name ModuleVersion |
+            Get-PlumberTaskRunWhen -Name ModuleVersion |
                 Should -Be 'OnRelease'
         }
     }
 
-    It 'returns configured EnforceWhen for local task names' {
+    It 'returns configured RunWhen for local task names' {
         InModuleScope Plumber {
             $script:PlumberConfig = New-PlumberConfig -Config @{
                 Tasks = @{
                     LocalTask = @{
-                        EnforceWhen = 'Never'
+                        RunWhen = 'Never'
                     }
                 }
             }
 
-            Get-PlumberTaskEnforceWhen -Name LocalTask |
+            Get-PlumberTaskRunWhen -Name LocalTask |
                 Should -Be 'Never'
         }
     }
@@ -39,7 +39,7 @@ Describe 'Get-PlumberTaskEnforceWhen' {
         InModuleScope Plumber {
             $script:PlumberConfig = New-PlumberConfig -Config @{}
 
-            Get-PlumberTaskEnforceWhen -Name LocalTask |
+            Get-PlumberTaskRunWhen -Name LocalTask |
                 Should -Be 'Always'
         }
     }

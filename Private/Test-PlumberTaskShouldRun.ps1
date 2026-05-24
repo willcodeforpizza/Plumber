@@ -1,10 +1,10 @@
-function Test-PlumberTaskEnabled {
+function Test-PlumberTaskShouldRun {
     <#
         .SYNOPSIS
-        Tests whether a Plumber task should run for the current enforcement context.
+        Tests whether a Plumber task should run for the current run context.
 
         .DESCRIPTION
-        Evaluates a task's EnforceWhen policy. Always runs in every context,
+        Evaluates a task's RunWhen policy. Always runs in every context,
         OnRelease runs only when PLUMBER_RELEASE_INTENT is true, and Never skips
         in every context.
     #>
@@ -17,10 +17,10 @@ function Test-PlumberTaskEnabled {
 
         [ValidateSet('Always', 'OnRelease', 'Never')]
         [string]
-        $EnforceWhen = 'Always'
+        $RunWhen = 'Always'
     )
 
-    switch ($EnforceWhen) {
+    switch ($RunWhen) {
         'Always' {
             $true
         }
@@ -31,7 +31,7 @@ function Test-PlumberTaskEnabled {
             $false
         }
         default {
-            throw "Unsupported EnforceWhen value for task '$Name': $EnforceWhen"
+            throw "Unsupported RunWhen value for task '$Name': $RunWhen"
         }
     }
 }
