@@ -262,7 +262,14 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
     }
 
     It 'loads Plumber.Release tasks from the repository build file' {
-        Import-Module Plumber.Release -RequiredVersion 0.1.4 -ErrorAction Stop
+        $releaseModuleSplat = @{
+            Name        = 'Plumber.Release'
+            ErrorAction = 'Stop'
+        }
+        if ($env:PLUMBER_RELEASE_VERSION) {
+            $releaseModuleSplat.RequiredVersion = $env:PLUMBER_RELEASE_VERSION
+        }
+        Import-Module @releaseModuleSplat
 
         $tasks = & $script:invokeBuild -Task '??' -File './Plumber.build.ps1'
 
