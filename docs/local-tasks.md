@@ -60,5 +60,31 @@ config block named after the local task file stem:
 }
 ```
 
-Use `RunWhen = 'OnRelease'` to run a local task only when
-`PLUMBER_RELEASE_INTENT=true`.
+Use `RunWhen = 'OnRelease'` for local release checks that are useful before
+publishing but too noisy for every development validation run. For example, this
+runs `ValidateGeneratedDocs` only when release intent is set:
+
+```powershell
+. (Get-PlumberTaskLoader) -Config @{
+    ModuleManifest = 'MyModule.psd1'
+    Tasks = @{
+        Local = @(
+            'Tasks/ValidateTaskDocs.ps1'
+            'Tasks/ValidateGeneratedDocs.ps1'
+        )
+        ValidateGeneratedDocs = @{
+            RunWhen = 'OnRelease'
+        }
+    }
+}
+```
+
+In CI, set release intent before invoking Plumber:
+
+```yaml
+env:
+  PLUMBER_RELEASE_INTENT: 'true'
+```
+
+`PLUMBER_RELEASE_INTENT` accepts common truthy values such as `true`, `True`,
+`TRUE`, `1`, and `yes`.
