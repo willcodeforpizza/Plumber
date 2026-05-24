@@ -247,6 +247,22 @@ Describe 'Test-PlumberConfig' {
         }
     }
 
+    It 'reports invalid local task RunWhen values' {
+        InModuleScope Plumber {
+            $config = New-PlumberConfig -Config @{
+                Tasks = @{
+                    Local     = @('LocalTasks/BuildDocs.ps1')
+                    BuildDocs = @{
+                        RunWhen = 'Sometimes'
+                    }
+                }
+            }
+
+            { Test-PlumberConfig -Config $config } |
+                Should -Throw -ExpectedMessage '*Tasks.BuildDocs.RunWhen: Expected one of*Always*OnRelease*Never*'
+        }
+    }
+
     It 'rejects removed ExcludeTask configuration' {
         InModuleScope Plumber {
             $config = New-PlumberConfig -Config @{
@@ -267,6 +283,7 @@ Describe 'Test-PlumberConfig' {
                     Local     = @('LocalTasks/BuildDocs.ps1')
                     BuildDocs = @{
                         Whatever = 123
+                        RunWhen  = 'Never'
                     }
                 }
             }

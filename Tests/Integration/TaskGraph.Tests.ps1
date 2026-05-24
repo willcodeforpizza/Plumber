@@ -160,9 +160,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
             '    Tasks = @{'
-            "        PesterUnit = @{ RunWhen = 'Never' }"
             "        PesterIntegration = @{ RunWhen = 'Never' }"
-            "        CodeCoverage = @{ RunWhen = 'Never' }"
             '    }'
             '}'
         ) | Set-Content -Path $buildFile
@@ -175,6 +173,45 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
         $tasks['CodeQuality'].Jobs | Should -Contain '?PesterUnit'
         $tasks['CodeQuality'].Jobs | Should -Contain '?PesterIntegration'
         $tasks['CodeQuality'].Jobs | Should -Contain '?CodeCoverage'
+    }
+
+    It 'does not load CodeCoverage when PesterUnit is skipped' {
+        $buildFile = Join-Path $TestDrive 'skip-pester-unit.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '    Tasks = @{'
+            "        PesterUnit = @{ RunWhen = 'Never' }"
+            '    }'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Contain 'PesterUnit'
+        $tasks.Keys | Should -Not -Contain 'CodeCoverage'
+        $tasks['CodeQuality'].Jobs | Should -Contain '?PesterUnit'
+        $tasks['CodeQuality'].Jobs | Should -Not -Contain '?CodeCoverage'
+    }
+
+    It 'registers CodeQuality as skipped without loading children when CodeQuality uses RunWhen Never' {
+        $buildFile = Join-Path $TestDrive 'skip-code-quality-group.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '    Tasks = @{'
+            "        CodeQuality = @{ RunWhen = 'Never' }"
+            '    }'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
+        $tasks.Keys | Should -Contain 'CodeQuality'
+        $tasks.Keys | Should -Not -Contain 'PSScriptAnalyzer'
+        $tasks.Keys | Should -Not -Contain 'PesterUnit'
+        $tasks.Keys | Should -Not -Contain 'CodeCoverage'
+        $tasks['Validate'].Jobs | Should -Contain '?CodeQuality'
     }
 
     It 'loads Pester leaf tasks directly under CodeQuality' {

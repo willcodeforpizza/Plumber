@@ -57,20 +57,19 @@ function Test-PlumberConfig {
             }
         )
         foreach ($taskKey in $Config.Tasks.Keys) {
+            $isLocalTask = $taskKey -in $localTaskName
             if ($taskKey -notin $taskKeys) {
-                if ($taskKey -in $localTaskName) {
+                if (-not $isLocalTask) {
+                    $path = "Tasks.$taskKey"
+                    $allowedTaskName = @($taskKeys) + @($localTaskName)
+                    $messageSplat = @{
+                        Path        = $path
+                        Kind        = 'task'
+                        AllowedName = $allowedTaskName
+                    }
+                    $errors.Add((Get-PlumberConfigUnknownKeyMessage @messageSplat))
                     continue
                 }
-
-                $path = "Tasks.$taskKey"
-                $allowedTaskName = @($taskKeys) + @($localTaskName)
-                $messageSplat = @{
-                    Path        = $path
-                    Kind        = 'task'
-                    AllowedName = $allowedTaskName
-                }
-                $errors.Add((Get-PlumberConfigUnknownKeyMessage @messageSplat))
-                continue
             }
 
             if ($taskKey -eq 'Local') {
@@ -87,12 +86,20 @@ function Test-PlumberConfig {
                 continue
             }
 
-            $settingKeys = @(
-                $rules.Keys |
-                    Where-Object {$_ -like "Tasks.$taskKey.*"} |
-                        ForEach-Object {($_ -split '\.')[2]}
-            )
+            $settingKeys = if ($isLocalTask) {
+                @('RunWhen')
+            } else {
+                @(
+                    $rules.Keys |
+                        Where-Object {$_ -like "Tasks.$taskKey.*"} |
+                            ForEach-Object {($_ -split '\.')[2]}
+                )
+            }
             foreach ($settingKey in $Config.Tasks[$taskKey].Keys) {
+                if ($isLocalTask -and $settingKey -ne 'RunWhen') {
+                    continue
+                }
+
                 if ($settingKey -notin $settingKeys) {
                     $path = "Tasks.$taskKey.$settingKey"
                     $messageSplat = @{
@@ -105,9 +112,14 @@ function Test-PlumberConfig {
                 }
 
                 $rulePath = "Tasks.$taskKey.$settingKey"
+                $validatorRulePath = if ($isLocalTask -and $settingKey -eq 'RunWhen') {
+                    'Tasks.CodeQuality.RunWhen'
+                } else {
+                    $rulePath
+                }
                 $validatorSplat = @{
                     Value = $Config.Tasks[$taskKey][$settingKey]
-                    Rule  = $rules[$rulePath]
+                    Rule  = $rules[$validatorRulePath]
                 }
                 $message = Invoke-PlumberConfigValidator @validatorSplat
                 if ($message) {

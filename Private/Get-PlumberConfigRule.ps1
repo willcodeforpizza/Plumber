@@ -16,6 +16,10 @@ function Get-PlumberConfigRule {
         IncludeModuleFolders                    = @{Validate = 'string-array'}
         BuildRoot                               = @{Validate = 'string'}
         'Tasks.Local'                           = @{Validate = 'string-array'}
+        'Tasks.CodeQuality.RunWhen'             = $runWhenRule
+        'Tasks.ReleaseHygiene.RunWhen'          = $runWhenRule
+        'Tasks.Content.RunWhen'                 = $runWhenRule
+        'Tasks.ModuleConventions.RunWhen'       = $runWhenRule
         'Tasks.Backticks.RunWhen'           = $runWhenRule
         'Tasks.Backticks.Exclude'               = @{Validate = 'string-array'}
         'Tasks.CodeCoverage.RunWhen'        = $runWhenRule

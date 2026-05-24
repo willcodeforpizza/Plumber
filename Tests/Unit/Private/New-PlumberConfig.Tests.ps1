@@ -14,6 +14,10 @@ Describe 'New-PlumberConfig' {
             $config.Tasks.CodeCoverage.Minimum | Should -Be 75
             $config.Tasks.PSScriptAnalyzer.IncludeTests | Should -BeTrue
             $config.Tasks.ContainsKey('Exclude') | Should -BeFalse
+            $config.Tasks.CodeQuality.RunWhen | Should -Be 'Always'
+            $config.Tasks.ReleaseHygiene.RunWhen | Should -Be 'Always'
+            $config.Tasks.Content.RunWhen | Should -Be 'Always'
+            $config.Tasks.ModuleConventions.RunWhen | Should -Be 'Always'
             $config.Tasks.Backticks.Exclude | Should -Be @()
             $config.Tasks.Backticks.RunWhen | Should -Be 'Always'
             $config.Tasks.CodeCoverage.RunWhen | Should -Be 'Always'
@@ -44,6 +48,9 @@ Describe 'New-PlumberConfig' {
                         Minimum     = 90
                         RunWhen = 'OnRelease'
                     }
+                    Content = @{
+                        RunWhen = 'Never'
+                    }
                     Local = $null
                     PublicFunctionPrefix = @{
                         Prefix     = 'Thing'
@@ -64,6 +71,7 @@ Describe 'New-PlumberConfig' {
             $config.IncludeModuleFolders | Should -Be @('TaskFunctions')
             $config.Tasks.CodeCoverage.Minimum | Should -Be 90
             $config.Tasks.CodeCoverage.RunWhen | Should -Be 'OnRelease'
+            $config.Tasks.Content.RunWhen | Should -Be 'Never'
             $config.Tasks.ContainsKey('Exclude') | Should -BeFalse
             $config.Tasks.Local | Should -Be @()
             $config.Tasks.PublicFunctionPrefix.Prefix | Should -Be 'Thing'

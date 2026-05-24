@@ -25,6 +25,18 @@ function New-PlumberConfig {
         IncludeModuleFolders = @()
         Tasks                = @{
             Local                = @()
+            CodeQuality          = @{
+                RunWhen = 'Always'
+            }
+            ReleaseHygiene       = @{
+                RunWhen = 'Always'
+            }
+            Content              = @{
+                RunWhen = 'Always'
+            }
+            ModuleConventions    = @{
+                RunWhen = 'Always'
+            }
             Backticks            = @{
                 RunWhen = 'Always'
                 Exclude     = @()

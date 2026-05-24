@@ -115,7 +115,8 @@ untracked files.
 
 ### Tasks.<Task>.RunWhen
 
-`Tasks.<Task>.RunWhen` controls when a task runs. Supported values are:
+`Tasks.<Task>.RunWhen` controls when a task runs. `<Task>` can be a built-in
+task, a group task, or the file stem of a local task. Supported values are:
 
 - `Always` - run whenever the task is selected. This is the default.
 - `OnRelease` - run only when `PLUMBER_RELEASE_INTENT=true`.
@@ -131,6 +132,9 @@ explains why validation did not run.
             RunWhen = 'OnRelease'
         }
         ToDo = @{
+            RunWhen = 'Never'
+        }
+        Content = @{
             RunWhen = 'Never'
         }
     }

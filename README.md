@@ -284,13 +284,14 @@ code:
 
 #### Tasks.<Task>.RunWhen
 
-`Tasks.<Task>.RunWhen` controls when a task runs. Supported values are:
+`Tasks.<Task>.RunWhen` controls when a task runs. `<Task>` can be a built-in
+task, a group task, or the file stem of a local task. Supported values are:
 
 - `Always` - run whenever the task is selected. This is the default.
 - `OnRelease` - run only when `PLUMBER_RELEASE_INTENT=true`.
 - `Never` - never run the task.
 
-Use `Never` to disable a task:
+Use `Never` to disable a task or group:
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
@@ -300,6 +301,9 @@ Use `Never` to disable a task:
         }
         ModuleVersion = @{
             RunWhen = 'OnRelease'
+        }
+        Content = @{
+            RunWhen = 'Never'
         }
     }
 }
