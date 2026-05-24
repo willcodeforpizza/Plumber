@@ -68,6 +68,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify tag is on main
+        shell: bash
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          git merge-base --is-ancestor HEAD origin/main
+
       - name: Install dependencies
         shell: pwsh
         run: |
