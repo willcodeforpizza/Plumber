@@ -230,6 +230,52 @@ Describe 'Test-PlumberConfig' {
         }
     }
 
+    It 'reports invalid RunWhen values' {
+        InModuleScope Plumber {
+            $config = New-PlumberConfig -Config @{
+                Tasks = @{
+                    ModuleVersion = @{
+                        RunWhen = 'Sometimes'
+                    }
+                }
+            }
+
+            $expectedMessage = '*Tasks.ModuleVersion.RunWhen: Expected one of*Always*OnRelease*Never*'
+
+            { Test-PlumberConfig -Config $config } |
+                Should -Throw -ExpectedMessage $expectedMessage
+        }
+    }
+
+    It 'reports invalid local task RunWhen values' {
+        InModuleScope Plumber {
+            $config = New-PlumberConfig -Config @{
+                Tasks = @{
+                    Local     = @('LocalTasks/BuildDocs.ps1')
+                    BuildDocs = @{
+                        RunWhen = 'Sometimes'
+                    }
+                }
+            }
+
+            { Test-PlumberConfig -Config $config } |
+                Should -Throw -ExpectedMessage '*Tasks.BuildDocs.RunWhen: Expected one of*Always*OnRelease*Never*'
+        }
+    }
+
+    It 'rejects removed ExcludeTask configuration' {
+        InModuleScope Plumber {
+            $config = New-PlumberConfig -Config @{
+                Tasks = @{
+                    Exclude = @('YAML')
+                }
+            }
+
+            { Test-PlumberConfig -Config $config } |
+                Should -Throw -ExpectedMessage '*Tasks.Exclude is not a known task*'
+        }
+    }
+
     It 'allows configured local task names with unchecked bodies' {
         InModuleScope Plumber {
             $config = New-PlumberConfig -Config @{
@@ -237,6 +283,7 @@ Describe 'Test-PlumberConfig' {
                     Local     = @('LocalTasks/BuildDocs.ps1')
                     BuildDocs = @{
                         Whatever = 123
+                        RunWhen  = 'Never'
                     }
                 }
             }

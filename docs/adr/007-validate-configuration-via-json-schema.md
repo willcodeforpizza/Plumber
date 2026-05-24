@@ -48,9 +48,9 @@ The rule map describes the built-in config surface:
 
 - top-level keys such as `ModuleManifest`, `FileScope`, `DiffBase`,
   `IncludeModuleFolders`, and runtime-injected `BuildRoot`
-- task-level arrays such as `Tasks.Exclude` and `Tasks.Local`
-- per-task settings such as `Tasks.LineLength.MaxLength` and
-  `Tasks.JSONSchema.Schemas`
+- task-level arrays such as `Tasks.Local`
+- per-task settings such as `Tasks.<Task>.RunWhen`,
+  `Tasks.LineLength.MaxLength` and `Tasks.JSONSchema.Schemas`
 
 `Invoke-PlumberConfigValidator` implements the primitive validators:
 `string`, `string-array`, `integer`, `boolean`, `enum`, and structured

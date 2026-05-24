@@ -113,19 +113,36 @@ untracked files.
 
 ## Task Settings
 
-### Tasks.Exclude
+### Tasks.<Task>.RunWhen
 
-`Tasks.Exclude` removes tasks before `Invoke-Build` runs. Excluding a group task
-excludes all of its children. For example, `Content` excludes `JSON`,
-`JSONSchema` and `YAML`.
+`Tasks.<Task>.RunWhen` controls when a task runs. `<Task>` can be a built-in
+task, a group task, or the file stem of a local task. Supported values are:
+
+- `Always` - run whenever the task is selected. This is the default.
+- `OnRelease` - run only when `PLUMBER_RELEASE_INTENT=true`.
+- `Never` - never run the task.
+
+Skipped tasks are registered as explicit skip tasks so direct task invocation
+explains why validation did not run.
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
     Tasks = @{
-        Exclude = @('Backticks', 'ToDo')
+        ModuleVersion = @{
+            RunWhen = 'OnRelease'
+        }
+        ToDo = @{
+            RunWhen = 'Never'
+        }
+        Content = @{
+            RunWhen = 'Never'
+        }
     }
 }
 ```
+
+`Tasks.Exclude` has been removed. Use `Tasks.<Task>.RunWhen = 'Never'`
+instead.
 
 ### Tasks.Local
 

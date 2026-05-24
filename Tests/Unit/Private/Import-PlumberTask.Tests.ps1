@@ -7,18 +7,30 @@ BeforeAll {
 Describe 'Import-PlumberTask' {
     It 'returns task import details when the task is enabled' {
         InModuleScope Plumber {
-            $task = Import-PlumberTask -Name JSON -Path 'Content/JSON.ps1' -TaskRoot $TestDrive -Parent Content
+            $taskSplat = @{
+                Name        = 'JSON'
+                Path        = 'Content/JSON.ps1'
+                TaskRoot    = $TestDrive
+                Parent      = 'Content'
+                RunWhen = 'Always'
+            }
+            $task = Import-PlumberTask @taskSplat
 
             $task.Name | Should -Be 'JSON'
             $task.FullName | Should -Be (Join-Path $TestDrive 'Content/JSON.ps1')
             $task.Parent | Should -Be 'Content'
+            $task.RunWhen | Should -Be 'Always'
+            $task.ShouldRun | Should -BeTrue
         }
     }
 
-    It 'returns nothing when the task is excluded' {
+    It 'marks task imports as skipped when RunWhen disables the task' {
         InModuleScope Plumber {
-            Import-PlumberTask -Name YAML -Path 'Content/YAML.ps1' -TaskRoot $TestDrive -ExcludeTasks YAML |
-                Should -BeNullOrEmpty
+            $task = Import-PlumberTask -Name YAML -Path 'Content/YAML.ps1' -TaskRoot $TestDrive -RunWhen Never
+
+            $task.Name | Should -Be 'YAML'
+            $task.RunWhen | Should -Be 'Never'
+            $task.ShouldRun | Should -BeFalse
         }
     }
 }

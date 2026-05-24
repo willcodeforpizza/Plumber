@@ -282,13 +282,34 @@ code:
 }
 ```
 
-#### Tasks.Exclude
+#### Tasks.<Task>.RunWhen
 
-`Tasks.Exclude` removes tasks before `Invoke-Build` runs. Excluding a group task excludes all of
-its children, for example `Content` excludes `JSON`, `JSONSchema` and `YAML`. If all children of a
-parent task are excluded, the parent task is not loaded.
+`Tasks.<Task>.RunWhen` controls when a task runs. `<Task>` can be a built-in
+task, a group task, or the file stem of a local task. Supported values are:
 
-You can also exclude individual tasks.
+- `Always` - run whenever the task is selected. This is the default.
+- `OnRelease` - run only when `PLUMBER_RELEASE_INTENT=true`.
+- `Never` - never run the task.
+
+Use `Never` to disable a task or group:
+
+```powershell
+. (Get-PlumberTaskLoader) -Config @{
+    Tasks = @{
+        ToDo = @{
+            RunWhen = 'Never'
+        }
+        ModuleVersion = @{
+            RunWhen = 'OnRelease'
+        }
+        Content = @{
+            RunWhen = 'Never'
+        }
+    }
+}
+```
+
+`Tasks.Exclude` has been removed. Use `Tasks.<Task>.RunWhen = 'Never'` instead.
 
 #### Tasks.<Task>.Exclude
 

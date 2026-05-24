@@ -24,6 +24,12 @@
                 'Tests/Unit/Private/Get-PlumberToDoComment.Tests.ps1'
             )
         }
+        ModuleVersion    = @{
+            RunWhen = 'OnRelease'
+        }
+        ChangelogUpdated = @{
+            RunWhen = 'OnRelease'
+        }
         Local            = @(
             'LocalTasks/ValidateTaskHelp.ps1'
         )

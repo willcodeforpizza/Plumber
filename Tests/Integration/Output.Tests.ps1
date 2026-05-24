@@ -25,16 +25,23 @@ Describe 'Invoke-Plumber output integration' {
         @(
             '. (Get-PlumberTaskLoader) -Config @{'
             '    Tasks = @{'
-            '        Exclude = @('
-            "            'Backticks',"
-            "            'LineLength',"
-            "            'PesterUnit',"
-            "            'PesterIntegration',"
-            "            'CodeCoverage',"
-            "            'ReleaseHygiene',"
-            "            'Content',"
-            "            'ModuleConventions'"
-            '        )'
+            "        Backticks = @{ RunWhen = 'Never' }"
+            "        LineLength = @{ RunWhen = 'Never' }"
+            "        PesterUnit = @{ RunWhen = 'Never' }"
+            "        PesterIntegration = @{ RunWhen = 'Never' }"
+            "        CodeCoverage = @{ RunWhen = 'Never' }"
+            "        ModuleVersion = @{ RunWhen = 'Never' }"
+            "        ChangelogUpdated = @{ RunWhen = 'Never' }"
+            "        JSON = @{ RunWhen = 'Never' }"
+            "        JSONSchema = @{ RunWhen = 'Never' }"
+            "        YAML = @{ RunWhen = 'Never' }"
+            "        Manifest = @{ RunWhen = 'Never' }"
+            "        PublicFunctions = @{ RunWhen = 'Never' }"
+            "        PublicFunctionPrefix = @{ RunWhen = 'Never' }"
+            "        FunctionFiles = @{ RunWhen = 'Never' }"
+            "        Naming = @{ RunWhen = 'Never' }"
+            "        ToDo = @{ RunWhen = 'Never' }"
+            "        Help = @{ RunWhen = 'Never' }"
             '    }'
             '}'
         ) | Set-Content -Path $buildFile
@@ -109,16 +116,23 @@ Describe 'Invoke-Plumber output integration' {
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'PesterOutputModule.psd1'"
             '    Tasks = @{'
-            '        Exclude = @('
-            "            'PSScriptAnalyzer',"
-            "            'Backticks',"
-            "            'LineLength',"
-            "            'PesterIntegration',"
-            "            'CodeCoverage',"
-            "            'ReleaseHygiene',"
-            "            'Content',"
-            "            'ModuleConventions'"
-            '        )'
+            "        PSScriptAnalyzer = @{ RunWhen = 'Never' }"
+            "        Backticks = @{ RunWhen = 'Never' }"
+            "        LineLength = @{ RunWhen = 'Never' }"
+            "        PesterIntegration = @{ RunWhen = 'Never' }"
+            "        CodeCoverage = @{ RunWhen = 'Never' }"
+            "        ModuleVersion = @{ RunWhen = 'Never' }"
+            "        ChangelogUpdated = @{ RunWhen = 'Never' }"
+            "        JSON = @{ RunWhen = 'Never' }"
+            "        JSONSchema = @{ RunWhen = 'Never' }"
+            "        YAML = @{ RunWhen = 'Never' }"
+            "        Manifest = @{ RunWhen = 'Never' }"
+            "        PublicFunctions = @{ RunWhen = 'Never' }"
+            "        PublicFunctionPrefix = @{ RunWhen = 'Never' }"
+            "        FunctionFiles = @{ RunWhen = 'Never' }"
+            "        Naming = @{ RunWhen = 'Never' }"
+            "        ToDo = @{ RunWhen = 'Never' }"
+            "        Help = @{ RunWhen = 'Never' }"
             '    }'
             '}'
         ) | Set-Content -Path $buildFile

@@ -4,34 +4,10 @@ function Import-PlumberTask {
         Creates metadata for a Plumber task import.
 
         .DESCRIPTION
-        Returns task import metadata when a task is enabled. If the task name is
-        present in ExcludeTasks, no object is returned. TaskLoader.ps1 uses this
-        metadata to dot-source task files in the active Invoke-Build scope.
-
-        .PARAMETER Name
-        The Invoke-Build task name.
-
-        .PARAMETER Path
-        The task script path relative to the Plumber task root.
-
-        .PARAMETER TaskRoot
-        The root path that contains Plumber task scripts.
-
-        .PARAMETER Parent
-        The parent task that should reference this task.
-
-        .PARAMETER ExcludeTasks
-        Task names that should not be imported.
-
-        .EXAMPLE
-        Import-PlumberTask -Name JSON -Path Content/JSON.ps1 -TaskRoot $taskRoot -Parent Content
-
-        Returns metadata for importing the JSON task under the Content parent.
-
-        .EXAMPLE
-        Import-PlumberTask -Name YAML -Path Content/YAML.ps1 -TaskRoot $taskRoot -ExcludeTasks YAML
-
-        Returns nothing because YAML is excluded.
+        Returns task import metadata including the task's RunWhen policy and
+        whether it should run in the current context. TaskLoader.ps1 uses this
+        metadata to dot-source task files or register explicit skip tasks in the
+        active Invoke-Build scope.
     #>
     [CmdletBinding()]
     [OutputType([pscustomobject])]
@@ -51,17 +27,16 @@ function Import-PlumberTask {
         [string]
         $Parent,
 
-        [string[]]
-        $ExcludeTasks = @()
+        [ValidateSet('Always', 'OnRelease', 'Never')]
+        [string]
+        $RunWhen = 'Always'
     )
 
-    if (-not (Test-PlumberTaskEnabled -Name $Name -ExcludeTasks $ExcludeTasks)) {
-        return
-    }
-
     [pscustomobject]@{
-        Name     = $Name
-        FullName = Join-Path $TaskRoot $Path
-        Parent   = $Parent
+        Name        = $Name
+        FullName    = Join-Path $TaskRoot $Path
+        Parent      = $Parent
+        RunWhen     = $RunWhen
+        ShouldRun   = Test-PlumberTaskShouldRun -Name $Name -RunWhen $RunWhen
     }
 }

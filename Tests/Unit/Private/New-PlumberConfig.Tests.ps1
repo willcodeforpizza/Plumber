@@ -13,8 +13,20 @@ Describe 'New-PlumberConfig' {
             $config.IncludeModuleFolders | Should -Be @()
             $config.Tasks.CodeCoverage.Minimum | Should -Be 75
             $config.Tasks.PSScriptAnalyzer.IncludeTests | Should -BeTrue
-            $config.Tasks.Exclude | Should -Be @()
+            $config.Tasks.ContainsKey('Exclude') | Should -BeFalse
+            $config.Tasks.CodeQuality.RunWhen | Should -Be 'Always'
+            $config.Tasks.ReleaseHygiene.RunWhen | Should -Be 'Always'
+            $config.Tasks.Content.RunWhen | Should -Be 'Always'
+            $config.Tasks.ModuleConventions.RunWhen | Should -Be 'Always'
             $config.Tasks.Backticks.Exclude | Should -Be @()
+            $config.Tasks.Backticks.RunWhen | Should -Be 'Always'
+            $config.Tasks.CodeCoverage.RunWhen | Should -Be 'Always'
+            $config.Tasks.ModuleVersion.RunWhen | Should -Be 'Always'
+            $config.Tasks.ChangelogUpdated.RunWhen | Should -Be 'Always'
+            $config.Tasks.Manifest.RunWhen | Should -Be 'Always'
+            $config.Tasks.PublicFunctions.RunWhen | Should -Be 'Always'
+            $config.Tasks.FunctionFiles.RunWhen | Should -Be 'Always'
+            $config.Tasks.Naming.RunWhen | Should -Be 'Always'
             $config.Tasks.Local | Should -Be @()
             $config.Tasks.PublicFunctionPrefix.Prefix | Should -BeNullOrEmpty
             $config.Tasks.PublicFunctionPrefix.Exclusions | Should -Be @()
@@ -33,9 +45,12 @@ Describe 'New-PlumberConfig' {
                 IncludeModuleFolders = @('TaskFunctions')
                 Tasks     = @{
                     CodeCoverage = @{
-                        Minimum = 90
+                        Minimum     = 90
+                        RunWhen = 'OnRelease'
                     }
-                    Exclude = $null
+                    Content = @{
+                        RunWhen = 'Never'
+                    }
                     Local = $null
                     PublicFunctionPrefix = @{
                         Prefix     = 'Thing'
@@ -55,7 +70,9 @@ Describe 'New-PlumberConfig' {
             $config.FileScope | Should -Be 'Changed'
             $config.IncludeModuleFolders | Should -Be @('TaskFunctions')
             $config.Tasks.CodeCoverage.Minimum | Should -Be 90
-            $config.Tasks.Exclude | Should -Be @()
+            $config.Tasks.CodeCoverage.RunWhen | Should -Be 'OnRelease'
+            $config.Tasks.Content.RunWhen | Should -Be 'Never'
+            $config.Tasks.ContainsKey('Exclude') | Should -BeFalse
             $config.Tasks.Local | Should -Be @()
             $config.Tasks.PublicFunctionPrefix.Prefix | Should -Be 'Thing'
             $config.Tasks.PublicFunctionPrefix.Exclusions | Should -Be @()
