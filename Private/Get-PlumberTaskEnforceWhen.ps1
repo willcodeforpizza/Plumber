@@ -11,15 +11,13 @@ function Get-PlumberTaskEnforceWhen {
         $Name
     )
 
-    if (
-        $script:PlumberConfig -and
-        $script:PlumberConfig.Tasks -and
-        $script:PlumberConfig.Tasks.ContainsKey($Name) -and
-        $script:PlumberConfig.Tasks[$Name] -is [hashtable] -and
-        $script:PlumberConfig.Tasks[$Name].ContainsKey('EnforceWhen') -and
-        $script:PlumberConfig.Tasks[$Name].EnforceWhen
-    ) {
-        return $script:PlumberConfig.Tasks[$Name].EnforceWhen
+    if (-not $script:PlumberConfig.Tasks.ContainsKey($Name)) {
+        return 'Always'
+    }
+
+    $taskConfig = $script:PlumberConfig.Tasks[$Name]
+    if ($taskConfig -is [hashtable] -and $taskConfig.ContainsKey('EnforceWhen')) {
+        return $taskConfig.EnforceWhen
     }
 
     'Always'
