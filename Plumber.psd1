@@ -11,24 +11,6 @@
         'Install-PlumberDependency'
         'Invoke-Plumber'
     )
-    ModuleList = @(
-        @{
-            ModuleName    = 'InvokeBuild'
-            ModuleVersion = '5.14.23'
-        }
-        @{
-            ModuleName    = 'Pester'
-            ModuleVersion = '5.7.1'
-        }
-        @{
-            ModuleName    = 'PSScriptAnalyzer'
-            ModuleVersion = '1.24.0'
-        }
-        @{
-            ModuleName    = 'powershell-yaml'
-            ModuleVersion = '0.4.12'
-        }
-    )
     PrivateData = @{
         PSData = @{
             Tags = @('Validation', 'Pipeline', 'Invoke-Build')

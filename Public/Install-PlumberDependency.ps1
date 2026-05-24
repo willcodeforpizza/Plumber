@@ -14,6 +14,12 @@ function Install-PlumberDependency {
         A repository directory or dependency file path. When a directory is
         provided, Plumber looks for Plumber.dependencies.psd1 in that directory.
 
+        .PARAMETER Scope
+        Optional task scope names to install. Core dependencies are always
+        included when a scope is supplied. Dependency scopes should match
+        Plumber task or task-group names, for example PesterUnit, YAML, or
+        ReleaseHygiene.
+
         .EXAMPLE
         Install-PlumberDependency -Path .
 
@@ -25,7 +31,10 @@ function Install-PlumberDependency {
     [CmdletBinding()]
     param (
         [string]
-        $Path = '.'
+        $Path = '.',
+
+        [string[]]
+        $Scope
     )
 
     $dependencyPath = if (Test-Path -LiteralPath $Path -PathType Container) {
@@ -39,9 +48,9 @@ function Install-PlumberDependency {
     }
 
     $definition = Import-PowerShellDataFile -Path $dependencyPath
-    $dependencies = @($definition.Modules)
+    $dependencies = @(Select-PlumberDependency -Dependency $definition.Modules -Scope $Scope)
     if (-not $dependencies) {
-        throw "Plumber dependency file '$dependencyPath' does not define any Modules."
+        throw "Plumber dependency file '$dependencyPath' does not define any Modules for the requested scope."
     }
 
     Import-PlumberDependency -Dependency $dependencies -InstallMissing

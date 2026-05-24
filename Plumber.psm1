@@ -5,11 +5,12 @@ param (
 
 $script:moduleRoot = $PSScriptRoot
 
-$manifest = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'Plumber.psd1')
+$dependencyDefinition = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'Plumber.dependencies.psd1')
 . (Join-Path $PSScriptRoot 'Private/Install-PlumberModuleDependency.ps1')
 . (Join-Path $PSScriptRoot 'Private/Import-PlumberDependency.ps1')
+. (Join-Path $PSScriptRoot 'Private/Select-PlumberDependency.ps1')
 $dependencySplat = @{
-    Dependency = $manifest.ModuleList
+    Dependency = Select-PlumberDependency -Dependency $dependencyDefinition.Modules -Scope Core
 }
 $installMissingDependencies = if ($ImportOptions -is [hashtable]) {
     $ImportOptions.InstallMissingDependencies -eq $true
