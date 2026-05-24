@@ -25,7 +25,7 @@ function Test-PlumberTaskEnabled {
             $true
         }
         'OnRelease' {
-            $env:PLUMBER_RELEASE_INTENT -eq 'true'
+            $env:PLUMBER_RELEASE_INTENT -in @('true', 'True', 'TRUE', '1', 'yes')
         }
         'Never' {
             $false

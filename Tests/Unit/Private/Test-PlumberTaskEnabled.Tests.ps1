@@ -48,6 +48,17 @@ Describe 'Test-PlumberTaskEnabled' {
         }
     }
 
+    It 'accepts common truthy release intent values' {
+        foreach ($releaseIntent in @('True', 'TRUE', '1', 'yes')) {
+            $env:PLUMBER_RELEASE_INTENT = $releaseIntent
+
+            InModuleScope Plumber {
+                Test-PlumberTaskEnabled -Name ModuleVersion -EnforceWhen OnRelease |
+                    Should -BeTrue
+            }
+        }
+    }
+
     It 'throws for unknown EnforceWhen values' {
         InModuleScope Plumber {
             { Test-PlumberTaskEnabled -Name JSON -EnforceWhen Sometimes } |
