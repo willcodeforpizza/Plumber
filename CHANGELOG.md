@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.62
+- Fixed: release packaging now includes `TaskFunctions`, which Plumber imports
+  at module load time.
+
 ## 0.0.61
 - Added: task-level `RunWhen` policy with `Always`, `OnRelease`, and
   `Never` modes for built-in and local tasks.
