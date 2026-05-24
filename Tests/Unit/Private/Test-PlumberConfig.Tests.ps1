@@ -230,6 +230,36 @@ Describe 'Test-PlumberConfig' {
         }
     }
 
+    It 'reports invalid EnforceWhen values' {
+        InModuleScope Plumber {
+            $config = New-PlumberConfig -Config @{
+                Tasks = @{
+                    ModuleVersion = @{
+                        EnforceWhen = 'Sometimes'
+                    }
+                }
+            }
+
+            $expectedMessage = '*Tasks.ModuleVersion.EnforceWhen: Expected one of*Always*OnRelease*Never*'
+
+            { Test-PlumberConfig -Config $config } |
+                Should -Throw -ExpectedMessage $expectedMessage
+        }
+    }
+
+    It 'rejects removed ExcludeTask configuration' {
+        InModuleScope Plumber {
+            $config = New-PlumberConfig -Config @{
+                Tasks = @{
+                    Exclude = @('YAML')
+                }
+            }
+
+            { Test-PlumberConfig -Config $config } |
+                Should -Throw -ExpectedMessage '*Tasks.Exclude is not a known task*'
+        }
+    }
+
     It 'allows configured local task names with unchecked bodies' {
         InModuleScope Plumber {
             $config = New-PlumberConfig -Config @{

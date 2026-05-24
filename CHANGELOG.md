@@ -1,5 +1,11 @@
 # Plumber
 
+## 0.0.61
+- Added: task-level `EnforceWhen` policy with `Always`, `OnRelease`, and
+  `Never` modes for built-in and local tasks.
+- Removed: global `Tasks.Exclude`; use `Tasks.<Task>.EnforceWhen = 'Never'`
+  instead.
+
 ## 0.0.60
 - Added: Plumber config validation now reports unknown keys, invalid values
   and friendly suggestions at task-loader time.

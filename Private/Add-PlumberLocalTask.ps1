@@ -6,10 +6,7 @@ function Add-PlumberLocalTask {
     [CmdletBinding()]
     param ()
 
-    if (
-        -not $script:PlumberConfig.Tasks.Local -or
-        -not (Test-PlumberTaskEnabled -Name Local -ExcludeTasks $script:PlumberConfig.Tasks.Exclude)
-    ) {
+    if (-not $script:PlumberConfig.Tasks.Local) {
         return
     }
 
@@ -19,28 +16,30 @@ function Add-PlumberLocalTask {
         }
 
         $localTaskName = [System.IO.Path]::GetFileNameWithoutExtension($localTaskPath)
-        $taskEnabledSplat = @{
-            Name         = $localTaskName
-            ExcludeTasks = $script:PlumberConfig.Tasks.Exclude
-        }
-        $isLocalTaskEnabled = Test-PlumberTaskEnabled @taskEnabledSplat
-        if (-not $isLocalTaskEnabled) {
-            continue
-        }
+        $enforceWhen = Get-PlumberTaskEnforceWhen -Name $localTaskName
+        $isLocalTaskEnabled = Test-PlumberTaskEnabled -Name $localTaskName -EnforceWhen $enforceWhen
 
-        $resolvedLocalTaskPath = if ([System.IO.Path]::IsPathRooted($localTaskPath)) {
-            [System.IO.Path]::GetFullPath($localTaskPath)
-        } elseif (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
-            [System.IO.Path]::GetFullPath((Join-Path $BuildRoot $localTaskPath))
+        if ($isLocalTaskEnabled) {
+            $resolvedLocalTaskPath = if ([System.IO.Path]::IsPathRooted($localTaskPath)) {
+                [System.IO.Path]::GetFullPath($localTaskPath)
+            } elseif (Get-Variable -Name BuildRoot -ErrorAction SilentlyContinue) {
+                [System.IO.Path]::GetFullPath((Join-Path $BuildRoot $localTaskPath))
+            } else {
+                [System.IO.Path]::GetFullPath($localTaskPath)
+            }
+
+            if (-not (Test-Path $resolvedLocalTaskPath -PathType Leaf)) {
+                throw "Local task file not found: $localTaskPath"
+            }
+
+            . $resolvedLocalTaskPath
         } else {
-            [System.IO.Path]::GetFullPath($localTaskPath)
+            $skipMessage = Get-PlumberTaskSkipMessage -Name $localTaskName -EnforceWhen $enforceWhen
+            Add-BuildTask -Name $localTaskName -Jobs ({
+                Write-Host $skipMessage
+            }.GetNewClosure())
         }
 
-        if (-not (Test-Path $resolvedLocalTaskPath -PathType Leaf)) {
-            throw "Local task file not found: $localTaskPath"
-        }
-
-        . $resolvedLocalTaskPath
         $script:PlumberTaskJobs.Local += "?$localTaskName"
     }
 

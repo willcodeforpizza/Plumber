@@ -23,7 +23,6 @@ function Test-PlumberConfig {
         $rules.Keys |
             Where-Object {$_ -like 'Tasks.*.*'} |
                 ForEach-Object {($_ -split '\.')[1]}
-        'Exclude'
         'Local'
     ) | Sort-Object -Unique
     $errors = [System.Collections.Generic.List[string]]::new()
@@ -74,7 +73,7 @@ function Test-PlumberConfig {
                 continue
             }
 
-            if ($taskKey -in 'Exclude', 'Local') {
+            if ($taskKey -eq 'Local') {
                 $rulePath = "Tasks.$taskKey"
                 $message = Invoke-PlumberConfigValidator -Value $Config.Tasks[$taskKey] -Rule $rules[$rulePath]
                 if ($message) {

@@ -14,12 +14,6 @@ function Add-PlumberTaskGroup {
         $TaskRoot
     )
 
-    if (
-        -not (Test-PlumberTaskEnabled -Name $TaskGroup.Parent -ExcludeTasks $script:PlumberConfig.Tasks.Exclude)
-    ) {
-        return
-    }
-
     foreach ($childTask in $TaskGroup.Children) {
         if (
             $childTask -eq 'CodeCoverage' -and

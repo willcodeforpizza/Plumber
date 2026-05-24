@@ -24,55 +24,84 @@ function New-PlumberConfig {
         FileScope            = 'All'
         IncludeModuleFolders = @()
         Tasks                = @{
-            Exclude              = @()
             Local                = @()
             Backticks            = @{
-                Exclude = @()
+                EnforceWhen = 'Always'
+                Exclude     = @()
             }
             CodeCoverage         = @{
-                Minimum = 75
+                EnforceWhen = 'Always'
+                Minimum     = 75
             }
             Help                 = @{
+                EnforceWhen         = 'Always'
                 PrivateSynopsisOnly = $true
             }
             JSON                 = @{
-                Exclude = @()
+                EnforceWhen = 'Always'
+                Exclude     = @()
             }
             JSONSchema           = @{
-                Exclude = @()
-                Schemas = @()
+                EnforceWhen = 'Always'
+                Exclude     = @()
+                Schemas     = @()
             }
             LineLength           = @{
-                Exclude   = @()
-                MaxLength = 115
+                EnforceWhen = 'Always'
+                Exclude     = @()
+                MaxLength   = 115
             }
             PathSeparator        = @{
-                Exclude = @()
+                EnforceWhen = 'Always'
+                Exclude     = @()
             }
             ModuleVersion        = @{
+                EnforceWhen       = 'Always'
                 IncludePrerelease = $false
                 Remote            = 'origin'
                 Source            = 'PSGallery'
             }
+            ChangelogUpdated      = @{
+                EnforceWhen = 'Always'
+            }
             PesterIntegration    = @{
+                EnforceWhen  = 'Always'
                 StreamOutput = $true
             }
             PesterUnit           = @{
+                EnforceWhen  = 'Always'
                 StreamOutput = $true
             }
             PSScriptAnalyzer     = @{
+                EnforceWhen  = 'Always'
                 Exclude      = @()
                 IncludeTests = $true
             }
+            Manifest             = @{
+                EnforceWhen = 'Always'
+            }
+            PublicFunctions       = @{
+                EnforceWhen = 'Always'
+            }
             PublicFunctionPrefix = @{
-                Exclusions = @()
-                Prefix     = $null
+                EnforceWhen = 'Always'
+                Exclusions  = @()
+                Prefix      = $null
+            }
+            FunctionFiles         = @{
+                EnforceWhen = 'Always'
+                Exclude     = @()
+            }
+            Naming                = @{
+                EnforceWhen = 'Always'
             }
             ToDo                 = @{
-                Exclude = @()
+                EnforceWhen = 'Always'
+                Exclude     = @()
             }
             YAML                 = @{
-                Exclude = @()
+                EnforceWhen = 'Always'
+                Exclude     = @()
             }
         }
     }
@@ -100,9 +129,6 @@ function New-PlumberConfig {
 
     if (-not $plumberConfig.Tasks) {
         $plumberConfig.Tasks = @{}
-    }
-    if (-not $plumberConfig.Tasks.Exclude) {
-        $plumberConfig.Tasks.Exclude = @()
     }
     if (-not $plumberConfig.Tasks.Local) {
         $plumberConfig.Tasks.Local = @()

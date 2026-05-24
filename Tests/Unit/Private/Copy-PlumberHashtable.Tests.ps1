@@ -19,11 +19,11 @@ Describe 'Copy-PlumberHashtable' {
 
     It 'deep-clones nested hashtables' {
         InModuleScope Plumber {
-            $original = @{ Tasks = @{ Exclude = @('a', 'b') } }
+            $original = @{ Tasks = @{ Names = @('a', 'b') } }
             $copy = Copy-PlumberHashtable -InputObject $original
-            $copy.Tasks.Exclude += 'c'
-            $original.Tasks.Exclude.Count | Should -Be 2
-            $copy.Tasks.Exclude.Count | Should -Be 3
+            $copy.Tasks.Names += 'c'
+            $original.Tasks.Names.Count | Should -Be 2
+            $copy.Tasks.Names.Count | Should -Be 3
         }
     }
 
@@ -66,7 +66,7 @@ Describe 'Copy-PlumberHashtable' {
                 ModuleManifest = 'MyModule.psd1'
                 FileScope      = 'All'
                 Tasks          = @{
-                    Exclude    = @('YAML')
+                    Local      = @('Tasks/ValidateDocs.ps1')
                     LineLength = @{ MaxLength = 80; Exclude = @() }
                     JSONSchema = @{
                         Schemas = @(@{ Path = 'X'; Schema = 'Y' })
@@ -76,10 +76,10 @@ Describe 'Copy-PlumberHashtable' {
             $copy = Copy-PlumberHashtable -InputObject $original
             $copy.Tasks.LineLength.MaxLength = 120
             $copy.Tasks.JSONSchema.Schemas[0].Path = 'CHANGED'
-            $copy.Tasks.Exclude += 'JSON'
+            $copy.Tasks.Local += 'Tasks/CheckGenerated.ps1'
             $original.Tasks.LineLength.MaxLength | Should -Be 80
             $original.Tasks.JSONSchema.Schemas[0].Path | Should -Be 'X'
-            $original.Tasks.Exclude | Should -Be @('YAML')
+            $original.Tasks.Local | Should -Be @('Tasks/ValidateDocs.ps1')
         }
     }
 }

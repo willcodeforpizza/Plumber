@@ -14,10 +14,10 @@ function Copy-PlumberHashtable {
         The hashtable to clone.
 
         .EXAMPLE
-        $original = @{ Tasks = @{ Exclude = @('a', 'b') } }
+        $original = @{ Tasks = @{ Local = @('Tasks/ValidateDocs.ps1') } }
         $copy = Copy-PlumberHashtable -InputObject $original
-        $copy.Tasks.Exclude += 'c'
-        # $original.Tasks.Exclude is unchanged.
+        $copy.Tasks.Local += 'Tasks/CheckGenerated.ps1'
+        # $original.Tasks.Local is unchanged.
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]

@@ -24,14 +24,16 @@
                 'Tests/Unit/Private/Get-PlumberToDoComment.Tests.ps1'
             )
         }
+        ModuleVersion    = @{
+            EnforceWhen = 'OnRelease'
+        }
+        ChangelogUpdated = @{
+            EnforceWhen = 'OnRelease'
+        }
         Local            = @(
             'LocalTasks/ValidateTaskHelp.ps1'
         )
     }
-}
-
-. (Get-PlumberReleaseTaskLoader) -Config @{
-    ModuleManifest = 'Plumber.psd1'
 }
 
 . (Join-Path $PSScriptRoot 'LocalTasks/GenerateDocs.ps1')

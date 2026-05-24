@@ -47,7 +47,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
         $tasks['Validate'].Jobs | Should -Contain '?Local'
     }
 
-    It 'does not load local tasks when Local is excluded' {
+    It 'rejects removed Local group exclusion config' {
         $localTaskRoot = Join-Path $TestDrive 'Tasks'
         New-Item -Path $localTaskRoot -ItemType Directory -Force | Out-Null
         Set-Content -Path (Join-Path $localTaskRoot 'ValidateTaskDocs.ps1') -Value @(
@@ -67,13 +67,11 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             '}'
         ) | Set-Content -Path $buildFile
 
-        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
-        $tasks.Keys | Should -Not -Contain 'ValidateTaskDocs'
-        $tasks.Keys | Should -Not -Contain 'Local'
-        $tasks['Validate'].Jobs | Should -Not -Contain '?Local'
+        { & $script:invokeBuild -Task '??' -File $buildFile } |
+            Should -Throw -ExpectedMessage '*Tasks.Exclude is not a known task*'
     }
 
-    It 'excludes individual local tasks by filename task name' {
+    It 'registers individual local tasks as skipped by filename task name' {
         $localTaskRoot = Join-Path $TestDrive 'Tasks'
         New-Item -Path $localTaskRoot -ItemType Directory -Force | Out-Null
         Set-Content -Path (Join-Path $localTaskRoot 'ValidateTaskDocs.ps1') -Value @(
@@ -95,16 +93,16 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "        'Tasks/ValidateTaskDocs.ps1'"
             "        'Tasks/CheckGeneratedFiles.ps1'"
             '        )'
-            "        Exclude = @('ValidateTaskDocs')"
+            "        ValidateTaskDocs = @{ EnforceWhen = 'Never' }"
             '    }'
             '}'
         ) | Set-Content -Path $buildFile
 
         $tasks = & $script:invokeBuild -Task '??' -File $buildFile
-        $tasks.Keys | Should -Not -Contain 'ValidateTaskDocs'
+        $tasks.Keys | Should -Contain 'ValidateTaskDocs'
         $tasks.Keys | Should -Contain 'CheckGeneratedFiles'
         $tasks.Keys | Should -Contain 'Local'
-        $tasks['Local'].Jobs | Should -Not -Contain '?ValidateTaskDocs'
+        $tasks['Local'].Jobs | Should -Contain '?ValidateTaskDocs'
         $tasks['Local'].Jobs | Should -Contain '?CheckGeneratedFiles'
         $tasks['Validate'].Jobs | Should -Contain '?Local'
     }
@@ -115,13 +113,13 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    Tasks = @{ Exclude = @('JSON', 'YAML') }"
+            "    Tasks = @{ JSON = @{ EnforceWhen = 'Never' }; YAML = @{ EnforceWhen = 'Never' } }"
             '}'
         ) | Set-Content -Path $buildFile
 
         $tasks = & $script:invokeBuild -Task '??' -File $buildFile
-        $tasks.Keys | Should -Not -Contain 'JSON'
-        $tasks.Keys | Should -Not -Contain 'YAML'
+        $tasks.Keys | Should -Contain 'JSON'
+        $tasks.Keys | Should -Contain 'YAML'
         $tasks.Keys | Should -Contain 'JSONSchema'
         $tasks.Keys | Should -Contain 'Content'
         $tasks['Content'].Jobs | Should -Contain '?JSONSchema'
@@ -161,7 +159,11 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    Tasks = @{ Exclude = @('PesterUnit', 'PesterIntegration', 'CodeCoverage') }"
+            '    Tasks = @{'
+            "        PesterUnit = @{ EnforceWhen = 'Never' }"
+            "        PesterIntegration = @{ EnforceWhen = 'Never' }"
+            "        CodeCoverage = @{ EnforceWhen = 'Never' }"
+            '    }'
             '}'
         ) | Set-Content -Path $buildFile
 
@@ -170,9 +172,9 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
         $tasks.Keys | Should -Contain 'CodeQuality'
         $tasks.Keys | Should -Not -Contain 'Pester'
         $tasks['CodeQuality'].Jobs | Should -Contain '?PSScriptAnalyzer'
-        $tasks['CodeQuality'].Jobs | Should -Not -Contain '?PesterUnit'
-        $tasks['CodeQuality'].Jobs | Should -Not -Contain '?PesterIntegration'
-        $tasks['CodeQuality'].Jobs | Should -Not -Contain '?CodeCoverage'
+        $tasks['CodeQuality'].Jobs | Should -Contain '?PesterUnit'
+        $tasks['CodeQuality'].Jobs | Should -Contain '?PesterIntegration'
+        $tasks['CodeQuality'].Jobs | Should -Contain '?CodeCoverage'
     }
 
     It 'loads Pester leaf tasks directly under CodeQuality' {
@@ -211,7 +213,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = '$PSScriptRoot/../../Plumber.psd1'"
-            "    Tasks = @{ Exclude = @('ModuleVersion') }"
+            "    Tasks = @{ ModuleVersion = @{ EnforceWhen = 'Never' } }"
             '}'
         ) | Set-Content -Path $buildFile
 

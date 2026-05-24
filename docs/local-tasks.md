@@ -40,24 +40,10 @@ Add-BuildTask -Name ValidateTaskDocs -Jobs {
 
 `Tasks.Local` paths can be absolute or relative to the build root.
 
-## Excluding Local Tasks
+## Controlling Local Task Enforcement
 
-`Tasks.Exclude` works for the `Local` group and individual local tasks.
-
-```powershell
-. (Get-PlumberTaskLoader) -Config @{
-    ModuleManifest = 'MyModule.psd1'
-    Tasks = @{
-        Local = @(
-            'Tasks/ValidateTaskDocs.ps1'
-            'Tasks/CheckGeneratedFiles.ps1'
-        )
-        Exclude = @('ValidateTaskDocs')
-    }
-}
-```
-
-Exclude all local tasks by excluding the group:
+Local tasks support the same `EnforceWhen` task policy as built-in tasks. Add a
+config block named after the local task file stem:
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
@@ -67,7 +53,12 @@ Exclude all local tasks by excluding the group:
             'Tasks/ValidateTaskDocs.ps1'
             'Tasks/CheckGeneratedFiles.ps1'
         )
-        Exclude = @('Local')
+        ValidateTaskDocs = @{
+            EnforceWhen = 'Never'
+        }
     }
 }
 ```
+
+Use `EnforceWhen = 'OnRelease'` to run a local task only when
+`PLUMBER_RELEASE_INTENT=true`.

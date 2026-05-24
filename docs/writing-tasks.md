@@ -137,8 +137,8 @@ default is `115`.
 ```
 ````
 
-Do not include graph config such as `Tasks.Exclude` in each task page.
-Document global config once in global user documentation.
+Document global task policy such as `Tasks.<Task>.EnforceWhen` once in global
+user documentation, not in every task page.
 
 ## Help Examples
 

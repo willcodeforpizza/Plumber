@@ -23,22 +23,29 @@ Describe 'Get-PlumberTaskLoader content integration' {
         $tasks['Content'].Jobs | Should -Contain '?JSONSchema'
     }
 
-    It 'does not load Content when all Content child tasks are excluded' {
+    It 'loads Content with skipped children when all Content child tasks use EnforceWhen Never' {
         $buildFile = Join-Path $TestDrive 'skip-all-content.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
             '. (Get-PlumberTaskLoader) -Config @{'
             "    ModuleManifest = 'Plumber.psd1'"
-            "    Tasks = @{ Exclude = @('JSON', 'JSONSchema', 'YAML') }"
+            '    Tasks = @{'
+            "        JSON = @{ EnforceWhen = 'Never' }"
+            "        JSONSchema = @{ EnforceWhen = 'Never' }"
+            "        YAML = @{ EnforceWhen = 'Never' }"
+            '    }'
             '}'
         ) | Set-Content -Path $buildFile
 
         $tasks = & $script:invokeBuild -Task '??' -File $buildFile
-        $tasks.Keys | Should -Not -Contain 'Content'
-        $tasks['Validate'].Jobs | Should -Not -Contain '?Content'
+        $tasks.Keys | Should -Contain 'Content'
+        $tasks.Keys | Should -Contain 'JSON'
+        $tasks.Keys | Should -Contain 'JSONSchema'
+        $tasks.Keys | Should -Contain 'YAML'
+        $tasks['Validate'].Jobs | Should -Contain '?Content'
     }
 
-    It 'does not load Content children when Content is excluded' {
+    It 'rejects removed Content group exclusion config' {
         $buildFile = Join-Path $TestDrive 'skip-content-parent.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
@@ -48,12 +55,8 @@ Describe 'Get-PlumberTaskLoader content integration' {
             '}'
         ) | Set-Content -Path $buildFile
 
-        $tasks = & $script:invokeBuild -Task '??' -File $buildFile
-        $tasks.Keys | Should -Not -Contain 'Content'
-        $tasks.Keys | Should -Not -Contain 'JSON'
-        $tasks.Keys | Should -Not -Contain 'JSONSchema'
-        $tasks.Keys | Should -Not -Contain 'YAML'
-        $tasks['Validate'].Jobs | Should -Not -Contain '?Content'
+        { & $script:invokeBuild -Task '??' -File $buildFile } |
+            Should -Throw -ExpectedMessage '*Tasks.Exclude is not a known task*'
     }
 
 }

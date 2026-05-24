@@ -13,8 +13,16 @@ Describe 'New-PlumberConfig' {
             $config.IncludeModuleFolders | Should -Be @()
             $config.Tasks.CodeCoverage.Minimum | Should -Be 75
             $config.Tasks.PSScriptAnalyzer.IncludeTests | Should -BeTrue
-            $config.Tasks.Exclude | Should -Be @()
+            $config.Tasks.ContainsKey('Exclude') | Should -BeFalse
             $config.Tasks.Backticks.Exclude | Should -Be @()
+            $config.Tasks.Backticks.EnforceWhen | Should -Be 'Always'
+            $config.Tasks.CodeCoverage.EnforceWhen | Should -Be 'Always'
+            $config.Tasks.ModuleVersion.EnforceWhen | Should -Be 'Always'
+            $config.Tasks.ChangelogUpdated.EnforceWhen | Should -Be 'Always'
+            $config.Tasks.Manifest.EnforceWhen | Should -Be 'Always'
+            $config.Tasks.PublicFunctions.EnforceWhen | Should -Be 'Always'
+            $config.Tasks.FunctionFiles.EnforceWhen | Should -Be 'Always'
+            $config.Tasks.Naming.EnforceWhen | Should -Be 'Always'
             $config.Tasks.Local | Should -Be @()
             $config.Tasks.PublicFunctionPrefix.Prefix | Should -BeNullOrEmpty
             $config.Tasks.PublicFunctionPrefix.Exclusions | Should -Be @()
@@ -33,9 +41,9 @@ Describe 'New-PlumberConfig' {
                 IncludeModuleFolders = @('TaskFunctions')
                 Tasks     = @{
                     CodeCoverage = @{
-                        Minimum = 90
+                        Minimum     = 90
+                        EnforceWhen = 'OnRelease'
                     }
-                    Exclude = $null
                     Local = $null
                     PublicFunctionPrefix = @{
                         Prefix     = 'Thing'
@@ -55,7 +63,8 @@ Describe 'New-PlumberConfig' {
             $config.FileScope | Should -Be 'Changed'
             $config.IncludeModuleFolders | Should -Be @('TaskFunctions')
             $config.Tasks.CodeCoverage.Minimum | Should -Be 90
-            $config.Tasks.Exclude | Should -Be @()
+            $config.Tasks.CodeCoverage.EnforceWhen | Should -Be 'OnRelease'
+            $config.Tasks.ContainsKey('Exclude') | Should -BeFalse
             $config.Tasks.Local | Should -Be @()
             $config.Tasks.PublicFunctionPrefix.Prefix | Should -Be 'Thing'
             $config.Tasks.PublicFunctionPrefix.Exclusions | Should -Be @()
