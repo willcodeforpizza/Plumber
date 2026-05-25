@@ -5,6 +5,51 @@ BeforeAll {
 }
 
 Describe 'Invoke-Plumber output integration' {
+    It 'emits parseable JSON to stdout and diagnostics to stderr on command-line failure' {
+        $moduleRoot = Join-Path $TestDrive 'JsonContractFailureModule'
+        New-Item -Path $moduleRoot -ItemType Directory | Out-Null
+        Set-Content -Path (Join-Path $moduleRoot 'JsonContractFailureModule.psd1') -Value @(
+            '@{'
+            "    ModuleVersion = '0.1.0'"
+            '}'
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'JsonContractFailureModule.psm1') -Value '# TODO: make this fail'
+
+        $buildFile = Join-Path $moduleRoot 'JsonContractFailureModule.build.ps1'
+        Set-Content -Path $buildFile -Value @(
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'JsonContractFailureModule.psd1'"
+            '}'
+        )
+
+        $stdoutPath = Join-Path $TestDrive 'plumber.stdout.json'
+        $stderrPath = Join-Path $TestDrive 'plumber.stderr.txt'
+        $modulePath = (Resolve-Path "$PSScriptRoot/../../Plumber.psd1").Path.Replace("'", "''")
+        $moduleRootLiteral = $moduleRoot.Replace("'", "''")
+        $command = @"
+Import-Module '$modulePath' -Force
+Push-Location '$moduleRootLiteral'
+Invoke-Plumber -Task ToDo -OutputMode Json -NoFormat
+"@
+
+        & (Get-Command pwsh).Source -NoLogo -NoProfile -Command $command 1> $stdoutPath 2> $stderrPath
+        $exitCode = $LASTEXITCODE
+
+        $exitCode | Should -Not -Be 0
+        $stdout = Get-Content -Path $stdoutPath -Raw
+        $stderr = Get-Content -Path $stderrPath -Raw
+
+        { $stdout | ConvertFrom-Json } | Should -Not -Throw
+        $json = $stdout | ConvertFrom-Json
+        $json.Success | Should -BeFalse
+        $json.Failed | Should -Be 1
+        $json.Tasks[0].Name | Should -Be 'ToDo'
+        $json.Tasks[0].Status | Should -Be 'Failed'
+        $json.Failures[0].Error | Should -Match 'make this fail'
+        $stdout | Should -Not -Match 'Build failed!'
+        $stderr | Should -Match 'Build failed!'
+    }
+
     It 'reports PSScriptAnalyzer details without duplicate group failures' {
         $moduleRoot = Join-Path $TestDrive 'AnalyzerOutputModule'
         $publicRoot = Join-Path $moduleRoot 'Public'
