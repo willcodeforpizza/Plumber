@@ -207,7 +207,14 @@ output for automation, `Raw` preserves Invoke-Build output for debugging, and `C
 preserves Invoke-Build output with a concise final summary. Text output uses ANSI
 formatting by default; add `-NoFormat` for plain text.
 
+`Invoke-Plumber -OutputMode Json -NoFormat` writes one parseable JSON result object
+to stdout for automation. The JSON contract is schema-locked in
+[`docs/schemas/invoke-plumber-result.schema.json`](docs/schemas/invoke-plumber-result.schema.json)
+and documented in [Invoke-Plumber JSON output contract](docs/json-output.md).
+
 Failed validation throws after writing the selected output so CI can fail correctly.
+For JSON mode, keep stdout and stderr separate: stdout contains the JSON result,
+then the terminating error/non-zero exit follows; stderr is diagnostic only.
 
 Choose a build file explicitly when a repository has more than one build file:
 

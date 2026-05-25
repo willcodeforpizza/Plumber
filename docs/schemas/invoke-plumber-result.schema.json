@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://willcodeforpizza.github.io/Plumber/schemas/invoke-plumber-result.schema.json",
+  "title": "Invoke-Plumber JSON result",
+  "description": "Automation contract for Invoke-Plumber -OutputMode Json results.",
+  "type": "object",
+  "required": [
+    "Success",
+    "Passed",
+    "Failed",
+    "Tasks",
+    "Failures"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "Success": {
+      "type": "boolean",
+      "description": "True when all reported tasks passed."
+    },
+    "Passed": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of reported tasks with Passed status."
+    },
+    "Failed": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of reported tasks with Failed status."
+    },
+    "Tasks": {
+      "type": "array",
+      "description": "Reported task results. Group tasks may be omitted when child task results explain the group result.",
+      "items": {
+        "$ref": "#/definitions/taskResult"
+      }
+    },
+    "Failures": {
+      "type": "array",
+      "description": "Subset of Tasks whose Status is Failed.",
+      "items": {
+        "$ref": "#/definitions/taskResult"
+      }
+    }
+  },
+  "definitions": {
+    "taskResult": {
+      "type": "object",
+      "required": [
+        "Name",
+        "Status"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "Name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "Status": {
+          "type": "string",
+          "enum": [
+            "Passed",
+            "Failed"
+          ]
+        },
+        "Error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}
