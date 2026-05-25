@@ -118,20 +118,30 @@ officially supported.
 
 ## Dependencies
 
-Plumber has two dependency paths:
+Plumber has two dependency paths, both handled by `Install-PlumberDependency`:
 
-- Plumber's own task dependencies are internal to Plumber. When CI needs a
-  clean agent to install missing Plumber dependencies during module import, use:
+- **Plumber's own task dependencies** (Pester, PSScriptAnalyzer, InvokeBuild,
+  powershell-yaml) ship as a declaration in `Plumber.dependencies.psd1`
+  inside the Plumber module. They are installed with
+  `Install-PlumberDependency -Internal`.
+- **Repository build or release dependencies** belong in
+  `Plumber.dependencies.psd1` at the repository root. These are dependencies
+  needed to run that repository's Plumber tasks, not runtime dependencies for
+  normal users of the module. They are installed with `Install-PlumberDependency`
+  (no `-Internal`).
 
-  ```powershell
-  Import-Module Plumber -ArgumentList @{ InstallMissingDependencies = $true }
-  ```
+On a clean machine, importing Plumber when its task dependencies are missing
+will write a warning and expose only `Install-PlumberDependency`. Run the
+bootstrap, then re-import for a full load:
 
-- Repository build or release dependencies belong in `Plumber.dependencies.psd1`
-  at the repository root. These are dependencies needed to run that repository's
-  Plumber tasks, not runtime dependencies for normal users of the module.
+```powershell
+Install-Module Plumber -Scope CurrentUser
+Import-Module Plumber                # warns if deps missing
+Install-PlumberDependency -Internal  # installs Plumber's own task deps
+Import-Module Plumber -Force         # full load
+```
 
-Example `Plumber.dependencies.psd1`:
+Example consumer-repo `Plumber.dependencies.psd1`:
 
 ```powershell
 @{
@@ -144,23 +154,28 @@ Example `Plumber.dependencies.psd1`:
 }
 ```
 
-Install the repository dependencies explicitly before running tasks:
+Install the repository's dependencies explicitly before running tasks:
 
 ```powershell
 Install-PlumberDependency
 Invoke-Plumber
 ```
 
-CI commonly does both steps: import Plumber with dependency installation enabled
-for Plumber itself, then install the repository's task dependencies:
+A typical CI bootstrap installs Plumber's own dependencies, then this
+repository's task dependencies, then runs validation:
 
 ```powershell
-Import-Module Plumber -ArgumentList @{ InstallMissingDependencies = $true }
-Install-PlumberDependency
+Install-Module Plumber -Scope CurrentUser -Force
+Import-Module Plumber                # warns; bootstrap not yet loaded
+Install-PlumberDependency -Internal  # install Plumber's task deps
+Import-Module Plumber -Force         # reload with full surface
+Install-PlumberDependency            # install this repo's task deps
 Invoke-Plumber -OutputMode CI
 ```
 
-`Install-PlumberDependency` installs modules from `Plumber.dependencies.psd1`.
+`Install-PlumberDependency` prefers `Install-PSResource` (PSResourceGet) when
+available and falls back to `Install-Module` (PowerShellGet v2). Module imports
+never install dependencies as a side effect.
 Loading a consumer module should not install build tooling or force normal users
 to install Plumber. Keep Plumber and release tooling out of the module manifest
 unless they are real runtime dependencies.

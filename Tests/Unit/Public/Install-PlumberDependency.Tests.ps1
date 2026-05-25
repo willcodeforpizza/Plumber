@@ -32,6 +32,35 @@ Describe 'Install-PlumberDependency' {
         }
     }
 
+    It 'installs Plumber internal dependencies with -Internal' {
+        InModuleScope Plumber {
+            Mock Import-PlumberDependency {}
+
+            Install-PlumberDependency -Internal
+
+            $expectedNames = @(
+                'InvokeBuild', 'Pester', 'PSScriptAnalyzer', 'powershell-yaml'
+            )
+            Should -Invoke Import-PlumberDependency -Times 1 -Exactly -ParameterFilter {
+                $InstallMissing -and
+                ($Dependency | ForEach-Object { $_.ModuleName }) -join ',' -eq
+                    ($expectedNames -join ',')
+            }
+        }
+    }
+
+    It '-Internal ignores -Path' {
+        InModuleScope Plumber {
+            Mock Import-PlumberDependency {}
+
+            $bogusPath = Join-Path $TestDrive 'does-not-exist'
+            { Install-PlumberDependency -Internal -Path $bogusPath } |
+                Should -Not -Throw
+
+            Should -Invoke Import-PlumberDependency -Times 1 -Exactly
+        }
+    }
+
     It 'throws when the dependency file is missing' {
         InModuleScope Plumber {
             {
