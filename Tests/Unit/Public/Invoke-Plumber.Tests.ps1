@@ -3,7 +3,10 @@ BeforeAll {
         Import-Module "$PSScriptRoot/../../../Plumber.psd1" -Force
     }
 
-    $script:JsonResultSchemaPath = Join-Path $PSScriptRoot '../../../docs/schemas/invoke-plumber-result.schema.json'
+    $script:JsonResultSchemaPath = Join-Path @(
+        $PSScriptRoot
+        '../../../docs/schemas/invoke-plumber-result.schema.json'
+    )
 }
 
 Describe 'Invoke-Plumber' {
