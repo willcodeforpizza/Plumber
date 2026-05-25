@@ -56,10 +56,15 @@ configuration. Here is an example of all available options:
     DiffBase             = $null
     IncludeModuleFolders = @()
     Tasks                = @{
-        Exclude              = @(
-            'Backticks',
-            'ToDo'
-        )
+        Backticks            = @{
+            RunWhen = 'Never'
+        }
+        ToDo                 = @{
+            RunWhen = 'Never'
+        }
+        ModuleVersion        = @{
+            RunWhen = 'OnRelease'
+        }
         Local                = @(
             'Tasks/ValidateTaskDocs.ps1'
             'Tasks/CheckGeneratedFiles.ps1'
