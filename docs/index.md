@@ -10,6 +10,7 @@ Shared Invoke-Build tasks for PowerShell validation pipelines.
 - [Task index](tasks/index.md)
 - [Writing tasks](writing-tasks.md)
 - [Local tasks](local-tasks.md)
+- [Invoke-Plumber JSON output contract](json-output.md)
 - [Architecture decisions](adr/001-record-architecture-decisions.md)
 - [Repository README](https://github.com/willcodeforpizza/Plumber#readme)
 

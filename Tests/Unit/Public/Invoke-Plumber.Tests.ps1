@@ -2,6 +2,8 @@ BeforeAll {
     if (-not (Get-Module Plumber)) {
         Import-Module "$PSScriptRoot/../../../Plumber.psd1" -Force
     }
+
+    $script:JsonResultSchemaPath = Join-Path $PSScriptRoot '../../../docs/schemas/invoke-plumber-result.schema.json'
 }
 
 Describe 'Invoke-Plumber' {
@@ -189,6 +191,49 @@ Describe 'Invoke-Plumber' {
             $result.Success | Should -BeTrue
             $result.Passed | Should -Be 1
             $result.Tasks[0].Name | Should -Be 'Validate'
+        }
+    }
+
+    It 'writes success JSON that matches the automation schema' {
+        InModuleScope Plumber -Parameters @{ SchemaPath = $script:JsonResultSchemaPath } {
+            $jsonText = Invoke-Plumber -OutputMode Json -NoFormat
+
+            Test-Json -Json $jsonText -SchemaFile $SchemaPath | Should -BeTrue
+            $result = $jsonText | ConvertFrom-Json
+            $result.PSObject.Properties.Name | Should -Contain 'Success'
+            $result.PSObject.Properties.Name | Should -Contain 'Passed'
+            $result.PSObject.Properties.Name | Should -Contain 'Failed'
+            $result.PSObject.Properties.Name | Should -Contain 'Tasks'
+            $result.PSObject.Properties.Name | Should -Contain 'Failures'
+            $result.Tasks[0].Status | Should -Be 'Passed'
+        }
+    }
+
+    It 'writes failure JSON that matches the automation schema before throwing' {
+        InModuleScope Plumber -Parameters @{ SchemaPath = $script:JsonResultSchemaPath } {
+            $script:mockBuildResult = [pscustomobject]@{
+                Tasks = @(
+                    [pscustomobject]@{
+                        Name  = 'ToDo'
+                        Error = 'Found TODO'
+                    }
+                )
+            }
+
+            $jsonText = try {
+                Invoke-Plumber -Task ToDo -OutputMode Json -NoFormat
+            } catch {
+                $PSItem.Exception.Message | Should -Be 'Build failed!'
+            }
+
+            Test-Json -Json $jsonText -SchemaFile $SchemaPath | Should -BeTrue
+            $result = $jsonText | ConvertFrom-Json
+            $result.Success | Should -BeFalse
+            $result.Failed | Should -Be 1
+            $result.Tasks[0].Name | Should -Be 'ToDo'
+            $result.Tasks[0].Status | Should -Be 'Failed'
+            $result.Tasks[0].Error | Should -Be 'Found TODO'
+            $result.Failures[0].Name | Should -Be 'ToDo'
         }
     }
 
