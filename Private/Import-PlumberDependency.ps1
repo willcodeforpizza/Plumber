@@ -59,7 +59,7 @@ function Import-PlumberDependency {
                 "Install with 'Install-PSResource $name -Version ""[$version,)"" -Scope CurrentUser' " +
                 "or 'Install-Module $name -MinimumVersion $version -Scope CurrentUser -Force'. " +
                 "To let Plumber install its own missing dependencies, run " +
-                "'Install-PlumberDependency -Internal' then re-import Plumber. " +
+                "'Install-PlumberDependency'. " +
                 "Error: $importError"
             )
         }

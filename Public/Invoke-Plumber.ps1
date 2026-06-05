@@ -56,6 +56,17 @@ function Invoke-Plumber {
         $NoFormat
     )
     process {
+        $dependencyPath = Join-Path $script:moduleRoot 'Plumber.internal.dependencies.psd1'
+        $dependencyDefinition = Import-PowerShellDataFile -Path $dependencyPath
+        try {
+            Import-PlumberDependency -Dependency @($dependencyDefinition.Modules) -ErrorAction Stop
+        } catch {
+            throw (
+                "Plumber dependencies are not available. Run 'Install-PlumberDependency' " +
+                "to install Plumber's internal task dependencies, then retry. Error: $PSItem"
+            )
+        }
+
         $resolvedBuildFile = Resolve-PlumberBuildFile -BuildFile $BuildFile
 
         Write-Verbose "Build file: $resolvedBuildFile"

@@ -1,31 +1,20 @@
-# Plumber's own task dependencies.
+# Build and release dependencies for this repository's Plumber tasks.
 #
-# This file ships inside the Plumber module. It is read at module import time
-# by Plumber.psm1's two-phase bootstrap. To install these dependencies run:
+# Plumber's own internal task dependencies are declared separately in
+# Plumber.internal.dependencies.psd1 and installed with:
 #
-#     Install-PlumberDependency -Internal
+#     Install-PlumberDependency
 #
-# Do not confuse this with the Plumber.dependencies.psd1 file that consumers
-# place at the root of their own repositories, which declares the build and
-# release modules required by that repository's Plumber tasks.
+# This file is for repository-specific build/release tooling and is installed
+# with:
+#
+#     Install-PlumberDependency -Build
 
 @{
     Modules = @(
         @{
-            ModuleName    = 'InvokeBuild'
-            ModuleVersion = '5.14.23'
-        }
-        @{
-            ModuleName    = 'Pester'
-            ModuleVersion = '5.7.1'
-        }
-        @{
-            ModuleName    = 'PSScriptAnalyzer'
-            ModuleVersion = '1.24.0'
-        }
-        @{
-            ModuleName    = 'powershell-yaml'
-            ModuleVersion = '0.4.12'
+            ModuleName    = 'Plumber.Release'
+            ModuleVersion = '0.1.6'
         }
     )
 }

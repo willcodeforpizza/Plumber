@@ -4,48 +4,47 @@ function Install-PlumberDependency {
         Installs Plumber-related PowerShell module dependencies.
 
         .DESCRIPTION
-        Without -Internal, reads a Plumber.dependencies.psd1 file at the
-        supplied path and installs the modules listed under the Modules key.
-        This is the consumer-repo surface: it installs the build and release
-        modules a repository's Plumber tasks need.
+        By default, installs Plumber's own task dependencies from the dependency
+        file bundled inside the Plumber module. This is the bootstrap surface for
+        clean machines.
 
-        With -Internal, installs Plumber's own task dependencies (Pester,
-        PSScriptAnalyzer, InvokeBuild, powershell-yaml) from the
-        Plumber.dependencies.psd1 file that ships inside the Plumber module.
-        This is the bootstrap surface, exposed so users can resolve a missing
-        dependency state without an install-on-import side effect.
+        With -Build, reads a Plumber.dependencies.psd1 file at the supplied path
+        and installs the modules listed under the Modules key. This is the
+        consumer-repo surface: it installs the build and release modules a
+        repository's Plumber tasks need.
 
-        Importing Plumber should not install dependencies as a side effect.
+        Importing Plumber does not install dependencies as a side effect.
         Callers opt in by running this command before invoking Plumber tasks.
 
         .PARAMETER Path
         A repository directory or dependency file path. When a directory is
-        provided, Plumber looks for Plumber.dependencies.psd1 in that
-        directory. Ignored when -Internal is supplied.
+        provided, Plumber looks for Plumber.dependencies.psd1 in that directory.
+        Path is only used with -Build.
 
-        .PARAMETER Internal
-        Install Plumber's own task dependencies from the file bundled inside
-        the Plumber module.
+        .PARAMETER Build
+        Install the calling repository's build/release dependencies from
+        Plumber.dependencies.psd1. Without -Build, Plumber installs its own
+        internal task dependencies.
 
         .EXAMPLE
-        Install-PlumberDependency -Path .
+        Install-PlumberDependency
+
+        Bootstrap Plumber on a clean machine by installing Plumber's own task
+        dependencies.
+
+        .EXAMPLE
+        Install-PlumberDependency -Build -Path .
 
         Install the calling repository's build and release dependencies.
 
         .EXAMPLE
-        Install-PlumberDependency -Internal
-        Import-Module Plumber -Force
-
-        Bootstrap Plumber on a clean machine: install Plumber's own task
-        dependencies, then re-import to load the full module.
-
-        .EXAMPLE
-        Install-PlumberDependency -Internal
+        Import-Module Plumber
         Install-PlumberDependency
+        Install-PlumberDependency -Build
         Invoke-Plumber -OutputMode CI
 
-        CI flow: install Plumber's task dependencies, install this repo's
-        build dependencies, run validation.
+        CI flow: import Plumber, install Plumber's task dependencies, install
+        this repo's build dependencies, run validation.
     #>
     [CmdletBinding()]
     param (
@@ -53,17 +52,25 @@ function Install-PlumberDependency {
         $Path = '.',
 
         [switch]
-        $Internal
+        $Build
     )
 
-    $dependencyPath = if ($Internal) {
-        Join-Path $script:moduleRoot 'Plumber.dependencies.psd1'
+    if (-not $Build -and $PSBoundParameters.ContainsKey('Path')) {
+        throw (
+            'Path is only valid with -Build. Run Install-PlumberDependency ' +
+            'for Plumber dependencies, or Install-PlumberDependency -Build ' +
+            '-Path . for repository build dependencies.'
+        )
     }
-    elseif (Test-Path -LiteralPath $Path -PathType Container) {
-        Join-Path $Path 'Plumber.dependencies.psd1'
-    }
-    else {
-        $Path
+
+    $dependencyPath = if ($Build) {
+        if (Test-Path -LiteralPath $Path -PathType Container) {
+            Join-Path $Path 'Plumber.dependencies.psd1'
+        } else {
+            $Path
+        }
+    } else {
+        Join-Path $script:moduleRoot 'Plumber.internal.dependencies.psd1'
     }
 
     if (-not (Test-Path -LiteralPath $dependencyPath -PathType Leaf)) {

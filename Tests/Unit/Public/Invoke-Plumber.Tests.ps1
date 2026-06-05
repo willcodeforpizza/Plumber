@@ -38,6 +38,19 @@ Describe 'Invoke-Plumber' {
         }
     }
 
+    It 'fails clearly when Plumber internal dependencies are missing' {
+        InModuleScope Plumber {
+            Mock Import-PlumberDependency { throw 'InvokeBuild missing' }
+
+            {
+                Invoke-Plumber
+            } | Should -Throw -ExpectedMessage (
+                "Plumber dependencies are not available. " +
+                "Run 'Install-PlumberDependency'*"
+            )
+        }
+    }
+
     It 'writes ANSI formatting by default' {
         InModuleScope Plumber {
             $escape = [regex]::Escape("$([char]27)[32mPlumber validation passed.")

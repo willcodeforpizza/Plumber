@@ -12,32 +12,37 @@ consumers. Plumber and Plumber.Release are build and release tooling for module
 maintainers, not runtime requirements for people importing a module such as
 PSPiHole or Homelab.
 
-Using manifest dependency declarations for Plumber tooling forces normal module
-consumers to install build-only modules. `RequiredModules` also imports its
-listed modules into the caller's global session state when the parent module
-loads, which leaks build-only commands such as `Invoke-Pester` and
-`Invoke-ScriptAnalyzer` into the consumer's session and can interfere with test
+Using manifest dependency declarations for Plumber-backed build tooling forces
+normal module consumers to install build-only modules. `RequiredModules` also
+imports listed modules into the caller's global session state when the parent
+module loads, which can leak build-only commands such as `Invoke-Pester` and
+`Invoke-ScriptAnalyzer` into the consumer's session and interfere with test
 isolation.
 
 Plumber itself has internal task dependencies that must be available before its
-tasks can run. Repositories can also have task dependencies that are only
-needed for validation or release tasks. For example, a repository that uses
-Plumber.Release may need `Microsoft.PowerShell.PSResourceGet` for publishing,
-but that dependency is not needed to import the module at runtime.
+tasks can run. Repositories can also have task dependencies that are only needed
+for validation or release tasks. For example, a repository that uses
+Plumber.Release may need publishing modules, but those dependencies are not
+needed to import the module under test at runtime.
 
 ## Decision
 
 Plumber separates dependency concerns:
 
 - Runtime module manifests should declare only real runtime dependencies.
-- Plumber's own task dependencies are declared in a `Plumber.dependencies.psd1`
-  file that ships inside the Plumber module, alongside `Plumber.psd1`.
+- Plumber's own task dependencies are declared in
+  `Plumber.internal.dependencies.psd1`, bundled inside the Plumber
+  module.
 - Repository build and release dependencies are declared in
-  `Plumber.dependencies.psd1` at the repository root (same schema, different
-  location).
-- Both files are installed by `Install-PlumberDependency`. The `-Internal`
-  switch targets Plumber's own bundled file; the default targets a consumer
-  repository's file.
+  `Plumber.dependencies.psd1` at the repository root.
+- `Install-PlumberDependency` installs Plumber's own internal task dependencies
+  by default.
+- `Install-PlumberDependency -Build` installs the calling repository's build and
+  release dependencies from its root `Plumber.dependencies.psd1`.
+- `Import-Module Plumber` never installs dependencies as a side effect and does
+  not enter a partial/bootstrap-only state. It exposes the full Plumber command
+  surface. Commands that need Plumber task dependencies validate/import them at
+  the command boundary and fail clearly if they are missing.
 
 ### Why not the manifest
 
@@ -54,39 +59,31 @@ install-time problem.
 `ModuleList` is documented as inventory only — a hint with no install or load
 behaviour. Earlier versions of Plumber repurposed `ModuleList` as an internal
 dependency declaration, but this misused a documented field. The dedicated
-`Plumber.dependencies.psd1` file replaces that use.
+internal dependency file replaces that use.
 
-### Two-phase module import
+### Bootstrap flow
 
-`Plumber.psm1` loads in two phases:
-
-1. **Bootstrap phase.** The .psm1 dot-sources `Import-PlumberDependency` and
-   `Install-PlumberDependency` and attempts to import the dependencies listed
-   in the bundled `Plumber.dependencies.psd1`. These two functions depend only
-   on built-in cmdlets, so they load even when Plumber's task dependencies are
-   missing.
-2. **Full load.** If the bootstrap phase succeeds, the .psm1 dot-sources the
-   remaining `Public/`, `Private/`, and `TaskFunctions/` files. If it fails,
-   the .psm1 writes a warning naming `Install-PlumberDependency -Internal` as
-   the bootstrap command, exports `Install-PlumberDependency` only, and
-   returns. Importing Plumber never installs anything as a side effect.
-
-Bootstrap on a clean machine:
+Clean machine bootstrap:
 
 ```powershell
 Install-Module Plumber -Scope CurrentUser
-Import-Module Plumber                # warns; bootstrap surface only
-Install-PlumberDependency -Internal  # installs Plumber's task deps
-Import-Module Plumber -Force         # full load
+Import-Module Plumber
+Install-PlumberDependency
+Invoke-Plumber
 ```
 
-CI extends this with the consumer-repo dependency install:
+Repository/CI bootstrap:
 
 ```powershell
-Import-Module Plumber -Force
+Import-Module ./Plumber.psd1 -Force
 Install-PlumberDependency
+Install-PlumberDependency -Build -Path .
 Invoke-Plumber -OutputMode CI
 ```
+
+If Plumber's internal task dependencies are missing and a caller runs
+`Invoke-Plumber`, the command fails with a message pointing to
+`Install-PlumberDependency`.
 
 ### Installer choice
 
@@ -111,12 +108,18 @@ consumer's session at import time.
 Plumber could keep the previous `Import-Module Plumber -ArgumentList @{
 InstallMissingDependencies = $true }` shape. This worked but was undiscoverable
 (no tab-complete, no `Get-Help`) and conflated module import with package
-installation. Surfacing `Install-PlumberDependency -Internal` as a normal
-cmdlet trades one extra command for a standard, discoverable interface.
+installation.
+
+Plumber could partially import when dependencies are missing, export only the
+installer, and require a second import after installation. This avoids
+install-on-import, but creates a confusing state where `Import-Module Plumber`
+succeeds even though normal commands such as `Invoke-Plumber` are missing.
+Plumber instead imports fully and fails at command boundaries that actually need
+task dependencies.
 
 Plumber.Release could install its own publishing dependencies when
 `PublishModule` runs. This hides installation inside a task and duplicates
-dependency policy that belongs in Plumber.
+dependency policy that belongs in Plumber-backed repository setup.
 
 Plumber could install repository dependencies automatically when imported. This
 would surprise users by performing installation during module import, and it
@@ -127,15 +130,13 @@ would make import behavior depend on network and gallery availability.
 Normal module consumers do not need to install Plumber, Plumber.Release, or
 other build tooling unless those modules are true runtime dependencies.
 
-Build and release dependencies are visible in two files (one inside Plumber,
-one at the consumer repo root) and can be installed explicitly by local
-developers or CI.
+Build and release dependencies are visible in explicit dependency files and can
+be installed by local developers or CI.
 
-Clean CI agents need a bootstrap step that imports Plumber once to expose the
-installer, runs `Install-PlumberDependency -Internal`, and re-imports for a
-full load before running `Install-PlumberDependency` and `Invoke-Plumber`.
+Clean CI agents need an explicit bootstrap step that imports Plumber, runs
+`Install-PlumberDependency`, runs `Install-PlumberDependency -Build`, and then
+runs `Invoke-Plumber`.
 
-Plumber.Release can assume Plumber loaded it as task tooling, but it should
-not install its own dependencies. If a task dependency such as PSResourceGet
-is missing, Plumber.Release should fail clearly and point users to
-`Install-PlumberDependency`.
+Plumber.Release can assume repository setup installed it as task tooling, but it
+should not install its own dependencies. If a task dependency is missing,
+Plumber.Release should fail clearly and point users to `Install-PlumberDependency -Build`.
