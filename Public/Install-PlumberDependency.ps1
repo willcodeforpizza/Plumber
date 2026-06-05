@@ -1,37 +1,76 @@
 function Install-PlumberDependency {
     <#
         .SYNOPSIS
-        Installs build dependencies declared for a Plumber-enabled repository.
+        Installs Plumber-related PowerShell module dependencies.
 
         .DESCRIPTION
-        Reads a Plumber.dependencies.psd1 file and installs the modules listed
-        under the Modules key. This is intended for development and CI setup so
-        runtime module manifests do not need to declare Plumber build tooling.
-        Importing a consumer module should not install dependencies; callers
-        opt in by running this command before invoking Plumber tasks.
+        By default, installs Plumber's own task dependencies from the dependency
+        file bundled inside the Plumber module. This is the bootstrap surface for
+        clean machines.
+
+        With -Build, reads a Plumber.dependencies.psd1 file at the supplied path
+        and installs the modules listed under the Modules key. This is the
+        consumer-repo surface: it installs the build and release modules a
+        repository's Plumber tasks need.
+
+        Importing Plumber does not install dependencies as a side effect.
+        Callers opt in by running this command before invoking Plumber tasks.
 
         .PARAMETER Path
         A repository directory or dependency file path. When a directory is
         provided, Plumber looks for Plumber.dependencies.psd1 in that directory.
+        Path is only used with -Build.
+
+        .PARAMETER Build
+        Install the calling repository's build/release dependencies from
+        Plumber.dependencies.psd1. Without -Build, Plumber installs its own
+        internal task dependencies.
 
         .EXAMPLE
-        Install-PlumberDependency -Path .
-
-        .EXAMPLE
-        Import-Module Plumber -ArgumentList @{ InstallMissingDependencies = $true }
         Install-PlumberDependency
+
+        Bootstrap Plumber on a clean machine by installing Plumber's own task
+        dependencies.
+
+        .EXAMPLE
+        Install-PlumberDependency -Build -Path .
+
+        Install the calling repository's build and release dependencies.
+
+        .EXAMPLE
+        Import-Module Plumber
+        Install-PlumberDependency
+        Install-PlumberDependency -Build
         Invoke-Plumber -OutputMode CI
+
+        CI flow: import Plumber, install Plumber's task dependencies, install
+        this repo's build dependencies, run validation.
     #>
     [CmdletBinding()]
     param (
         [string]
-        $Path = '.'
+        $Path = '.',
+
+        [switch]
+        $Build
     )
 
-    $dependencyPath = if (Test-Path -LiteralPath $Path -PathType Container) {
-        Join-Path $Path 'Plumber.dependencies.psd1'
+    if (-not $Build -and $PSBoundParameters.ContainsKey('Path')) {
+        throw (
+            'Path is only valid with -Build. Run Install-PlumberDependency ' +
+            'for Plumber dependencies, or Install-PlumberDependency -Build ' +
+            '-Path . for repository build dependencies.'
+        )
+    }
+
+    $dependencyPath = if ($Build) {
+        if (Test-Path -LiteralPath $Path -PathType Container) {
+            Join-Path $Path 'Plumber.dependencies.psd1'
+        } else {
+            $Path
+        }
     } else {
-        $Path
+        Join-Path $script:moduleRoot 'Plumber.internal.dependencies.psd1'
     }
 
     if (-not (Test-Path -LiteralPath $dependencyPath -PathType Leaf)) {

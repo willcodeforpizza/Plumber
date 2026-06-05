@@ -11,9 +11,6 @@ on:
 permissions:
   contents: read
 
-env:
-  PLUMBER_RELEASE_VERSION: 0.1.6
-
 jobs:
   test:
     name: ${{ matrix.os }}
@@ -34,17 +31,9 @@ jobs:
         shell: pwsh
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-          Import-Module ./Plumber.psd1 -Force -ArgumentList @{
-            InstallMissingDependencies = $true
-          }
-          $releaseSplat = @{
-            Name               = 'Plumber.Release'
-            RequiredVersion    = $env:PLUMBER_RELEASE_VERSION
-            Scope              = 'CurrentUser'
-            Force              = $true
-            SkipPublisherCheck = $true
-          }
-          Install-Module @releaseSplat
+          Import-Module ./Plumber.psd1 -Force
+          Install-PlumberDependency
+          Install-PlumberDependency -Build -Path .
 
       - name: Invoke-Plumber
         shell: pwsh
@@ -78,17 +67,9 @@ jobs:
         shell: pwsh
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-          Import-Module ./Plumber.psd1 -Force -ArgumentList @{
-            InstallMissingDependencies = $true
-          }
-          $releaseSplat = @{
-            Name               = 'Plumber.Release'
-            RequiredVersion    = $env:PLUMBER_RELEASE_VERSION
-            Scope              = 'CurrentUser'
-            Force              = $true
-            SkipPublisherCheck = $true
-          }
-          Install-Module @releaseSplat
+          Import-Module ./Plumber.psd1 -Force
+          Install-PlumberDependency
+          Install-PlumberDependency -Build -Path .
 
       - name: Validate
         shell: pwsh

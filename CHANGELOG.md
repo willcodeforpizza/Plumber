@@ -1,5 +1,21 @@
 # Plumber
 
+## 0.0.63
+- Changed: Plumber's own task dependencies moved out of `Plumber.psd1`
+  `ModuleList` into bundled `Plumber.internal.dependencies.psd1`.
+- Changed: `Import-Module Plumber` no longer installs dependencies and no
+  longer enters a partial bootstrap-only state; commands that need task
+  dependencies validate them at the command boundary.
+- Changed: `Install-PlumberDependency` now installs Plumber's own internal task
+  dependencies by default; use `Install-PlumberDependency -Build` for repository
+  build/release dependencies from root `Plumber.dependencies.psd1`.
+- Removed: `Import-Module Plumber -ArgumentList @{ InstallMissingDependencies = $true }`
+  install-on-import path; use explicit `Install-PlumberDependency` instead.
+- Fixed: dependency version comparison now uses
+  `System.Management.Automation.SemanticVersion`, tolerating pre-release tags.
+- Changed: dependency installer prefers `Install-PSResource` (PSResourceGet)
+  when available, falling back to `Install-Module` (PowerShellGet v2).
+
 ## 0.0.62
 - Fixed: release packaging now includes `TaskFunctions`, which Plumber imports
   at module load time.

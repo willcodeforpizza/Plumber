@@ -1,6 +1,6 @@
 @{
     RootModule           = 'Plumber.psm1'
-    ModuleVersion        = '0.0.62'
+    ModuleVersion        = '0.0.63'
     GUID                 = '03d665a4-c447-470b-acfc-ee7195c019e0'
     PowerShellVersion    = '7.0'
     CompatiblePSEditions = @('Core')
@@ -12,24 +12,6 @@
         'Get-PlumberTaskLoader'
         'Install-PlumberDependency'
         'Invoke-Plumber'
-    )
-    ModuleList = @(
-        @{
-            ModuleName    = 'InvokeBuild'
-            ModuleVersion = '5.14.23'
-        }
-        @{
-            ModuleName    = 'Pester'
-            ModuleVersion = '5.7.1'
-        }
-        @{
-            ModuleName    = 'PSScriptAnalyzer'
-            ModuleVersion = '1.24.0'
-        }
-        @{
-            ModuleName    = 'powershell-yaml'
-            ModuleVersion = '0.4.12'
-        }
     )
     PrivateData = @{
         PSData = @{
