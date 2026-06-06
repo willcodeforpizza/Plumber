@@ -87,12 +87,10 @@ function Import-PlumberDependency {
             }
             else {
                 $installSplat = @{
-                    Name               = $name
-                    MinimumVersion     = $version
-                    Scope              = 'CurrentUser'
-                    Force              = $true
-                    SkipPublisherCheck = $true
-                    ErrorAction        = 'Stop'
+                    Name           = $name
+                    MinimumVersion = $version
+                    Scope          = 'CurrentUser'
+                    ErrorAction    = 'Stop'
                 }
                 Install-Module @installSplat
             }

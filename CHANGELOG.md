@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.64
+- Changed: `Install-PlumberDependency` no longer passes `-Force` or
+  `-SkipPublisherCheck` to the `Install-Module` fallback path by default.
+
 ## 0.0.63
 - Changed: Plumber's own task dependencies moved out of `Plumber.psd1`
   `ModuleList` into bundled `Plumber.internal.dependencies.psd1`.
