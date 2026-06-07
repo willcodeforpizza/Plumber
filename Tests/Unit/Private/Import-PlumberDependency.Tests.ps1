@@ -163,6 +163,40 @@ Describe 'Import-PlumberDependency' {
         }
     }
 
+    It 'does not force install or skip publisher checks by default with Install-Module' {
+        InModuleScope Plumber {
+            $script:importCount = 0
+            Mock Get-Module {}
+            Mock Import-Module {
+                $script:importCount++
+                if ($script:importCount -eq 1) {
+                    throw 'Dependency missing'
+                }
+            }
+            Mock Get-Command { $null } -ParameterFilter {
+                $Name -eq 'Install-PSResource'
+            }
+            Mock Get-Command {
+                [pscustomobject]@{ Name = 'Install-Module' }
+            } -ParameterFilter { $Name -eq 'Install-Module' }
+            Mock Install-Module {}
+
+            Import-PlumberDependency -Dependency @(
+                @{
+                    ModuleName    = 'Example.Dependency'
+                    ModuleVersion = '1.2.3'
+                }
+            ) -InstallMissing
+
+            Should -Invoke Install-Module -Times 1 -Exactly -ParameterFilter {
+                $Name -eq 'Example.Dependency' -and
+                $MinimumVersion -eq '1.2.3' -and
+                -not $Force -and
+                -not $SkipPublisherCheck
+            }
+        }
+    }
+
     It 'throws when neither installer is available' {
         InModuleScope Plumber {
             Mock Get-Module {}

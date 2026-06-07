@@ -175,7 +175,9 @@ Invoke-Plumber -OutputMode CI
 
 `Install-PlumberDependency` prefers `Install-PSResource` (PSResourceGet) when
 available and falls back to `Install-Module` (PowerShellGet v2). Module imports
-never install dependencies as a side effect.
+never install dependencies as a side effect. The `Install-Module` fallback does
+not pass `-Force` or `-SkipPublisherCheck` by default; if your environment needs
+publisher-check bypasses, make that policy explicit outside Plumber.
 Loading a consumer module should not install build tooling or force normal users
 to install Plumber. Keep Plumber and release tooling out of the module manifest
 unless they are real runtime dependencies.
