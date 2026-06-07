@@ -14,7 +14,6 @@ permissions:
 jobs:
   test:
     name: ${{ matrix.os }}
-    if: github.ref_type != 'tag'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -43,6 +42,7 @@ jobs:
 
   release:
     name: Release
+    needs: test
     runs-on: ubuntu-latest
     if: github.ref_type == 'tag'
     permissions:
