@@ -13,8 +13,9 @@ function Invoke-PlumberPublicFunctions {
 
     $exportedFunctions = @($script:psd1.FunctionsToExport)
     $publicRoot = Join-Path $BuildRoot 'Public'
+    $pathComparison = Get-PlumberPathStringComparison
     $nonPublicRoots = $script:moduleFolders |
-        Where-Object {-not $_.Equals($publicRoot, [System.StringComparison]::OrdinalIgnoreCase)}
+        Where-Object {-not $_.Equals($publicRoot, $pathComparison)}
     $publicFiles = if (Test-Path $publicRoot) {
         @(Get-ChildItem $publicRoot -File -Filter '*.ps1')
     } else {
