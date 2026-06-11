@@ -81,6 +81,9 @@ Describe 'Get-PlumberTaskFile' {
     }
 
     It 'filters files to a path' {
+        New-Item -Path (Join-Path $script:buildRoot 'resource') -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $script:buildRoot 'resource/lowercase.json') -Value '{}'
+
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
             $script:PlumberFiles = $null
             $script:PlumberChangedFiles = $null
@@ -95,17 +98,26 @@ Describe 'Get-PlumberTaskFile' {
 
             $files.Name | Should -Contain 'config.json'
             $files.Name | Should -Contain 'config.schema.json'
+            if ($IsLinux) {
+                $files.Name | Should -Not -Contain 'lowercase.json'
+            } else {
+                $files.Name | Should -Contain 'lowercase.json'
+            }
             $files.Name | Should -Not -Contain 'Invoke-Thing.ps1'
         }
     }
 
     It 'limits files to changed files before extension, path and exclusion filters' {
+        New-Item -Path (Join-Path $script:buildRoot 'resource') -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $script:buildRoot 'resource/lowercase.json') -Value '{}'
+
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
             $script:PlumberFiles = $null
             $script:PlumberChangedFilesLoaded = $true
             $script:PlumberChangedFiles = @(
                 Get-Item (Join-Path $BuildRoot 'Public/Invoke-Thing.ps1')
                 Get-Item (Join-Path $BuildRoot 'Resource/config.json')
+                Get-Item (Join-Path $BuildRoot 'resource/lowercase.json')
                 Get-Item (Join-Path $BuildRoot 'Tests/Assets/Fixture.ps1')
             )
             $script:PlumberConfig = @{
@@ -122,6 +134,11 @@ Describe 'Get-PlumberTaskFile' {
 
             $files.Name | Should -Contain 'config.json'
             $files.Name | Should -Not -Contain 'config.schema.json'
+            if ($IsLinux) {
+                $files.Name | Should -Not -Contain 'lowercase.json'
+            } else {
+                $files.Name | Should -Contain 'lowercase.json'
+            }
             $files.Name | Should -Not -Contain 'Invoke-Thing.ps1'
             $files.Name | Should -Not -Contain 'Fixture.ps1'
         }

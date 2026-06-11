@@ -7,6 +7,7 @@ function Invoke-PlumberHelp {
     param ()
 
     $publicRoot = Join-Path $BuildRoot 'Public'
+    $pathComparison = Get-PlumberPathStringComparison
     $functionRoots = @(
         @{
             Path            = $publicRoot
@@ -14,7 +15,7 @@ function Invoke-PlumberHelp {
         }
     )
     $functionRoots += foreach ($moduleFolder in $script:moduleFolders) {
-        if ($moduleFolder.Equals($publicRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+        if ($moduleFolder.Equals($publicRoot, $pathComparison)) {
             continue
         }
 

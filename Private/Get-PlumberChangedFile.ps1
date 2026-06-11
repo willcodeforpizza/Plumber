@@ -48,7 +48,7 @@ function Get-PlumberChangedFile {
     $gitRoot = [System.IO.Path]::GetFullPath($gitRoot)
 
     $pathSet = [System.Collections.Generic.HashSet[string]]::new(
-        [System.StringComparer]::OrdinalIgnoreCase
+        (Get-PlumberPathStringComparer)
     )
 
     $diffArgs = [System.Collections.Generic.List[object]]::new()

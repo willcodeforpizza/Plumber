@@ -115,4 +115,40 @@ Describe 'Invoke-PlumberHelp' {
                 Should -Throw -ExpectedMessage '*Get-Thing is missing help*'
         }
     }
+
+    It 'does not treat a differently-cased Public directory as Public on Linux' {
+        $caseVariantPublicRoot = Join-Path $script:buildRoot 'public'
+        New-Item -Path $caseVariantPublicRoot -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $script:publicRoot 'Get-Thing.ps1') -Value 'function Get-Thing {}'
+        Set-Content -Path (Join-Path $caseVariantPublicRoot 'Invoke-Helper.ps1') -Value 'function Invoke-Helper {}'
+
+        InModuleScope Plumber -Parameters @{
+            BuildRoot             = $script:buildRoot
+            PublicRoot            = $script:publicRoot
+            CaseVariantPublicRoot = $caseVariantPublicRoot
+        } {
+            Mock Get-PlumberFunctionHelp {
+                [pscustomobject]@{
+                    Path = $Path
+                }
+            }
+            Mock Test-PlumberFunctionHelp {}
+
+            $script:moduleFolders = @($PublicRoot, $CaseVariantPublicRoot)
+            $script:PlumberConfig = @{
+                Tasks = @{
+                    Help = @{
+                        PrivateSynopsisOnly = $true
+                    }
+                }
+            }
+
+            Invoke-PlumberHelp
+
+            Should -Invoke Test-PlumberFunctionHelp -ParameterFilter {
+                (Split-Path $Help.Path -Leaf) -eq 'Invoke-Helper.ps1' -and
+                    $RequireFullHelp -eq (-not $IsLinux)
+            }
+        }
+    }
 }
