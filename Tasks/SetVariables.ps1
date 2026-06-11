@@ -4,6 +4,9 @@
 #>
 Add-BuildTask -Name SetVariables -Jobs {
     $script:PlumberConfig.BuildRoot = $BuildRoot
+    $script:PlumberFiles = $null
+    $script:PlumberChangedFiles = $null
+    $script:PlumberChangedFilesLoaded = $false
     $script:moduleFolders = @()
     $moduleFolderPaths = @(
         'Public'
