@@ -11,6 +11,7 @@ function Invoke-PlumberPSScriptAnalyzer {
     )
 
     if (-not $script:PlumberConfig.Tasks.PSScriptAnalyzer.IncludeTests) {
+        $pathComparison = Get-PlumberPathStringComparison
         $testRoot = [System.IO.Path]::GetFullPath((Join-Path $BuildRoot 'Tests')).TrimEnd(
             [System.IO.Path]::DirectorySeparatorChar,
             [System.IO.Path]::AltDirectorySeparatorChar
@@ -21,11 +22,11 @@ function Invoke-PlumberPSScriptAnalyzer {
                 Where-Object {
                     -not $_.FullName.Equals(
                         $testRoot,
-                        [System.StringComparison]::OrdinalIgnoreCase
+                        $pathComparison
                     ) -and
                     -not $_.FullName.StartsWith(
                         $testRootWithSeparator,
-                        [System.StringComparison]::OrdinalIgnoreCase
+                        $pathComparison
                     )
                 }
         )

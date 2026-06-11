@@ -3,6 +3,11 @@
 ## 0.0.66
 - Fixed: manifest discovery now chooses the build-root matching manifest when dependency manifests are present and fails clearly when discovery is ambiguous.
 
+## 0.0.65
+- Added: module loader regression coverage for deterministic script loading.
+- Fixed: path comparisons now preserve Linux case-sensitive filesystem
+  semantics while remaining case-insensitive on Windows and macOS.
+
 ## 0.0.64
 - Changed: `Install-PlumberDependency` no longer passes `-Force` or
   `-SkipPublisherCheck` to the `Install-Module` fallback path by default.
