@@ -124,4 +124,35 @@ Describe 'Invoke-PlumberPublicFunctions' {
                 Should -Throw -ExpectedMessage '*Invoke-Helper is exported from Private/Invoke-Helper.ps1*'
         }
     }
+
+    It 'does not treat a differently-cased Public directory as Public on Linux' {
+        $caseVariantPublicRoot = Join-Path $script:buildRoot 'public'
+        New-Item -Path $caseVariantPublicRoot -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $script:publicRoot 'Get-Thing.ps1') -Value @(
+            'function Get-Thing {'
+            '}'
+        )
+        Set-Content -Path (Join-Path $caseVariantPublicRoot 'Invoke-Helper.ps1') -Value @(
+            'function Invoke-Helper {'
+            '}'
+        )
+
+        InModuleScope Plumber -Parameters @{
+            BuildRoot             = $script:buildRoot
+            PublicRoot            = $script:publicRoot
+            CaseVariantPublicRoot = $caseVariantPublicRoot
+        } {
+            $script:psd1 = @{
+                FunctionsToExport = @('Get-Thing', 'Invoke-Helper')
+            }
+            $script:moduleFolders = @($PublicRoot, $CaseVariantPublicRoot)
+
+            if ($IsLinux) {
+                { Invoke-PlumberPublicFunctions -ErrorAction Stop } |
+                    Should -Throw -ExpectedMessage '*Invoke-Helper is exported from public/Invoke-Helper.ps1*'
+            } else {
+                { Invoke-PlumberPublicFunctions -ErrorAction Stop } | Should -Not -Throw
+            }
+        }
+    }
 }

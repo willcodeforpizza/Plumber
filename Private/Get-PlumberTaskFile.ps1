@@ -74,7 +74,7 @@ function Get-PlumberTaskFile {
     $files = $script:PlumberFiles
     if ($script:PlumberConfig.FileScope -eq 'Changed') {
         $changedPathSet = [System.Collections.Generic.HashSet[string]]::new(
-            [System.StringComparer]::OrdinalIgnoreCase
+            (Get-PlumberPathStringComparer)
         )
         foreach ($changedFile in $script:PlumberChangedFiles) {
             $null = $changedPathSet.Add($changedFile.FullName)
@@ -84,6 +84,7 @@ function Get-PlumberTaskFile {
     }
 
     if ($basePath) {
+        $pathComparison = Get-PlumberPathStringComparison
         $basePath = $basePath.TrimEnd(
             [System.IO.Path]::DirectorySeparatorChar,
             [System.IO.Path]::AltDirectorySeparatorChar
@@ -94,11 +95,11 @@ function Get-PlumberTaskFile {
                 Where-Object {
                     $_.FullName.Equals(
                         $basePath,
-                        [System.StringComparison]::OrdinalIgnoreCase
+                        $pathComparison
                     ) -or
                     $_.FullName.StartsWith(
                         $basePathWithSeparator,
-                        [System.StringComparison]::OrdinalIgnoreCase
+                        $pathComparison
                     )
                 }
         )

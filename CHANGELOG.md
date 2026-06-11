@@ -2,6 +2,8 @@
 
 ## 0.0.65
 - Added: module loader regression coverage for deterministic script loading.
+- Fixed: path comparisons now preserve Linux case-sensitive filesystem
+  semantics while remaining case-insensitive on Windows and macOS.
 
 ## 0.0.64
 - Changed: `Install-PlumberDependency` no longer passes `-Force` or
