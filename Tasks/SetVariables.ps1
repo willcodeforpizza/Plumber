@@ -19,16 +19,9 @@ Add-BuildTask -Name SetVariables -Jobs {
         if (Test-Path $moduleFolder) { $script:moduleFolders += $moduleFolder }
     }
 
-    $manifestPath = if ($script:PlumberConfig.ModuleManifest) {
-        if ([System.IO.Path]::IsPathRooted($script:PlumberConfig.ModuleManifest)) {
-            $script:PlumberConfig.ModuleManifest
-        } else {
-            Join-Path $BuildRoot $script:PlumberConfig.ModuleManifest
-        }
-    } else {
-        Get-ChildItem $BuildRoot -File -Filter '*.psd1' |
-            Select-Object -First 1 -ExpandProperty FullName
-    }
+    $manifestPath = Resolve-PlumberModuleManifest -BuildRoot $BuildRoot -ModuleManifest (
+        $script:PlumberConfig.ModuleManifest
+    )
 
     $script:moduleManifest = Get-Item $manifestPath
     $script:moduleName = $script:moduleManifest.BaseName

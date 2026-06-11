@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.66
+- Fixed: manifest discovery now chooses the build-root matching manifest when dependency manifests are present and fails clearly when discovery is ambiguous.
+
 ## 0.0.64
 - Changed: `Install-PlumberDependency` no longer passes `-Force` or
   `-SkipPublisherCheck` to the `Install-Module` fallback path by default.

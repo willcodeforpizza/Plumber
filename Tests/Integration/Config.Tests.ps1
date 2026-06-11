@@ -155,6 +155,91 @@ Describe 'Get-PlumberTaskLoader config integration' {
         $result | Should -Contain 'TaskFunctions'
     }
 
+
+    It 'selects the manifest matching the build root name when dependency manifests exist' {
+        $moduleRoot = Join-Path $TestDrive 'DeterministicModule'
+        New-Item -Path $moduleRoot -ItemType Directory | Out-Null
+        '@{ ModuleVersion = "0.0.1" }' | Set-Content -Path (
+            Join-Path $moduleRoot 'DeterministicModule.dependencies.psd1'
+        )
+        '@{ ModuleVersion = "0.0.1" }' | Set-Content -Path (
+            Join-Path $moduleRoot 'DeterministicModule.psd1'
+        )
+
+        $buildFile = Join-Path $moduleRoot 'deterministic-manifest.build.ps1'
+        @(
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "SetVariables") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            'function Write-Build {'
+            '    param ($Color, $Message)'
+            '    $null = $Color'
+            '    $null = $Message'
+            '}'
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader)'
+            '$script:moduleManifest.Name'
+        ) | Set-Content -Path $buildFile
+
+        $result = & pwsh -NoLogo -NoProfile -File $buildFile
+
+        $result | Select-Object -Last 1 | Should -Be 'DeterministicModule.psd1'
+    }
+
+    It 'fails with a friendly message when manifest discovery is ambiguous' {
+        $moduleRoot = Join-Path $TestDrive 'AmbiguousModule'
+        New-Item -Path $moduleRoot -ItemType Directory | Out-Null
+        '@{ ModuleVersion = "0.0.1" }' | Set-Content -Path (Join-Path $moduleRoot 'Alpha.psd1')
+        '@{ ModuleVersion = "0.0.1" }' | Set-Content -Path (Join-Path $moduleRoot 'Beta.psd1')
+
+        $buildFile = Join-Path $moduleRoot 'ambiguous-manifest.build.ps1'
+        @(
+            'function Add-BuildTask {'
+            '    param ('
+            '        [string]'
+            '        $Name,'
+            ''
+            '        $Jobs'
+            '    )'
+            ''
+            '    if ($Name -eq "SetVariables") {'
+            '        & $Jobs'
+            '    }'
+            '}'
+            'function Write-Build {'
+            '    param ($Color, $Message)'
+            '    $null = $Color'
+            '    $null = $Message'
+            '}'
+            "Set-Variable -Name BuildRoot -Value '$moduleRoot' -Scope Script"
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            'try {'
+            '    . (Get-PlumberTaskLoader)'
+            '    exit 0'
+            '} catch {'
+            '    $_.Exception.Message'
+            '    exit 1'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $output = & pwsh -NoLogo -NoProfile -File $buildFile 2>&1
+
+        $LASTEXITCODE | Should -Not -Be 0
+        $output -join "`n" | Should -Match 'ModuleManifest is not configured'
+        $output -join "`n" | Should -Match 'Alpha\.psd1'
+        $output -join "`n" | Should -Match 'Beta\.psd1'
+    }
+
     It 'fails at task-loader time for invalid config with a friendly message' {
         $buildFile = Join-Path $TestDrive 'invalid-config.build.ps1'
         @(
