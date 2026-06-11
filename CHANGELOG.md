@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.65
+- Added: module loader regression coverage for deterministic script loading.
+
 ## 0.0.64
 - Changed: `Install-PlumberDependency` no longer passes `-Force` or
   `-SkipPublisherCheck` to the `Install-Module` fallback path by default.
