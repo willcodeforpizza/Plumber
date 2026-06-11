@@ -55,11 +55,16 @@ Describe 'Invoke-PlumberPSScriptAnalyzer' {
 
     It 'applies PSScriptAnalyzer path exclusions and test inclusion config' {
         $testRoot = Join-Path $script:buildRoot 'Tests'
+        $caseVariantTestRoot = Join-Path $script:buildRoot 'tests'
         $testAssetRoot = Join-Path $script:buildRoot 'TestsAsset'
-        New-Item -Path $testRoot, $testAssetRoot -ItemType Directory -Force | Out-Null
+        New-Item -Path $testRoot, $caseVariantTestRoot, $testAssetRoot -ItemType Directory -Force |
+            Out-Null
         Set-Content -Path (Join-Path $script:publicRoot 'Get-Thing.ps1') -Value 'function Get-Thing {}'
         Set-Content -Path (Join-Path $script:privateRoot 'Skip-Thing.ps1') -Value 'function Skip-Thing {}'
         Set-Content -Path (Join-Path $testRoot 'Get-Thing.Tests.ps1') -Value 'Describe thing {}'
+        Set-Content -Path (Join-Path $caseVariantTestRoot 'Keep-LowercaseTests.ps1') -Value @(
+            'function Keep-LowercaseTests {}'
+        )
         Set-Content -Path (Join-Path $testAssetRoot 'Keep-Thing.ps1') -Value 'function Keep-Thing {}'
 
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
@@ -92,6 +97,15 @@ Describe 'Invoke-PlumberPSScriptAnalyzer' {
             }
             Should -Not -Invoke Invoke-ScriptAnalyzer -ParameterFilter {
                 (Split-Path $Path -Leaf) -eq 'Get-Thing.Tests.ps1'
+            }
+            if ($IsLinux) {
+                Should -Invoke Invoke-ScriptAnalyzer -ParameterFilter {
+                    (Split-Path $Path -Leaf) -eq 'Keep-LowercaseTests.ps1'
+                }
+            } else {
+                Should -Not -Invoke Invoke-ScriptAnalyzer -ParameterFilter {
+                    (Split-Path $Path -Leaf) -eq 'Keep-LowercaseTests.ps1'
+                }
             }
         }
     }
