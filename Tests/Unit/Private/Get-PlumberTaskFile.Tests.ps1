@@ -59,10 +59,8 @@ Describe 'Get-PlumberTaskFile' {
     }
 
     It 'excludes files under excluded directories at any depth' {
-        New-Item -Path (Join-Path $script:buildRoot '.git/objects') -ItemType Directory -Force | Out-Null
         New-Item -Path (Join-Path $script:buildRoot 'out/Module') -ItemType Directory -Force | Out-Null
         New-Item -Path (Join-Path $script:buildRoot 'Nested/out') -ItemType Directory -Force | Out-Null
-        Set-Content -Path (Join-Path $script:buildRoot '.git/objects/pack.ps1') -Value '$true'
         Set-Content -Path (Join-Path $script:buildRoot 'out/Module/Module.ps1') -Value '$true'
         Set-Content -Path (Join-Path $script:buildRoot 'Nested/out/artifact.ps1') -Value '$true'
 
@@ -73,21 +71,22 @@ Describe 'Get-PlumberTaskFile' {
             $script:PlumberConfig = @{
                 BuildRoot          = $BuildRoot
                 FileScope          = 'All'
-                ExcludeDirectories = @('.git', 'out')
+                ExcludeDirectories = @('out')
                 Tasks              = @{}
             }
 
             $files = Get-PlumberTaskFile -Task PSScriptAnalyzer -Extension '.ps1'
 
             $files.Name | Should -Contain 'Invoke-Thing.ps1'
-            $files.Name | Should -Not -Contain 'pack.ps1'
             $files.Name | Should -Not -Contain 'Module.ps1'
             $files.Name | Should -Not -Contain 'artifact.ps1'
         }
     }
 
-    It 'includes all files when no directories are excluded' {
+    It 'always excludes .git even when ExcludeDirectories is empty' {
+        New-Item -Path (Join-Path $script:buildRoot '.git/objects') -ItemType Directory -Force | Out-Null
         New-Item -Path (Join-Path $script:buildRoot 'out') -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $script:buildRoot '.git/objects/pack.ps1') -Value '$true'
         Set-Content -Path (Join-Path $script:buildRoot 'out/artifact.ps1') -Value '$true'
 
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
@@ -104,6 +103,7 @@ Describe 'Get-PlumberTaskFile' {
             $files = Get-PlumberTaskFile -Task PSScriptAnalyzer -Extension '.ps1'
 
             $files.Name | Should -Contain 'artifact.ps1'
+            $files.Name | Should -Not -Contain 'pack.ps1'
         }
     }
 

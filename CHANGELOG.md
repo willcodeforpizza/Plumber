@@ -1,7 +1,7 @@
 # Plumber
 
 ## 0.0.69
-- Fixed: shared file discovery now skips `.git` internals, and the new `ExcludeDirectories` config can exclude build artifact directories such as `out`.
+- Fixed: shared file discovery now always skips `.git` internals, and the new `ExcludeDirectories` config can exclude additional directories such as `out`.
 
 ## 0.0.68
 - Fixed: Pester tasks now import the resolved module manifest path instead of rebuilding it from the build root, so subfolder manifests work.

@@ -6,10 +6,10 @@ function Get-PlumberTaskFile {
         .DESCRIPTION
         Returns files under the build root after applying optional changed-file
         scope, extension, base path, and task-scoped exclude filters. Files
-        under directories named in the ExcludeDirectories config (`.git` by
-        default, matched as path segments at any depth) never enter the
-        shared file list. The full build-root file list is cached for the
-        current build run.
+        under `.git` directories are always excluded; the ExcludeDirectories
+        config names additional directories to skip. Both match path segments
+        at any depth and never enter the shared file list. The full
+        build-root file list is cached for the current build run.
 
         .PARAMETER Task
         The task name used to apply task-scoped exclusions.
@@ -42,7 +42,11 @@ function Get-PlumberTaskFile {
     if (-not $script:PlumberFiles) {
         $discoveredFiles = @(Get-ChildItem $BuildRoot -File -Recurse -Force)
 
-        $excludedDirectories = @($script:PlumberConfig.ExcludeDirectories)
+        # .git is always excluded; ExcludeDirectories config adds to it.
+        $excludedDirectories = @(
+            '.git'
+            $script:PlumberConfig.ExcludeDirectories | Where-Object {$_}
+        )
         if ($excludedDirectories) {
             $excludedDirectorySet = [System.Collections.Generic.HashSet[string]]::new(
                 [string[]]$excludedDirectories,
