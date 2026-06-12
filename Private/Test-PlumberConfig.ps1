@@ -16,6 +16,7 @@ function Test-PlumberConfig {
         'DiffBase'
         'FileScope'
         'IncludeModuleFolders'
+        'ExcludeDirectories'
         'BuildRoot'
         'Tasks'
     )

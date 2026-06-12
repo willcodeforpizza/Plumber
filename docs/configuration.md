@@ -78,6 +78,25 @@ and `Private` folders. Source-root tasks such as `PesterUnit` code coverage and
 }
 ```
 
+### ExcludeDirectories
+
+`ExcludeDirectories` lists additional directory names that Plumber's shared
+file discovery skips entirely. `.git` is always excluded and does not need to
+be listed. Names match path segments at any depth under the build root.
+
+Use it to exclude build artifact directories, such as the `out` folder a local
+Plumber.Release build writes:
+
+```powershell
+. (Get-PlumberTaskLoader) -Config @{
+    ExcludeDirectories = @('out')
+}
+```
+
+Like `FileScope`, this applies only to tasks that use `Get-PlumberTaskFile`.
+Use `Tasks.<Task>.Exclude` for task-scoped exclusions of files that other tasks
+should still see.
+
 ### FileScope
 
 `FileScope` controls which files are returned by Plumber's shared file

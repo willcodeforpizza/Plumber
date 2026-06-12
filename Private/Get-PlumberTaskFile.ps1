@@ -5,7 +5,10 @@ function Get-PlumberTaskFile {
 
         .DESCRIPTION
         Returns files under the build root after applying optional changed-file
-        scope, extension, base path, and task-scoped exclude filters. The full
+        scope, extension, base path, and task-scoped exclude filters. Files
+        under `.git` directories are always excluded; the ExcludeDirectories
+        config names additional directories to skip. Both match path segments
+        at any depth and never enter the shared file list. The full
         build-root file list is cached for the current build run.
 
         .PARAMETER Task
@@ -37,7 +40,43 @@ function Get-PlumberTaskFile {
     )
 
     if (-not $script:PlumberFiles) {
-        $script:PlumberFiles = @(Get-ChildItem $BuildRoot -File -Recurse -Force)
+        $discoveredFiles = @(Get-ChildItem $BuildRoot -File -Recurse -Force)
+
+        # .git is always excluded; ExcludeDirectories config adds to it.
+        $excludedDirectories = @(
+            '.git'
+            $script:PlumberConfig.ExcludeDirectories | Where-Object {$_}
+        )
+        if ($excludedDirectories) {
+            $excludedDirectorySet = [System.Collections.Generic.HashSet[string]]::new(
+                [string[]]$excludedDirectories,
+                (Get-PlumberPathStringComparer)
+            )
+            # [char[]] is load-bearing: an object[] binds to Split(string,...)
+            # and silently fails to split on the separator characters.
+            $separators = [char[]]@(
+                [System.IO.Path]::DirectorySeparatorChar
+                [System.IO.Path]::AltDirectorySeparatorChar
+            )
+            $discoveredFiles = @(
+                $discoveredFiles | Where-Object {
+                    $relativeDirectory = [System.IO.Path]::GetRelativePath(
+                        $BuildRoot,
+                        $_.DirectoryName
+                    )
+                    $excluded = $false
+                    foreach ($segment in $relativeDirectory.Split($separators)) {
+                        if ($excludedDirectorySet.Contains($segment)) {
+                            $excluded = $true
+                            break
+                        }
+                    }
+                    -not $excluded
+                }
+            )
+        }
+
+        $script:PlumberFiles = $discoveredFiles
     }
 
     if (

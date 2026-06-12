@@ -14,6 +14,7 @@ function Get-PlumberConfigRule {
         DiffBase                                = @{Validate = 'string'; Nullable = $true}
         FileScope                               = @{Validate = 'enum'; Values = @('All', 'Changed')}
         IncludeModuleFolders                    = @{Validate = 'string-array'}
+        ExcludeDirectories                      = @{Validate = 'string-array'}
         BuildRoot                               = @{Validate = 'string'}
         'Tasks.Local'                           = @{Validate = 'string-array'}
         'Tasks.CodeQuality.RunWhen'             = $runWhenRule
