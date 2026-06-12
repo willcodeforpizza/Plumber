@@ -12,7 +12,7 @@ function Invoke-PlumberJSON {
         return
     }
 
-    $failures = @()
+    $failures = [System.Collections.Generic.List[string]]::new()
     foreach ($jsonFile in $jsonFiles) {
         try {
             Get-Content $jsonFile.FullName -Raw -ErrorAction Stop |
@@ -22,7 +22,7 @@ function Invoke-PlumberJSON {
         catch {
             # Write-Error per file would terminate the loop under
             # Invoke-Build's ErrorActionPreference Stop; collect instead.
-            $failures += "Invalid JSON in $($jsonFile.FullName): $($_.Exception.Message)"
+            $failures.Add("Invalid JSON in $($jsonFile.FullName): $($_.Exception.Message)")
         }
     }
 

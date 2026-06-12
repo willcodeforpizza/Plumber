@@ -8,31 +8,34 @@ function Invoke-PlumberHelp {
 
     $publicRoot = Join-Path $BuildRoot 'Public'
     $pathComparison = Get-PlumberPathStringComparison
-    $functionRoots = @(
-        @{
-            Path            = $publicRoot
-            RequireFullHelp = $true
-        }
-    )
-    $functionRoots += foreach ($moduleFolder in $script:moduleFolders) {
+    $functionRoots = [System.Collections.Generic.List[hashtable]]::new()
+    $functionRoots.Add(@{
+        Path            = $publicRoot
+        RequireFullHelp = $true
+    })
+    foreach ($moduleFolder in $script:moduleFolders) {
         if ($moduleFolder.Equals($publicRoot, $pathComparison)) {
             continue
         }
 
-        @{
+        $functionRoots.Add(@{
             Path            = $moduleFolder
             RequireFullHelp = -not $script:PlumberConfig.Tasks.Help.PrivateSynopsisOnly
-        }
+        })
     }
 
-    $failures = foreach ($functionRoot in $functionRoots) {
+    $failures = [System.Collections.Generic.List[string]]::new()
+    foreach ($functionRoot in $functionRoots) {
         if (-not (Test-Path $functionRoot.Path)) {
             continue
         }
 
         foreach ($file in Get-ChildItem $functionRoot.Path -File -Filter '*.ps1') {
             $help = Get-PlumberFunctionHelp -Path $file.FullName
-            Test-PlumberFunctionHelp -Help $help -RequireFullHelp:$functionRoot.RequireFullHelp
+            $helpFailures = Test-PlumberFunctionHelp -Help $help -RequireFullHelp:$functionRoot.RequireFullHelp
+            foreach ($helpFailure in $helpFailures) {
+                $failures.Add($helpFailure)
+            }
         }
     }
 

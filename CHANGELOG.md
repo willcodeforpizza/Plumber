@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.73
+- Fixed: PublicFunctions task no longer mashes multiple failure messages into one line; local failure accumulators now use typed lists instead of array `+=`.
+
 ## 0.0.72
 - Fixed: ChangelogUpdated task now parses prerelease versions and reports a clear error when no version heading exists.
 

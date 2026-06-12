@@ -95,6 +95,31 @@ Describe 'Task failure aggregation through Invoke-Plumber' {
         $result.Output | Should -BeLike '*invalid-two.yml*'
     }
 
+    It 'PublicFunctions task reports every failure as a separate entry in a real build run' {
+        $moduleRoot = Join-Path $TestDrive 'PublicFunctionsAggregationModule'
+        Remove-Item -Path $moduleRoot -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -Path (Join-Path $moduleRoot 'Public') -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $moduleRoot 'PublicFunctionsAggregationModule.psd1') -Value @(
+            '@{'
+            "    ModuleVersion     = '0.1.0'"
+            "    FunctionsToExport = @('Get-Thing')"
+            '}'
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'Public/Get-OtherThing.ps1') -Value @(
+            'function Get-OtherThing {'
+            '}'
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'PublicFunctionsAggregationModule.build.ps1') -Value @(
+            '. (Get-PlumberTaskLoader) -Config @{}'
+        )
+
+        $result = Invoke-PlumberTaskRun -ModuleRoot $moduleRoot -Task PublicFunctions
+
+        $result.ExitCode | Should -Not -Be 0
+        $result.Output | Should -BeLike '*Get-OtherThing is not in FunctionsToExport,*'
+        $result.Output | Should -BeLike '*Get-Thing is exported but Public/Get-Thing.ps1 was not found*'
+    }
+
     It 'JSONSchema task reports every schema-invalid file in a real build run' {
         $moduleRoot = New-AggregationFixtureModule -Name 'SchemaAggregationModule'
         New-Item -Path (Join-Path $moduleRoot 'Resource/Schema') -ItemType Directory -Force | Out-Null
