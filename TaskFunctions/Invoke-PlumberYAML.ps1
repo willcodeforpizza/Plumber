@@ -19,6 +19,7 @@ function Invoke-PlumberYAML {
         return
     }
 
+    $failures = @()
     foreach ($yamlFile in $yamlFiles) {
         try {
             Get-Content $yamlFile.FullName -Raw -ErrorAction Stop |
@@ -26,7 +27,13 @@ function Invoke-PlumberYAML {
                 ConvertTo-Yaml -ErrorAction Stop | Out-Null
         }
         catch {
-            Write-Error "Invalid YAML in $($yamlFile.FullName): $($_.Exception.Message)"
+            # Write-Error per file would terminate the loop under
+            # Invoke-Build's ErrorActionPreference Stop; collect instead.
+            $failures += "Invalid YAML in $($yamlFile.FullName): $($_.Exception.Message)"
         }
+    }
+
+    if ($failures) {
+        Write-Error ($failures -join (', ' + [Environment]::NewLine))
     }
 }

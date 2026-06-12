@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.71
+- Fixed: JSON and YAML tasks now report every invalid file instead of stopping at the first failure.
+
 ## 0.0.70
 - Fixed: JSONSchema task now reports every schema-invalid file with its reason instead of aborting on the first failure.
 
