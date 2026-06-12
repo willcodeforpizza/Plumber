@@ -6,9 +6,9 @@ function Get-PlumberTaskFile {
         .DESCRIPTION
         Returns files under the build root after applying optional changed-file
         scope, extension, base path, and task-scoped exclude filters. Files
-        under directories named in the ExcludeDirectories config (`.git` and
-        `out` by default, matched as path segments at any depth) never enter
-        the shared file list. The full build-root file list is cached for the
+        under directories named in the ExcludeDirectories config (`.git` by
+        default, matched as path segments at any depth) never enter the
+        shared file list. The full build-root file list is cached for the
         current build run.
 
         .PARAMETER Task

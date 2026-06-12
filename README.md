@@ -55,7 +55,7 @@ configuration. Here is an example of all available options:
     FileScope            = 'All'
     DiffBase             = $null
     IncludeModuleFolders = @()
-    ExcludeDirectories   = @('.git', 'out')
+    ExcludeDirectories   = @('.git')
     Tasks                = @{
         Backticks            = @{
             RunWhen = 'Never'
@@ -315,13 +315,13 @@ code:
 #### ExcludeDirectories
 
 `ExcludeDirectories` lists directory names that Plumber's shared file discovery
-skips entirely. The default is `@('.git', 'out')`, so version control internals
-and local release build artifacts are never validated. Names match path
-segments at any depth under the build root.
+skips entirely. The default is `@('.git')`, so version control internals are
+never validated. Names match path segments at any depth under the build root.
+Add build artifact directories such as `out` to exclude them too:
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
-    ExcludeDirectories = @('.git', 'out', 'artifacts')
+    ExcludeDirectories = @('.git', 'out')
 }
 ```
 

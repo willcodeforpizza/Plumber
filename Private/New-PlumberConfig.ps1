@@ -23,7 +23,7 @@ function New-PlumberConfig {
         DiffBase             = $null
         FileScope            = 'All'
         IncludeModuleFolders = @()
-        ExcludeDirectories   = @('.git', 'out')
+        ExcludeDirectories   = @('.git')
         Tasks                = @{
             Local                = @()
             CodeQuality          = @{

@@ -81,15 +81,15 @@ and `Private` folders. Source-root tasks such as `PesterUnit` code coverage and
 ### ExcludeDirectories
 
 `ExcludeDirectories` lists directory names that Plumber's shared file discovery
-skips entirely. The default is `@('.git', 'out')`, so version control internals
-and local release build artifacts are never validated. Names match path
-segments at any depth under the build root.
+skips entirely. The default is `@('.git')`, so version control internals are
+never validated. Names match path segments at any depth under the build root.
 
-Set your own list to add directories or to reclaim a default name as source:
+Set your own list to exclude build artifact directories, such as the `out`
+folder a local Plumber.Release build writes:
 
 ```powershell
 . (Get-PlumberTaskLoader) -Config @{
-    ExcludeDirectories = @('.git', 'out', 'artifacts')
+    ExcludeDirectories = @('.git', 'out')
 }
 ```
 
