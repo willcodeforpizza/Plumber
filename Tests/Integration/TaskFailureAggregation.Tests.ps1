@@ -58,6 +58,32 @@ Invoke-Plumber -Task $Task -OutputMode Summary -NoFormat
 }
 
 Describe 'Task failure aggregation through Invoke-Plumber' {
+    It 'PesterUnit task reports the real failed test count in a real build run' {
+        $moduleRoot = Join-Path $TestDrive 'PesterCountModule'
+        Remove-Item -Path $moduleRoot -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -Path (Join-Path $moduleRoot 'Tests/Unit') -ItemType Directory -Force | Out-Null
+        Set-Content -Path (Join-Path $moduleRoot 'PesterCountModule.psd1') -Value @(
+            '@{'
+            "    ModuleVersion = '0.1.0'"
+            '}'
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'Tests/Unit/Failing.Tests.ps1') -Value @(
+            "Describe 'Fixture' {"
+            "    It 'fails one' { 1 | Should -Be 2 }"
+            "    It 'fails two' { 1 | Should -Be 2 }"
+            "    It 'passes' { 1 | Should -Be 1 }"
+            '}'
+        )
+        Set-Content -Path (Join-Path $moduleRoot 'PesterCountModule.build.ps1') -Value @(
+            '. (Get-PlumberTaskLoader) -Config @{}'
+        )
+
+        $result = Invoke-PlumberTaskRun -ModuleRoot $moduleRoot -Task PesterUnit
+
+        $result.ExitCode | Should -Not -Be 0
+        $result.Output | Should -BeLike '*Pester failed with 2 failed test(s)*'
+    }
+
     It 'JSON task reports every invalid file in a real build run' {
         $moduleRoot = New-AggregationFixtureModule -Name 'JsonAggregationModule'
         Set-Content -Path (Join-Path $moduleRoot 'Resource/invalid-one.json') -Value '{"name":'

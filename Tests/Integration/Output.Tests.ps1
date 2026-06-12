@@ -199,7 +199,7 @@ Invoke-Plumber -Task ToDo -OutputMode Json -NoFormat
             }
             $tableText = $table | Out-String
             $tableText | Should -Match 'PesterUnit\s+Failed'
-            $tableText | Should -Match 'Pester failed with 1 error\(s\)'
+            $tableText | Should -Match 'Pester failed with 1 failed test\(s\)'
         } finally {
             Pop-Location
         }

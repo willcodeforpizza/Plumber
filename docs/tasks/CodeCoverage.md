@@ -2,12 +2,12 @@
 
 ## Synopsis
 
-Validates code coverage is over the configured minimum for each file tested.
+Validates the test run's overall code coverage is over the configured minimum.
 
 ## Description
 
-Uses the Pester unit test result and fails when any covered file reports a
-coverage percentage below the configured minimum. When PesterUnit does not
+Uses the Pester unit test result and fails when the run's overall coverage
+percentage is below the configured minimum. When PesterUnit does not
 run, CodeCoverage registers as an explicit skip task that explains why,
 instead of disappearing from the task graph.
 
@@ -42,13 +42,13 @@ Invoke-Plumber -Task CodeCoverage
 ## Pass
 
 ```text
-Covered file reports coverage greater than or equal to the configured minimum.
+Overall coverage is greater than or equal to the configured minimum.
 ```
 
 ## Fail
 
 ```text
-Covered file reports coverage lower than the configured minimum.
+Overall coverage is lower than the configured minimum.
 ```
 
 ## Navigation

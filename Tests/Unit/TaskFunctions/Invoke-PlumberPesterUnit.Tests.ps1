@@ -80,10 +80,10 @@ Describe 'Invoke-PlumberPesterUnit' {
 
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
             Mock Invoke-PlumberPester {
-                @(
-                    [pscustomobject]@{Result = 'Failed'}
-                    [pscustomobject]@{Result = 'Passed'}
-                )
+                [pscustomobject]@{
+                    Result      = 'Failed'
+                    FailedCount = 3
+                }
             }
 
             $script:moduleManifest = [pscustomobject]@{
@@ -99,7 +99,36 @@ Describe 'Invoke-PlumberPesterUnit' {
             }
 
             { Invoke-PlumberPesterUnit -ErrorAction Stop } |
-                Should -Throw -ExpectedMessage '*Pester failed with 1 error(s)*'
+                Should -Throw -ExpectedMessage '*Pester failed with 3 failed test(s)*'
+        }
+    }
+
+    It 'reports a failed run without test failures' {
+        $unitTestPath = Join-Path $script:buildRoot 'Tests/Unit'
+        New-Item -Path $unitTestPath -ItemType Directory -Force | Out-Null
+
+        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+            Mock Invoke-PlumberPester {
+                [pscustomobject]@{
+                    Result      = 'Failed'
+                    FailedCount = 0
+                }
+            }
+
+            $script:moduleManifest = [pscustomobject]@{
+                FullName = Join-Path $BuildRoot 'PesterUnitModule.psd1'
+            }
+            $script:moduleFolders = @()
+            $script:PlumberConfig = @{
+                Tasks = @{
+                    PesterUnit = @{
+                        StreamOutput = $true
+                    }
+                }
+            }
+
+            { Invoke-PlumberPesterUnit -ErrorAction Stop } |
+                Should -Throw -ExpectedMessage '*failed without test failures*'
         }
     }
 }

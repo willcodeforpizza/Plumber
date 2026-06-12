@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.76
+- Fixed: Pester task failures now report the real failed-test count, and CodeCoverage reports the run's overall percentage instead of naming the first test container.
+
 ## 0.0.75
 - Fixed: git helper no longer mixes git's stderr warnings into successful command output.
 
