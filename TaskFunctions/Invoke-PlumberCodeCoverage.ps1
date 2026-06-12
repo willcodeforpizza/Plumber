@@ -11,11 +11,16 @@ function Invoke-PlumberCodeCoverage {
         return
     }
 
-    $script:pesterResult | ForEach-Object {
-        $file = $_.Containers[0].Name
-        $percent = $_.CodeCoverage.CoveragePercent
-        if ($percent -lt $script:PlumberConfig.Tasks.CodeCoverage.Minimum) {
-            Write-Error "$percent% coverage for $file"
-        }
+    $coverage = $script:pesterResult.CodeCoverage
+    if (-not $coverage) {
+        Write-Build Yellow 'No code coverage data found'
+        return
+    }
+
+    $minimum = $script:PlumberConfig.Tasks.CodeCoverage.Minimum
+    $percent = $coverage.CoveragePercent
+    if ($percent -lt $minimum) {
+        $rounded = [math]::Round($percent, 2)
+        Write-Error "Overall code coverage $rounded% is below the configured minimum of $minimum%"
     }
 }

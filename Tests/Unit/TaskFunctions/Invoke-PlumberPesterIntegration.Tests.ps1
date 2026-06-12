@@ -72,10 +72,10 @@ Describe 'Invoke-PlumberPesterIntegration' {
 
         InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
             Mock Invoke-PlumberPester {
-                @(
-                    [pscustomobject]@{Result = 'Failed'}
-                    [pscustomobject]@{Result = 'Passed'}
-                )
+                [pscustomobject]@{
+                    Result      = 'Failed'
+                    FailedCount = 2
+                }
             }
 
             $script:moduleManifest = [pscustomobject]@{
@@ -90,7 +90,7 @@ Describe 'Invoke-PlumberPesterIntegration' {
             }
 
             { Invoke-PlumberPesterIntegration -ErrorAction Stop } |
-                Should -Throw -ExpectedMessage '*Pester failed with 1 error(s)*'
+                Should -Throw -ExpectedMessage '*Pester failed with 2 failed test(s)*'
         }
     }
 }

@@ -19,6 +19,7 @@ function Invoke-PlumberPesterIntegration {
     }
     $result = Invoke-PlumberPester @pesterSplat
 
-    $failures = $result | Where-Object { $_.Result -eq 'Failed' }
-    if ($failures) { Write-Error "Pester failed with $($failures.count) error(s)" }
+    if ($result.Result -eq 'Failed') {
+        Write-Error (Get-PlumberPesterFailureMessage -Result $result)
+    }
 }
