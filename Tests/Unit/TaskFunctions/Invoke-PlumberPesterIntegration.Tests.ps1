@@ -30,18 +30,24 @@ Describe 'Invoke-PlumberPesterIntegration' {
         }
     }
 
-    It 'runs integration tests with module manifest and stream output config' {
+    It 'runs integration tests with the resolved manifest and stream output config' {
         $integrationTestPath = Join-Path $script:buildRoot 'Tests/Integration'
         New-Item -Path $integrationTestPath -ItemType Directory -Force | Out-Null
+        $manifestPath = Join-Path $script:buildRoot 'src/PesterIntegrationModule.psd1'
+        New-Item -Path (Join-Path $script:buildRoot 'src') -ItemType Directory -Force | Out-Null
+        Set-Content -Path $manifestPath -Value "@{ModuleVersion = '0.0.1'}"
 
-        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+        InModuleScope Plumber -Parameters @{
+            BuildRoot    = $script:buildRoot
+            ManifestPath = $manifestPath
+        } {
             Mock Invoke-PlumberPester {
                 [pscustomobject]@{
                     Result = 'Passed'
                 }
             }
 
-            $script:moduleName = 'PesterIntegrationModule'
+            $script:moduleManifest = Get-Item $ManifestPath
             $script:PlumberConfig = @{
                 Tasks = @{
                     PesterIntegration = @{
@@ -54,7 +60,7 @@ Describe 'Invoke-PlumberPesterIntegration' {
 
             Should -Invoke Invoke-PlumberPester -ParameterFilter {
                 $Path -eq (Join-Path $BuildRoot 'Tests/Integration') -and
-                    $ModuleManifest -eq (Join-Path $BuildRoot 'PesterIntegrationModule.psd1') -and
+                    $ModuleManifest -eq (Get-Item $ManifestPath).FullName -and
                     $StreamOutput -eq $false
             }
         }
@@ -72,7 +78,9 @@ Describe 'Invoke-PlumberPesterIntegration' {
                 )
             }
 
-            $script:moduleName = 'PesterIntegrationModule'
+            $script:moduleManifest = [pscustomobject]@{
+                FullName = Join-Path $BuildRoot 'PesterIntegrationModule.psd1'
+            }
             $script:PlumberConfig = @{
                 Tasks = @{
                     PesterIntegration = @{

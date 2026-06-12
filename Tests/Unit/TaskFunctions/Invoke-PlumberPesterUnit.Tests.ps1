@@ -30,11 +30,17 @@ Describe 'Invoke-PlumberPesterUnit' {
         }
     }
 
-    It 'runs unit tests with module manifest, coverage paths and stream output config' {
+    It 'runs unit tests with the resolved manifest, coverage paths and stream output config' {
         $unitTestPath = Join-Path $script:buildRoot 'Tests/Unit'
         New-Item -Path $unitTestPath -ItemType Directory -Force | Out-Null
+        $manifestPath = Join-Path $script:buildRoot 'src/PesterUnitModule.psd1'
+        New-Item -Path (Join-Path $script:buildRoot 'src') -ItemType Directory -Force | Out-Null
+        Set-Content -Path $manifestPath -Value "@{ModuleVersion = '0.0.1'}"
 
-        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+        InModuleScope Plumber -Parameters @{
+            BuildRoot    = $script:buildRoot
+            ManifestPath = $manifestPath
+        } {
             Mock Invoke-PlumberPester {
                 [pscustomobject]@{
                     Result       = 'Passed'
@@ -43,7 +49,7 @@ Describe 'Invoke-PlumberPesterUnit' {
                 }
             }
 
-            $script:moduleName = 'PesterUnitModule'
+            $script:moduleManifest = Get-Item $ManifestPath
             $script:moduleFolders = @(
                 Join-Path $BuildRoot 'Public'
                 Join-Path $BuildRoot 'Private'
@@ -60,7 +66,7 @@ Describe 'Invoke-PlumberPesterUnit' {
 
             Should -Invoke Invoke-PlumberPester -ParameterFilter {
                 $Path -eq (Join-Path $BuildRoot 'Tests/Unit') -and
-                    $ModuleManifest -eq (Join-Path $BuildRoot 'PesterUnitModule.psd1') -and
+                    $ModuleManifest -eq (Get-Item $ManifestPath).FullName -and
                     $CodeCoveragePath.Count -eq 2 -and
                     $StreamOutput -eq $false
             }
@@ -80,7 +86,9 @@ Describe 'Invoke-PlumberPesterUnit' {
                 )
             }
 
-            $script:moduleName = 'PesterUnitModule'
+            $script:moduleManifest = [pscustomobject]@{
+                FullName = Join-Path $BuildRoot 'PesterUnitModule.psd1'
+            }
             $script:moduleFolders = @()
             $script:PlumberConfig = @{
                 Tasks = @{
