@@ -16,11 +16,12 @@ function Invoke-PlumberJSONSchema {
         return
     }
 
+    $failures = @()
     foreach ($mapping in $script:PlumberConfig.Tasks.JSONSchema.Schemas) {
         $schema = Join-Path $BuildRoot $mapping.Schema
 
         if (-not (Test-Path $schema)) {
-            Write-Error "JSON schema not found: $schema"
+            $failures += "JSON schema not found: $schema"
             continue
         }
 
@@ -42,15 +43,21 @@ function Invoke-PlumberJSONSchema {
             try {
                 $valid = Test-Json -Path $jsonFile.FullName -SchemaFile $schema -ErrorAction Stop
             } catch {
-                Write-Error (
+                # Write-Error per file would terminate the loop under
+                # Invoke-Build's ErrorActionPreference Stop; collect instead.
+                $failures += (
                     "JSON schema validation failed: $($jsonFile.FullName) - " +
                     $_.Exception.Message
                 )
                 continue
             }
             if (-not $valid) {
-                Write-Error "JSON schema validation failed: $($jsonFile.FullName)"
+                $failures += "JSON schema validation failed: $($jsonFile.FullName)"
             }
         }
+    }
+
+    if ($failures) {
+        Write-Error ($failures -join (', ' + [Environment]::NewLine))
     }
 }

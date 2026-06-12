@@ -93,14 +93,14 @@ Describe 'Invoke-PlumberJSONSchema' {
             Invoke-PlumberJSONSchema -ErrorAction SilentlyContinue -ErrorVariable schemaErrors
 
             # ErrorVariable also collects Test-Json's own caught records;
-            # assert on the task's reported failures only.
+            # assert on the task's single aggregated failure record only.
             $failures = @(
                 $schemaErrors |
                     Where-Object {$_.ToString() -like 'JSON schema validation failed:*'}
             )
-            $failures.Count | Should -Be 2
+            $failures.Count | Should -Be 1
             $failures[0].ToString() | Should -BeLike '*bad-one.json*'
-            $failures[1].ToString() | Should -BeLike '*bad-two.json*'
+            $failures[0].ToString() | Should -BeLike '*bad-two.json*'
         }
     }
 
