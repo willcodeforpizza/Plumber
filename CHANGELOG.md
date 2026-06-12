@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.72
+- Fixed: ChangelogUpdated task now parses prerelease versions and reports a clear error when no version heading exists.
+
 ## 0.0.71
 - Fixed: JSON and YAML tasks now report every invalid file instead of stopping at the first failure.
 

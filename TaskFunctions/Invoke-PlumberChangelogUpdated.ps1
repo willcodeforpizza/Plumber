@@ -16,14 +16,36 @@ function Invoke-PlumberChangelogUpdated {
         Where-Object { $_ -match '^## [0-9]' } |
         Select-Object -First 1
 
-    $changelogVersion = [version]($latestLine -replace '## ')
-    $psd1Version = $script:psd1.ModuleVersion
+    if (-not $latestLine) {
+        Write-Error (
+            'Changelog has no version heading. ' +
+            "Add a '## <version>' heading matching the module version."
+        )
+        return
+    }
 
-    if ($psd1Version -ne $changelogVersion) {
+    $headingVersionName = ($latestLine -replace '^##').Trim()
+    $changelogVersionInfo = ConvertTo-PlumberSemVer -VersionName $headingVersionName -AllowSystemVersion
+    if (-not $changelogVersionInfo) {
+        Write-Error "Changelog version heading '$headingVersionName' is not a valid version."
+        return
+    }
+
+    $psd1VersionName = [string]$script:psd1.ModuleVersion
+    $prereleaseTag = $script:psd1.PrivateData.PSData.Prerelease
+    if ($prereleaseTag) {
+        $psd1VersionName = "$psd1VersionName-$prereleaseTag"
+    }
+    $psd1VersionInfo = ConvertTo-PlumberSemVer -VersionName $psd1VersionName -AllowSystemVersion
+    if (-not $psd1VersionInfo) {
+        throw "ModuleVersion '$psd1VersionName' is not a valid version."
+    }
+
+    if ($psd1VersionInfo.Version -ne $changelogVersionInfo.Version) {
         Write-Error (
             'Changelog might be out of date. ' +
-            "PSD1 version $psd1Version " +
-            "changelog version $changelogVersion"
+            "PSD1 version $($psd1VersionInfo.Version) " +
+            "changelog version $($changelogVersionInfo.Version)"
         )
     }
 }
