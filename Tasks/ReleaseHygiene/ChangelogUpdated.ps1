@@ -4,7 +4,10 @@
 
     .DESCRIPTION
     Compares the latest version heading in `CHANGELOG.md` with the configured
-    module manifest version and fails when they do not match.
+    module manifest version and fails when they do not match. Prerelease
+    headings such as `## 1.2.0-beta.1` are supported and match when the
+    manifest declares the same `Prerelease` tag in `PrivateData.PSData`.
+    A changelog without any version heading fails with a clear message.
 
     .GROUP
     ReleaseHygiene

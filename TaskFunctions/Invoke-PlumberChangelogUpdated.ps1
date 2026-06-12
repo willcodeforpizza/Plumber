@@ -16,14 +16,35 @@ function Invoke-PlumberChangelogUpdated {
         Where-Object { $_ -match '^## [0-9]' } |
         Select-Object -First 1
 
-    $changelogVersion = [version]($latestLine -replace '## ')
-    $psd1Version = $script:psd1.ModuleVersion
+    if (-not $latestLine) {
+        Write-Error (
+            'Changelog has no version heading. ' +
+            "Add a '## <version>' heading matching the module version."
+        )
+        return
+    }
 
-    if ($psd1Version -ne $changelogVersion) {
+    $headingVersionName = ($latestLine -replace '^##').Trim()
+    $changelogVersionInfo = ConvertTo-PlumberSemVer -VersionName $headingVersionName -AllowSystemVersion
+    if (-not $changelogVersionInfo) {
+        Write-Error "Changelog version heading '$headingVersionName' is not a valid version."
+        return
+    }
+
+    $psd1VersionName = [string]$script:psd1.ModuleVersion
+    $prereleaseTag = $script:psd1.PrivateData.PSData.Prerelease
+    if ($prereleaseTag) {
+        $psd1VersionName = "$psd1VersionName-$prereleaseTag"
+    }
+
+    # The contract is an exact match, so compare the version strings directly:
+    # semver normalisation would drop the revision of 4-part versions and let
+    # a stale heading pass.
+    if ($psd1VersionName -ne $headingVersionName) {
         Write-Error (
             'Changelog might be out of date. ' +
-            "PSD1 version $psd1Version " +
-            "changelog version $changelogVersion"
+            "PSD1 version $psd1VersionName " +
+            "changelog version $headingVersionName"
         )
     }
 }

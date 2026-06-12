@@ -6,9 +6,10 @@ Validates public and private function help.
 
 ## Description
 
-Validates comment-based help on functions in `Public` and `Private`.
-Public functions require a synopsis, description, example and parameter help. Private functions
-require synopsis-only help unless configured otherwise.
+Validates comment-based help on functions in module source folders. Public
+functions require a synopsis, description, example and parameter help.
+Non-public module functions require synopsis-only help unless configured
+otherwise.
 
 ## Group
 
