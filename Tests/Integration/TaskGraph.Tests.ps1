@@ -175,7 +175,7 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
         $tasks['CodeQuality'].Jobs | Should -Contain '?CodeCoverage'
     }
 
-    It 'does not load CodeCoverage when PesterUnit is skipped' {
+    It 'registers CodeCoverage as a skip task when PesterUnit is skipped' {
         $buildFile = Join-Path $TestDrive 'skip-pester-unit.build.ps1'
         @(
             "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
@@ -189,9 +189,44 @@ Describe 'Get-PlumberTaskLoader task graph integration' {
 
         $tasks = & $script:invokeBuild -Task '??' -File $buildFile
         $tasks.Keys | Should -Contain 'PesterUnit'
-        $tasks.Keys | Should -Not -Contain 'CodeCoverage'
+        $tasks.Keys | Should -Contain 'CodeCoverage'
         $tasks['CodeQuality'].Jobs | Should -Contain '?PesterUnit'
-        $tasks['CodeQuality'].Jobs | Should -Not -Contain '?CodeCoverage'
+        $tasks['CodeQuality'].Jobs | Should -Contain '?CodeCoverage'
+    }
+
+    It 'explains the skip when CodeCoverage is invoked directly with PesterUnit disabled' {
+        $buildFile = Join-Path $TestDrive 'direct-code-coverage.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '    Tasks = @{'
+            "        PesterUnit = @{ RunWhen = 'Never' }"
+            '    }'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $output =  & $script:invokeBuild -Task CodeCoverage -File $buildFile *>&1 | Out-String
+
+        $output | Should -BeLike '*Skipping CodeCoverage: PesterUnit does not run*'
+    }
+
+    It 'prefers the RunWhen skip message when CodeCoverage itself is disabled' {
+        $buildFile = Join-Path $TestDrive 'never-code-coverage.build.ps1'
+        @(
+            "Import-Module '$PSScriptRoot/../../Plumber.psd1' -Force"
+            '. (Get-PlumberTaskLoader) -Config @{'
+            "    ModuleManifest = 'Plumber.psd1'"
+            '    Tasks = @{'
+            "        PesterUnit = @{ RunWhen = 'Never' }"
+            "        CodeCoverage = @{ RunWhen = 'Never' }"
+            '    }'
+            '}'
+        ) | Set-Content -Path $buildFile
+
+        $output =  & $script:invokeBuild -Task CodeCoverage -File $buildFile *>&1 | Out-String
+
+        $output | Should -BeLike '*Skipping CodeCoverage: RunWhen=Never*'
     }
 
     It 'registers CodeQuality as skipped without loading children when CodeQuality uses RunWhen Never' {
