@@ -14,7 +14,7 @@ function Invoke-PlumberPesterIntegration {
 
     $pesterSplat = @{
         Path           = $integrationTestPath
-        ModuleManifest = Join-Path $BuildRoot "$script:moduleName.psd1"
+        ModuleManifest = $script:moduleManifest.FullName
         StreamOutput   = $script:PlumberConfig.Tasks.PesterIntegration.StreamOutput
     }
     $result = Invoke-PlumberPester @pesterSplat

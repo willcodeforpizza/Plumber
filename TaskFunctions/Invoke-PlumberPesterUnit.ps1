@@ -14,7 +14,7 @@ function Invoke-PlumberPesterUnit {
 
     $pesterSplat = @{
         Path             = $unitTestPath
-        ModuleManifest   = Join-Path $BuildRoot "$script:moduleName.psd1"
+        ModuleManifest   = $script:moduleManifest.FullName
         CodeCoveragePath = $script:moduleFolders
         StreamOutput     = $script:PlumberConfig.Tasks.PesterUnit.StreamOutput
     }
