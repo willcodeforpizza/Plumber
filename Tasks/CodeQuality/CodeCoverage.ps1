@@ -4,7 +4,9 @@
 
     .DESCRIPTION
     Uses the Pester unit test result and fails when any covered file reports a
-    coverage percentage below the configured minimum.
+    coverage percentage below the configured minimum. When PesterUnit does not
+    run, CodeCoverage registers as an explicit skip task that explains why,
+    instead of disappearing from the task graph.
 
     .GROUP
     CodeQuality

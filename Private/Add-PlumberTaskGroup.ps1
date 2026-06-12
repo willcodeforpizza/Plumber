@@ -27,29 +27,29 @@ function Add-PlumberTaskGroup {
         return
     }
 
+    # CodeCoverage measures PesterUnit's test run, so it cannot run when
+    # PesterUnit does not. Resolve PesterUnit's policy up front rather than
+    # relying on it appearing before CodeCoverage in the child ordering.
     $pesterUnitRuns = $true
+    if ($TaskGroup.Children -contains 'CodeCoverage') {
+        $pesterUnitRunWhen = Get-PlumberTaskRunWhen -Name 'PesterUnit'
+        $pesterUnitRuns = Test-PlumberTaskShouldRun -Name 'PesterUnit' -RunWhen $pesterUnitRunWhen
+    }
+
     foreach ($childTask in $TaskGroup.Children) {
-        $childRunWhen = Get-PlumberTaskRunWhen -Name $childTask
-        $childShouldRun = Test-PlumberTaskShouldRun -Name $childTask -RunWhen $childRunWhen
-
-        if (
-            $childTask -eq 'CodeCoverage' -and
-            -not $pesterUnitRuns
-        ) {
-            continue
-        }
-
         $childSplat = @{
             Name     = $childTask
             Path     = "$($TaskGroup.Parent)/$childTask.ps1"
             TaskRoot = $TaskRoot
             Parent   = $TaskGroup.Parent
         }
-        Add-PlumberTask @childSplat
-
-        if ($childTask -eq 'PesterUnit') {
-            $pesterUnitRuns = $childShouldRun
+        if ($childTask -eq 'CodeCoverage' -and -not $pesterUnitRuns) {
+            $childSplat.SkipReason = (
+                'Skipping CodeCoverage: PesterUnit does not run, ' +
+                'so there is no test run to measure.'
+            )
         }
+        Add-PlumberTask @childSplat
     }
 
     if (-not $script:PlumberTaskJobs[$TaskGroup.Parent]) {

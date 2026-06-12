@@ -7,7 +7,9 @@ function Add-PlumberTask {
         Resolves task metadata, applies the task's RunWhen policy, dot-sources
         enabled task files, and records the task as an optional dependency of its
         parent group. Disabled tasks are registered as explicit skip tasks so direct
-        task invocation explains why no validation ran.
+        task invocation explains why no validation ran. SkipReason forces a skip
+        task for a task whose own policy would run, e.g. when a dependency it
+        consumes is disabled.
     #>
     [CmdletBinding()]
     param (
@@ -24,7 +26,10 @@ function Add-PlumberTask {
         $TaskRoot,
 
         [string]
-        $Parent
+        $Parent,
+
+        [string]
+        $SkipReason
     )
 
     $taskSplat = @{
@@ -36,13 +41,18 @@ function Add-PlumberTask {
     }
     $task = Import-PlumberTask @taskSplat
 
-    if ($task.ShouldRun) {
-        . $task.FullName
-    } else {
-        $skipMessage = Get-PlumberTaskSkipMessage -Name $task.Name -RunWhen $task.RunWhen
+    $skipMessage = if (-not $task.ShouldRun) {
+        Get-PlumberTaskSkipMessage -Name $task.Name -RunWhen $task.RunWhen
+    } elseif ($SkipReason) {
+        $SkipReason
+    }
+
+    if ($skipMessage) {
         Add-BuildTask -Name $task.Name -Jobs ({
             Write-Host $skipMessage
         }.GetNewClosure())
+    } else {
+        . $task.FullName
     }
 
     if ($task.Parent) {

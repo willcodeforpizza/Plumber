@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.74
+- Fixed: CodeCoverage now registers as an explicit skip task when PesterUnit is disabled instead of disappearing from the task graph.
+
 ## 0.0.73
 - Fixed: PublicFunctions task no longer mashes multiple failure messages into one line; local failure accumulators now use typed lists instead of array `+=`.
 
