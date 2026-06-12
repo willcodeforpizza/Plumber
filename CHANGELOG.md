@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.75
+- Fixed: git helper no longer mixes git's stderr warnings into successful command output.
+
 ## 0.0.74
 - Fixed: CodeCoverage now registers as an explicit skip task when PesterUnit is disabled instead of disappearing from the task graph.
 
