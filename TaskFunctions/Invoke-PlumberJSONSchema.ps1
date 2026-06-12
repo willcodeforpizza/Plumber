@@ -39,7 +39,15 @@ function Invoke-PlumberJSONSchema {
         }
 
         foreach ($jsonFile in $jsonFiles) {
-            $valid = Test-Json -Path $jsonFile.FullName -SchemaFile $schema -ErrorAction Stop
+            try {
+                $valid = Test-Json -Path $jsonFile.FullName -SchemaFile $schema -ErrorAction Stop
+            } catch {
+                Write-Error (
+                    "JSON schema validation failed: $($jsonFile.FullName) - " +
+                    $_.Exception.Message
+                )
+                continue
+            }
             if (-not $valid) {
                 Write-Error "JSON schema validation failed: $($jsonFile.FullName)"
             }
