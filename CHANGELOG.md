@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.69
+- Fixed: shared file discovery now skips `.git` internals and configured excluded directories such as `out`, so VCS files and build artifacts are no longer validated.
+
 ## 0.0.68
 - Fixed: Pester tasks now import the resolved module manifest path instead of rebuilding it from the build root, so subfolder manifests work.
 

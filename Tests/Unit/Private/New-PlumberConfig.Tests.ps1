@@ -11,6 +11,7 @@ Describe 'New-PlumberConfig' {
 
             $config.FileScope | Should -Be 'All'
             $config.IncludeModuleFolders | Should -Be @()
+            $config.ExcludeDirectories | Should -Be @('.git', 'out')
             $config.Tasks.CodeCoverage.Minimum | Should -Be 75
             $config.Tasks.PSScriptAnalyzer.IncludeTests | Should -BeTrue
             $config.Tasks.ContainsKey('Exclude') | Should -BeFalse
