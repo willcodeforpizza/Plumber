@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.77
+- Fixed: ModuleVersion task distinguishes a PSGallery query failure from a module that is genuinely not published.
+
 ## 0.0.76
 - Fixed: Pester task failures now report the real failed-test count, and CodeCoverage reports the run's overall percentage instead of naming the first test container.
 

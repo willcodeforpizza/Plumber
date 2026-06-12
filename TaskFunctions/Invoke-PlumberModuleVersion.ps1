@@ -9,8 +9,29 @@ function Invoke-PlumberModuleVersion {
     $versionSource = $script:PlumberConfig.Tasks.ModuleVersion.Source
     switch ($versionSource) {
         'PSGallery' {
-            $publishedModule = Find-Module $script:moduleName -ErrorAction SilentlyContinue
+            $findErrors = $null
+            $findModuleSplat = @{
+                Name          = $script:moduleName
+                ErrorAction   = 'SilentlyContinue'
+                ErrorVariable = 'findErrors'
+            }
+            $publishedModule = Find-Module @findModuleSplat
             if (-not $publishedModule) {
+                # Find-Module returns nothing both for an unpublished module
+                # and for a gallery that could not be queried; only a
+                # no-match error means the module is genuinely unpublished.
+                $queryFailures = @($findErrors | Where-Object {
+                    $_.FullyQualifiedErrorId -notlike 'NoMatchFoundForCriteria*'
+                })
+                if ($queryFailures) {
+                    throw (
+                        "Could not query PSGallery for $($script:moduleName): " +
+                        "$($queryFailures[0]) " +
+                        'This may be a transient gallery failure; retry before ' +
+                        'assuming the module is unpublished.'
+                    )
+                }
+
                 Write-Error (
                     "$script:moduleName is not published to PSGallery. " +
                     "Set Tasks.ModuleVersion.Source to GitTag for modules published from git tags."
