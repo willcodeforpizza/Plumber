@@ -19,7 +19,7 @@ function Invoke-PlumberYAML {
         return
     }
 
-    $failures = @()
+    $failures = [System.Collections.Generic.List[string]]::new()
     foreach ($yamlFile in $yamlFiles) {
         try {
             Get-Content $yamlFile.FullName -Raw -ErrorAction Stop |
@@ -29,7 +29,7 @@ function Invoke-PlumberYAML {
         catch {
             # Write-Error per file would terminate the loop under
             # Invoke-Build's ErrorActionPreference Stop; collect instead.
-            $failures += "Invalid YAML in $($yamlFile.FullName): $($_.Exception.Message)"
+            $failures.Add("Invalid YAML in $($yamlFile.FullName): $($_.Exception.Message)")
         }
     }
 

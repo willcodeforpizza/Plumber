@@ -28,9 +28,10 @@ function Invoke-PlumberPublicFunctions {
     }
 
     $publicFunctionNames = @($publicFiles | Select-Object -ExpandProperty BaseName)
-    $failures = foreach ($publicFile in $publicFiles) {
+    $failures = [System.Collections.Generic.List[string]]::new()
+    foreach ($publicFile in $publicFiles) {
         if ($publicFile.BaseName -notin $exportedFunctions) {
-            "$($publicFile.BaseName) is not in FunctionsToExport"
+            $failures.Add("$($publicFile.BaseName) is not in FunctionsToExport")
         }
 
         $tokens = $null
@@ -41,7 +42,7 @@ function Invoke-PlumberPublicFunctions {
             [ref]$parseErrors
         )
         if ($parseErrors) {
-            "$($publicFile.Name) could not be parsed"
+            $failures.Add("$($publicFile.Name) could not be parsed")
             continue
         }
 
@@ -53,17 +54,17 @@ function Invoke-PlumberPublicFunctions {
                 $true
             ) | Select-Object -ExpandProperty Name)
         if ($publicFile.BaseName -notin $functionNames) {
-            "$($publicFile.Name) does not define function $($publicFile.BaseName)"
+            $failures.Add("$($publicFile.Name) does not define function $($publicFile.BaseName)")
         }
     }
 
-    $failures += foreach ($exportedFunction in $exportedFunctions) {
+    foreach ($exportedFunction in $exportedFunctions) {
         if ($exportedFunction -notin $publicFunctionNames) {
-            "$exportedFunction is exported but Public/$exportedFunction.ps1 was not found"
+            $failures.Add("$exportedFunction is exported but Public/$exportedFunction.ps1 was not found")
         }
     }
 
-    $failures += foreach ($nonPublicFile in $nonPublicFiles) {
+    foreach ($nonPublicFile in $nonPublicFiles) {
         $tokens = $null
         $parseErrors = $null
         $ast = [System.Management.Automation.Language.Parser]::ParseFile(
@@ -72,7 +73,7 @@ function Invoke-PlumberPublicFunctions {
             [ref]$parseErrors
         )
         if ($parseErrors) {
-            "$($nonPublicFile.Name) could not be parsed"
+            $failures.Add("$($nonPublicFile.Name) could not be parsed")
             continue
         }
 
@@ -91,7 +92,7 @@ function Invoke-PlumberPublicFunctions {
                 ).
                     Replace([System.IO.Path]::DirectorySeparatorChar, '/').
                     Replace([System.IO.Path]::AltDirectorySeparatorChar, '/')
-                "$nonPublicFunctionName is exported from $relativePath"
+                $failures.Add("$nonPublicFunctionName is exported from $relativePath")
             }
         }
     }

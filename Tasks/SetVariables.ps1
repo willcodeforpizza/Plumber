@@ -7,7 +7,7 @@ Add-BuildTask -Name SetVariables -Jobs {
     $script:PlumberFiles = $null
     $script:PlumberChangedFiles = $null
     $script:PlumberChangedFilesLoaded = $false
-    $script:moduleFolders = @()
+    $moduleFolders = [System.Collections.Generic.List[string]]::new()
     $moduleFolderPaths = @(
         'Public'
         'Private'
@@ -19,8 +19,10 @@ Add-BuildTask -Name SetVariables -Jobs {
         } else {
             Join-Path $BuildRoot $moduleFolderPath
         }
-        if (Test-Path $moduleFolder) { $script:moduleFolders += $moduleFolder }
+        if (Test-Path $moduleFolder) { $moduleFolders.Add($moduleFolder) }
     }
+    # Stored as an array: consumers hand this to Pester's CodeCoveragePath.
+    $script:moduleFolders = $moduleFolders.ToArray()
 
     $manifestPath = Resolve-PlumberModuleManifest -BuildRoot $BuildRoot -ModuleManifest (
         $script:PlumberConfig.ModuleManifest

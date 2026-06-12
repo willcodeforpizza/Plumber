@@ -125,6 +125,32 @@ Describe 'Invoke-PlumberPublicFunctions' {
         }
     }
 
+    It 'reports failures from different checks as separate entries' {
+        Set-Content -Path (Join-Path $script:publicRoot 'Get-OtherThing.ps1') -Value @(
+            'function Get-OtherThing {'
+            '}'
+        )
+
+        InModuleScope Plumber -Parameters @{
+            BuildRoot = $script:buildRoot
+            PublicRoot = $script:publicRoot
+            PrivateRoot = $script:privateRoot
+        } {
+            $script:psd1 = @{
+                FunctionsToExport = @('Get-Thing')
+            }
+            $script:moduleFolders = @($PublicRoot, $PrivateRoot)
+
+            # The separator between the two messages is the regression: a
+            # scalar `+=` used to mash them into one unbroken string.
+            { Invoke-PlumberPublicFunctions -ErrorAction Stop } |
+                Should -Throw -ExpectedMessage (
+                    '*Get-OtherThing is not in FunctionsToExport,*' +
+                    'Get-Thing is exported but Public/Get-Thing.ps1 was not found*'
+                )
+        }
+    }
+
     It 'does not treat a differently-cased Public directory as Public on Linux' {
         $caseVariantPublicRoot = Join-Path $script:buildRoot 'public'
         New-Item -Path $caseVariantPublicRoot -ItemType Directory -Force | Out-Null
