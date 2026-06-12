@@ -36,16 +36,15 @@ function Invoke-PlumberChangelogUpdated {
     if ($prereleaseTag) {
         $psd1VersionName = "$psd1VersionName-$prereleaseTag"
     }
-    $psd1VersionInfo = ConvertTo-PlumberSemVer -VersionName $psd1VersionName -AllowSystemVersion
-    if (-not $psd1VersionInfo) {
-        throw "ModuleVersion '$psd1VersionName' is not a valid version."
-    }
 
-    if ($psd1VersionInfo.Version -ne $changelogVersionInfo.Version) {
+    # The contract is an exact match, so compare the version strings directly:
+    # semver normalisation would drop the revision of 4-part versions and let
+    # a stale heading pass.
+    if ($psd1VersionName -ne $headingVersionName) {
         Write-Error (
             'Changelog might be out of date. ' +
-            "PSD1 version $($psd1VersionInfo.Version) " +
-            "changelog version $($changelogVersionInfo.Version)"
+            "PSD1 version $psd1VersionName " +
+            "changelog version $headingVersionName"
         )
     }
 }

@@ -108,6 +108,24 @@ Describe 'Invoke-PlumberChangelogUpdated' {
         }
     }
 
+    It 'reports a stale four-part version heading' {
+        Set-Content -Path (Join-Path $script:buildRoot 'CHANGELOG.md') -Value @(
+            '# Changelog'
+            ''
+            '## 1.2.3.4'
+            '- Changed: example.'
+        )
+
+        InModuleScope Plumber -Parameters @{BuildRoot = $script:buildRoot} {
+            $script:psd1 = @{
+                ModuleVersion = '1.2.3.5'
+            }
+
+            { Invoke-PlumberChangelogUpdated -ErrorAction Stop } |
+                Should -Throw -ExpectedMessage '*PSD1 version 1.2.3.5 changelog version 1.2.3.4*'
+        }
+    }
+
     It 'reports a changelog with no version heading' {
         Set-Content -Path (Join-Path $script:buildRoot 'CHANGELOG.md') -Value @(
             '# Changelog'
