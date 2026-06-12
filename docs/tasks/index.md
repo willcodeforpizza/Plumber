@@ -6,7 +6,7 @@
 
 | Group | Includes |
 | --- | --- |
-| [CodeQuality](CodeQuality.md) | `PSScriptAnalyzer`, `Backticks`, `LineLength`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
+| [CodeQuality](CodeQuality.md) | `PSScriptAnalyzer`, `Backticks`, `LineLength`, `PathSeparator`, `PesterUnit`, `PesterIntegration`, `CodeCoverage` |
 | [Content](Content.md) | `JSON`, `JSONSchema`, `YAML` |
 | [ModuleConventions](ModuleConventions.md) | `Manifest`, `PublicFunctions`, `PublicFunctionPrefix`, `FunctionFiles`, `Naming`, `ToDo`, `Help` |
 | [ReleaseHygiene](ReleaseHygiene.md) | `ModuleVersion`, `ChangelogUpdated` |

@@ -10,6 +10,7 @@
     PSScriptAnalyzer
     Backticks
     LineLength
+    PathSeparator
     PesterUnit
     PesterIntegration
     CodeCoverage

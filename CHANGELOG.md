@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.78
+- Fixed: task help validation now catches task-group include drift before generated docs fall out of sync.
+
 ## 0.0.77
 - Fixed: ModuleVersion task distinguishes a PSGallery query failure from a module that is genuinely not published.
 
