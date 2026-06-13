@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.81
+- Fixed: internal dependency packaging now keeps only the module manifest at
+  the package root, avoiding `Publish-PSResource` manifest detection issues.
+
 ## 0.0.80
 - Fixed: release packaging now includes `Plumber.internal.dependencies.psd1`, which
   `Install-PlumberDependency` needs after installing Plumber from PSGallery.

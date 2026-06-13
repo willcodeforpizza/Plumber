@@ -70,7 +70,7 @@ function Install-PlumberDependency {
             $Path
         }
     } else {
-        Join-Path $script:moduleRoot 'Plumber.internal.dependencies.psd1'
+        Join-Path $script:moduleRoot 'Resource/Plumber.internal.dependencies.psd1'
     }
 
     if (-not (Test-Path -LiteralPath $dependencyPath -PathType Leaf)) {

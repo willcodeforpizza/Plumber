@@ -56,7 +56,7 @@ function Invoke-Plumber {
         $NoFormat
     )
     process {
-        $dependencyPath = Join-Path $script:moduleRoot 'Plumber.internal.dependencies.psd1'
+        $dependencyPath = Join-Path $script:moduleRoot 'Resource/Plumber.internal.dependencies.psd1'
         $dependencyDefinition = Import-PowerShellDataFile -Path $dependencyPath
         try {
             Import-PlumberDependency -Dependency @($dependencyDefinition.Modules) -ErrorAction Stop
