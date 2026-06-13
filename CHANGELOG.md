@@ -1,5 +1,8 @@
 # Plumber
 
+## 0.0.79
+- Added: focused tests for Write-PlumberResult output modes.
+
 ## 0.0.78
 - Fixed: task help validation now catches task-group include drift before generated docs fall out of sync.
 
