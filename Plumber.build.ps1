@@ -41,7 +41,6 @@
     ModuleManifest           = 'Plumber.psd1'
     ModuleBuildIncludeItems  = @(
         'TaskFunctions'
-        'Plumber.internal.dependencies.psd1'
     )
 }
 
