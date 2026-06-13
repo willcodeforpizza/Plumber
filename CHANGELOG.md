@@ -1,5 +1,9 @@
 # Plumber
 
+## 0.0.80
+- Fixed: release packaging now includes `Plumber.internal.dependencies.psd1`, which
+  `Install-PlumberDependency` needs after installing Plumber from PSGallery.
+
 ## 0.0.79
 - Added: focused tests for Write-PlumberResult output modes.
 
