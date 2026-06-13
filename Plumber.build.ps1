@@ -39,7 +39,10 @@
 
 . (Get-PlumberReleaseTaskLoader) -Config @{
     ModuleManifest           = 'Plumber.psd1'
-    ModuleBuildIncludeItems  = @('TaskFunctions')
+    ModuleBuildIncludeItems  = @(
+        'TaskFunctions'
+        'Plumber.internal.dependencies.psd1'
+    )
 }
 
 . (Join-Path $PSScriptRoot 'LocalTasks/GenerateDocs.ps1')
